@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-solana-sdk = "1.18"
+solana-sdk = "2.1.9"
 reqwest = { version = "0.11", features = ["json"] }
 base64 = "0.21"
 serde = { version = "1.0", features = ["derive"] }

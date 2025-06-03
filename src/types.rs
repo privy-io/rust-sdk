@@ -8,13 +8,7 @@ pub struct PrivySigner {
     pub wallet_id: String,
     pub api_base_url: String,
     pub client: Client,
-}
-
-#[derive(Default)]
-pub struct PrivyConfig {
-    pub app_id: Option<String>,
-    pub app_secret: Option<String>,
-    pub wallet_id: Option<String>,
+    pub public_key: String,
 }
 
 // API request/response types for Privy
@@ -56,30 +50,3 @@ pub struct WalletResponse {
     pub public_key: Option<String>,
 }
 
-// Error types
-#[derive(thiserror::Error, Debug)]
-pub enum PrivyError {
-    #[error("Missing config: {0}")]
-    MissingConfig(&'static str),
-    
-    #[error("API error: {0}")]
-    ApiError(u16),
-    
-    #[error("Invalid response")]
-    InvalidResponse,
-    
-    #[error("Invalid public key")]
-    InvalidPublicKey,
-    
-    #[error("Invalid signature")]
-    InvalidSignature,
-    
-    #[error("Request error: {0}")]
-    RequestError(#[from] reqwest::Error),
-    
-    #[error("JSON error: {0}")]
-    JsonError(#[from] serde_json::Error),
-    
-    #[error("Base64 error: {0}")]
-    Base64Error(#[from] base64::DecodeError),
-}

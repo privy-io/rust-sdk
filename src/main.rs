@@ -1,39 +1,34 @@
-use privy_rust::types::{PrivyConfig, PrivyError};
-use privy_rust::PrivySignerBlocking;
-use solana_sdk::signer::Signer;
+use privy_rust::PrivySigner;
 
 #[tokio::main]
-async fn main() -> Result<(), PrivyError> {
-    // Example usage - this demonstrates how to use the Privy signer
-    // In Kora, this would be integrated into their CLI arg parsing
+async fn main() -> Result<(), anyhow::Error> {
+    // Example usage - demonstrates how to use the Privy signer with tk-rs interface
     
-    // Load from environment variables
-    let config = PrivyConfig::from_env();
+    // Get credentials from environment
+    let app_id = std::env::var("PRIVY_APP_ID")
+        .expect("PRIVY_APP_ID environment variable not set");
+    let app_secret = std::env::var("PRIVY_APP_SECRET")
+        .expect("PRIVY_APP_SECRET environment variable not set");
+    let wallet_id = std::env::var("PRIVY_WALLET_ID")
+        .expect("PRIVY_WALLET_ID environment variable not set");
+    let public_key = std::env::var("PRIVY_PUBLIC_KEY")
+        .expect("PRIVY_PUBLIC_KEY environment variable not set");
     
-    // Check if required env vars are set
-    if config.app_id.is_none() || config.app_secret.is_none() || config.wallet_id.is_none() {
-        eprintln!("Error: Missing required environment variables.");
-        eprintln!("Please set:");
-        eprintln!("  PRIVY_APP_ID=<your-app-id>");
-        eprintln!("  PRIVY_APP_SECRET=<your-app-secret>");
-        eprintln!("  PRIVY_WALLET_ID=<your-wallet-id>");
-        eprintln!("");
-        eprintln!("For testing, you can use the test-with-creds.sh script.");
-        return Err(PrivyError::MissingConfig("environment variables"));
-    }
-    
-    // Build the signer
-    let signer = config.build()?;
-    
-    // Create a blocking version for use with Solana SDK
-    let blocking_signer = PrivySignerBlocking::new(signer)?;
+    // Create the signer (4th parameter is unused, just for tk-rs compatibility)
+    let signer = PrivySigner::new(
+        app_id,
+        app_secret,
+        wallet_id,
+        String::new(), // unused parameter for tk-rs compatibility
+        public_key,
+    )?;
     
     println!("Privy signer initialized!");
-    println!("Public key: {}", blocking_signer.pubkey());
+    println!("Public key: {}", signer.solana_pubkey());
     
     // Example: sign a message
     let message = b"Hello, Privy!";
-    let signature = blocking_signer.sign_message(message);
+    let signature = signer.sign_solana(message).await?;
     println!("Signature: {}", signature);
     
     Ok(())
