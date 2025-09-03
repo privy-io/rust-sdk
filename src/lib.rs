@@ -1,4 +1,5 @@
 #![deny(clippy::unwrap_used)]
+#![warn(clippy::pedantic)]
 
 use std::{str::FromStr, time::Duration};
 
@@ -9,28 +10,38 @@ use privy_api::{
     types::{
         SolanaSignMessageRpcInputChainType, SolanaSignMessageRpcInputMethod,
         SolanaSignMessageRpcInputParamsEncoding, WalletRpcBody,
-        builder::{
-            GetWalletsChainType, SolanaSignMessageRpcInput, SolanaSignMessageRpcInputParams,
-        },
+        builder::{SolanaSignMessageRpcInput, SolanaSignMessageRpcInputParams},
     },
 };
 use reqwest::header::{CONTENT_TYPE, HeaderValue};
+use solana_sdk::pubkey::ParsePubkeyError;
 
 pub(crate) mod errors;
 pub(crate) mod keys;
 pub(crate) mod types;
 
 pub use errors::*;
+pub use keys::*;
 pub use types::*;
 
 impl PrivySigner {
-    pub fn new(app_id: String, app_secret: String, wallet_id: String, public_key: String) -> Self {
+    /// Create a new `PrivySigner`
+    ///
+    /// # Errors
+    /// This can fail for two reasons, either the `app_id` or `app_secret` are not
+    /// valid headers, or that the underlying http client could not be created.
+    pub fn new(
+        app_id: String,
+        app_secret: String,
+        wallet_id: String,
+        public_key: String,
+    ) -> Result<Self, PrivyCreateError> {
         let mut headers = reqwest::header::HeaderMap::new();
         headers.insert(
             reqwest::header::AUTHORIZATION,
-            HeaderValue::from_str(&get_auth_header(&app_id, &app_secret)).unwrap(),
+            HeaderValue::from_str(&get_auth_header(&app_id, &app_secret))?,
         );
-        headers.insert("privy-app-id", HeaderValue::from_str(&app_id).unwrap());
+        headers.insert("privy-app-id", HeaderValue::from_str(&app_id)?);
         headers.insert(CONTENT_TYPE, HeaderValue::from_static("application/json"));
         headers.insert("privy-client", HeaderValue::from_static("rust-sdk"));
 
@@ -38,16 +49,15 @@ impl PrivySigner {
             .connect_timeout(Duration::from_secs(15))
             .timeout(Duration::from_secs(15))
             .default_headers(headers)
-            .build()
-            .unwrap();
+            .build()?;
 
-        Self {
+        Ok(Self {
             app_id,
             app_secret,
             wallet_id,
             client: Client::new_with_client("https://api.privy.io", client_with_custom_defaults),
             public_key,
-        }
+        })
     }
 
     // this is the crux of the impl, a handy macro that delegates all the
@@ -56,17 +66,27 @@ impl PrivySigner {
     delegate! {
         to self.client {
             #[expr($.privy_app_id(&self.app_id))]
-            pub fn authenticate(&self) -> privy_api::builder::Authenticate<'_>;
+            #[must_use] pub fn authenticate(&self) -> privy_api::builder::Authenticate<'_>;
 
             #[expr($.privy_app_id(&self.app_id))]
-            pub fn get_wallet(&self) -> privy_api::builder::GetWallet<'_>;
+            #[must_use] pub fn get_wallet(&self) -> privy_api::builder::GetWallet<'_>;
 
             #[expr($.privy_app_id(&self.app_id))]
-            pub fn get_wallets(&self) -> privy_api::builder::GetWallets<'_>;
+            #[must_use] pub fn get_wallets(&self) -> privy_api::builder::GetWallets<'_>;
         }
     }
 
-    pub async fn sign(&self, message: &[u8]) -> Result<Vec<u8>> {
+    /// Sign a message on the solana blockchain
+    ///
+    /// # Errors
+    /// This can fail if the underlying http request fails
+    ///
+    /// # Panics
+    /// If the server returns a mismatched RPC response
+    pub async fn sign(
+        &self,
+        message: &[u8],
+    ) -> Result<solana_sdk::signature::Signature, PrivyError> {
         let input = SolanaSignMessageRpcInput::default()
             .method(SolanaSignMessageRpcInputMethod::SignMessage)
             .chain_type(Some(SolanaSignMessageRpcInputChainType::Solana))
@@ -75,8 +95,7 @@ impl PrivySigner {
                     .encoding(SolanaSignMessageRpcInputParamsEncoding::Base64)
                     .message(STANDARD.encode(message)),
             )
-            .try_into()
-            .unwrap();
+            .try_into()?;
 
         let response = self
             .client
@@ -85,34 +104,33 @@ impl PrivySigner {
             .privy_app_id(&self.app_id)
             .body(WalletRpcBody::SolanaSignMessageRpcInput(input))
             .send()
-            .await
-            .unwrap();
+            .await?;
 
-        let sign_response = match response.into_inner() {
-            privy_api::types::WalletRpcResponse::SolanaSignMessageRpcResponse(response) => response,
-            _ => panic!("error"),
+        let privy_api::types::WalletRpcResponse::SolanaSignMessageRpcResponse(sign_response) =
+            response.into_inner()
+        else {
+            panic!("invalid response type");
         };
 
-        let sig_bytes = STANDARD.decode(&sign_response.data.signature)?;
+        let mut sig_bytes: [u8; 64] = [0; 64];
+        STANDARD
+            .decode_slice(&sign_response.data.signature, &mut sig_bytes)
+            .expect("exactly 64 bytes");
 
-        Ok(sig_bytes)
-    }
-
-    pub async fn sign_solana(&self, message: &[u8]) -> Result<solana_sdk::signature::Signature> {
-        let sig = self.sign(message).await?;
-        let sig_bytes: [u8; 64] = sig
-            .try_into()
-            .map_err(|_| PrivyError::InvalidSignatureLength)?;
         Ok(solana_sdk::signature::Signature::from(sig_bytes))
     }
 
-    pub fn solana_pubkey(&self) -> Result<solana_sdk::pubkey::Pubkey> {
-        tracing::info!("Solana pubkey: {}", self.public_key);
-        Ok(solana_sdk::pubkey::Pubkey::from_str(&self.public_key)?)
+    /// Get the public key of the solana wallet
+    ///
+    /// # Errors
+    /// This can fail if the public key is not a valid solana pubkey
+    pub fn solana_pubkey(&self) -> Result<solana_sdk::pubkey::Pubkey, ParsePubkeyError> {
+        tracing::debug!("solana pubkey: {}", self.public_key);
+        solana_sdk::pubkey::Pubkey::from_str(&self.public_key)
     }
 }
 
 fn get_auth_header(app_id: &str, app_secret: &str) -> String {
-    let credentials = format!("{}:{}", app_id, app_secret);
+    let credentials = format!("{app_id}:{app_secret}");
     format!("Basic {}", STANDARD.encode(credentials))
 }

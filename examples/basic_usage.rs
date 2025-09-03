@@ -1,7 +1,8 @@
 //! Example usage - demonstrates how to use the Privy signer with tk-rs interface
 
-use privy_rust::{PrivySigner, Result};
+use privy_rust::{PrivySigner};
 use tracing_subscriber::EnvFilter;
+use anyhow::Result;
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -28,7 +29,7 @@ async fn main() -> Result<()> {
         public_key
     );
 
-    let signer = PrivySigner::new(app_id, app_secret, wallet_id, public_key);
+    let signer = PrivySigner::new(app_id, app_secret, wallet_id, public_key)?;
 
     {
         let key = signer.solana_pubkey()?;
@@ -36,7 +37,7 @@ async fn main() -> Result<()> {
     }
 
     let message = b"Hello, Privy!";
-    let signature = signer.sign_solana(message).await?;
+    let signature = signer.sign(message).await?;
     tracing::info!("Signature: {:?}", signature);
 
     Ok(())

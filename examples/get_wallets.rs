@@ -29,7 +29,7 @@ async fn main() -> Result<()> {
         public_key
     );
 
-    let signer = PrivySigner::new(app_id, app_secret, wallet_id, public_key);
+    let signer = PrivySigner::new(app_id, app_secret, wallet_id, public_key)?;
 
     let wallets = signer.get_wallets().limit(5).send().await?;
 

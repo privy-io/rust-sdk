@@ -1,14 +1,17 @@
+use privy_api::types::error::ConversionError;
 use solana_sdk::pubkey::ParsePubkeyError;
 use thiserror::Error;
 
 #[derive(Error, Debug)]
+pub enum PrivyCreateError {
+    #[error("Invalid header value: {0}")]
+    InvalidHeaderValue(#[from] reqwest::header::InvalidHeaderValue),
+    #[error("Unable to create client: {0}")]
+    Client(#[from] reqwest::Error),
+}
+
+#[derive(Error, Debug)]
 pub enum PrivyError {
-    #[error("HTTP request failed: {0}")]
-    Http(#[from] reqwest::Error),
-
-    #[error("JSON parsing failed: {0}")]
-    Json(#[from] serde_json::Error),
-
     #[error("Base64 decoding failed: {0}")]
     Base64(#[from] base64::DecodeError),
 
@@ -18,14 +21,15 @@ pub enum PrivyError {
     #[error("Solana pubkey parsing failed: {0}")]
     SolanaPubkey(#[from] ParsePubkeyError),
 
-    #[error("Privy API error {status}: {message}")]
-    Api { status: u16, message: String },
-
     #[error("Invalid signature length: expected 64 bytes")]
     InvalidSignatureLength,
 
     #[error("Configuration error: {0}")]
     Config(String),
-}
 
-pub type Result<T> = std::result::Result<T, PrivyError>;
+    #[error("Unable to convert fields: {0}")]
+    Conversion(#[from] ConversionError),
+
+    #[error("Error while accessing API: {0}")]
+    Api(#[from] privy_api::Error),
+}

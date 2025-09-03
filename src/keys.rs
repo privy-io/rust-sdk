@@ -8,30 +8,30 @@ const EXPIRY_BUFFER: Duration = Duration::from_secs(60);
 
 pub type Error = ();
 
-#[derive(Copy, Clone)]
-pub struct Key;
+#[derive(Clone)]
+pub struct Key(String);
 
 pub trait IntoKey {
-    async fn get_key(&self) -> Result<Key, Error>;
+    fn get_key(&self) -> impl Future<Output = Result<Key, Error>> + Send;
 }
 
 pub trait IntoSignature {
-    async fn sign(&self, message: &[u8]) -> Result<Vec<u8>, Error>;
+    fn sign(&self, message: &[u8]) -> impl Future<Output = Result<Vec<u8>, Error>> + Send;
 }
 
 pub struct TimeCachingKey<T: IntoKey>(T, Arc<RwLock<Option<(SystemTime, Key)>>>);
 
-impl<T: IntoKey> TimeCachingKey<T> {
+impl<T: IntoKey + Sync> TimeCachingKey<T> {
     pub fn new(key: T) -> Self {
         Self(key, Arc::new(RwLock::new(None)))
     }
 }
 
-impl<T: IntoKey> IntoKey for TimeCachingKey<T> {
+impl<T: IntoKey + Sync> IntoKey for TimeCachingKey<T> {
     async fn get_key(&self) -> Result<Key, Error> {
         {
             let valid = self.1.read().await;
-            if let Some((_, key)) = valid.filter(|(time, _)| time > &SystemTime::now()) {
+            if let Some((_, key)) = valid.as_ref().filter(|(time, _)| time > &SystemTime::now()) {
                 return Ok(key.clone());
             }
         }
@@ -53,19 +53,21 @@ pub struct JwtUser(String);
 
 impl IntoKey for JwtUser {
     async fn get_key(&self) -> Result<Key, Error> {
+        tracing::debug!("getting key from jwt {}", self.0);
         todo!("get the key from the authorization endpoint in privy")
     }
 }
 
 impl IntoSignature for Key {
-    async fn sign(&self, message: &[u8]) -> Result<Vec<u8>, Error> {
+    async fn sign(&self, _message: &[u8]) -> Result<Vec<u8>, Error> {
+        tracing::debug!("signing with key {}", self.0);
         todo!("impl signature for a type of key")
     }
 }
 
 impl<T> IntoSignature for T
 where
-    T: IntoKey,
+    T: IntoKey + Sync,
 {
     async fn sign(&self, message: &[u8]) -> Result<Vec<u8>, Error> {
         let key = self.get_key().await?;
@@ -77,14 +79,14 @@ pub struct PrivateKey(String);
 
 pub struct KMSService;
 impl IntoSignature for KMSService {
-    async fn sign(&self, message: &[u8]) -> Result<Vec<u8>, Error> {
+    async fn sign(&self, _message: &[u8]) -> Result<Vec<u8>, Error> {
         todo!("kms signature")
     }
 }
 
 impl IntoKey for PrivateKey {
     async fn get_key(&self) -> Result<Key, Error> {
-        Ok(Key)
+        Ok(Key(self.0.clone()))
     }
 }
 
