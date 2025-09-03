@@ -13,8 +13,7 @@ use privy_api::{
         builder::{SolanaSignMessageRpcInput, SolanaSignMessageRpcInputParams},
     },
 };
-use reqwest::header::{CONTENT_TYPE, HeaderValue};
-use solana_sdk::pubkey::ParsePubkeyError;
+use reqwest::header::{ACCEPT, CONTENT_TYPE, HeaderValue};
 
 pub(crate) mod errors;
 pub(crate) mod keys;
@@ -73,6 +72,12 @@ impl PrivySigner {
 
             #[expr($.privy_app_id(&self.app_id))]
             #[must_use] pub fn get_wallets(&self) -> privy_api::builder::GetWallets<'_>;
+
+            #[expr($.privy_app_id(&self.app_id))]
+            #[must_use] pub fn create_wallet(&self) -> privy_api::builder::CreateWallet<'_>;
+
+            #[expr($.privy_app_id(&self.app_id))]
+            #[must_use] pub fn update_wallet(&self) -> privy_api::builder::UpdateWallet<'_>;
         }
     }
 
@@ -127,6 +132,56 @@ impl PrivySigner {
     pub fn solana_pubkey(&self) -> Result<solana_sdk::pubkey::Pubkey, ParsePubkeyError> {
         tracing::debug!("solana pubkey: {}", self.public_key);
         solana_sdk::pubkey::Pubkey::from_str(&self.public_key)
+    }
+
+    /// Create canonical request data for signing
+    ///
+    /// # Errors
+    /// This can fail if JSON serialization fails
+    pub fn build_canonical_request(
+        &self,
+        method: Method,
+        url: String,
+        body: Option<serde_json::Value>,
+        headers: Option<serde_json::Value>,
+    ) -> Result<String, serde_json::Error> {
+        let builder = PrivySignerBuilder::new(method, url)
+            .body(body.unwrap_or_default())
+            .headers(headers.unwrap_or_default());
+
+        builder.canonicalize()
+    }
+
+    /// Create canonical request data for wallet update operations
+    ///
+    /// # Errors
+    /// This can fail if JSON serialization fails
+    pub fn build_update_wallet_canonical_request(
+        &self,
+        wallet_id: &str,
+        body: serde_json::Value,
+        idempotency_key: Option<String>,
+    ) -> Result<String, serde_json::Error> {
+        let url = format!("https://api.privy.io/v1/wallets/{wallet_id}");
+
+        let mut headers = serde_json::Map::new();
+        headers.insert(
+            "privy-app-id".into(),
+            serde_json::Value::String(self.app_id.clone()),
+        );
+        if let Some(key) = idempotency_key {
+            headers.insert(
+                "privy-idempotency-key".to_string(),
+                serde_json::Value::String(key),
+            );
+        }
+
+        self.build_canonical_request(
+            Method::PATCH,
+            url,
+            Some(body),
+            Some(serde_json::Value::Object(headers)),
+        )
     }
 }
 

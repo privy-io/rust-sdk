@@ -46966,6 +46966,9 @@ pub mod builder {
             let body = body
                 .and_then(|v| types::UpdateWalletBody::try_from(v).map_err(|e| e.to_string()))
                 .map_err(Error::InvalidRequest)?;
+
+            tracing::debug!("body: {:?}", body);
+
             let url = format!(
                 "{}/v1/wallets/{}",
                 client.baseurl,

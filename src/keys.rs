@@ -1,4 +1,9 @@
+use p256::{
+    ecdsa::{Signature, SigningKey, signature::SignerMut},
+    elliptic_curve::SecretKey,
+};
 use std::{
+    path::PathBuf,
     sync::Arc,
     time::{Duration, SystemTime},
 };
@@ -8,15 +13,14 @@ const EXPIRY_BUFFER: Duration = Duration::from_secs(60);
 
 pub type Error = ();
 
-#[derive(Clone)]
-pub struct Key(String);
+type Key = SecretKey<p256::NistP256>;
 
 pub trait IntoKey {
     fn get_key(&self) -> impl Future<Output = Result<Key, Error>> + Send;
 }
 
 pub trait IntoSignature {
-    fn sign(&self, message: &[u8]) -> impl Future<Output = Result<Vec<u8>, Error>> + Send;
+    fn sign(&self, message: &[u8]) -> impl Future<Output = Result<Signature, Error>> + Send;
 }
 
 pub struct TimeCachingKey<T: IntoKey>(T, Arc<RwLock<Option<(SystemTime, Key)>>>);
@@ -59,9 +63,10 @@ impl IntoKey for JwtUser {
 }
 
 impl IntoSignature for Key {
-    async fn sign(&self, _message: &[u8]) -> Result<Vec<u8>, Error> {
-        tracing::debug!("signing with key {}", self.0);
-        todo!("impl signature for a type of key")
+    async fn sign(&self, message: &[u8]) -> Result<Signature, Error> {
+        tracing::debug!("signing with key {:?}", self);
+        let mut sk = SigningKey::from(self.clone());
+        Ok(sk.sign(message))
     }
 }
 
@@ -69,7 +74,7 @@ impl<T> IntoSignature for T
 where
     T: IntoKey + Sync,
 {
-    async fn sign(&self, message: &[u8]) -> Result<Vec<u8>, Error> {
+    async fn sign(&self, message: &[u8]) -> Result<Signature, Error> {
         let key = self.get_key().await?;
         key.sign(message).await
     }
@@ -77,16 +82,26 @@ where
 
 pub struct PrivateKey(String);
 
+pub struct PrivateKeyFromFile(pub PathBuf);
+
 pub struct KMSService;
 impl IntoSignature for KMSService {
-    async fn sign(&self, _message: &[u8]) -> Result<Vec<u8>, Error> {
+    async fn sign(&self, _message: &[u8]) -> Result<Signature, Error> {
         todo!("kms signature")
     }
 }
 
 impl IntoKey for PrivateKey {
     async fn get_key(&self) -> Result<Key, Error> {
-        Ok(Key(self.0.clone()))
+        Ok(SecretKey::<p256::NistP256>::from_sec1_pem(&self.0).unwrap())
+    }
+}
+
+impl IntoKey for PrivateKeyFromFile {
+    async fn get_key(&self) -> Result<Key, Error> {
+        std::fs::read_to_string(&self.0)
+            .map_err(|_| ())
+            .and_then(|s| SecretKey::<p256::NistP256>::from_sec1_pem(&s).map_err(|_| ()))
     }
 }
 
@@ -105,17 +120,20 @@ mod tests {
         let jwt = JwtUser("test".to_string());
         let cached_jwt = TimeCachingKey::new(jwt);
         let key = cached_jwt.get_key().await.unwrap();
+        println!("{:?}", key);
     }
 
     #[tokio::test]
     async fn cached_private_key() {
-        let key = PrivateKey("test".to_string());
+        let key = PrivateKey(include_str!("../private_key.pem").to_string());
         let key = key.get_key().await.unwrap();
+        println!("{:?}", key);
     }
 
     #[tokio::test]
     async fn custom_kms() {
         let kms = KMSService;
         let key = kms.sign(&[0, 1, 2, 3]).await.unwrap();
+        println!("{:?}", key);
     }
 }

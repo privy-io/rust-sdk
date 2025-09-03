@@ -16,3 +16,16 @@ _.file = ['.env', '.env.local']
 # PRIVY_APP_SECRET = ""
 # PRIVY_WALLET_ID = ""
 # PRIVY_PUBLIC_KEY = ""
+
+[tasks.gen-p256-key]
+description = "Generate P-256 key pair for Privy wallet owner"
+run = [
+  "openssl ecparam -genkey -name prime256v1 -noout -out private_key.pem",
+  "openssl ec -in private_key.pem -pubout -out public_key.pem",
+  "echo 'Generated P-256 key pair:'",
+  "echo 'Private key: private_key.pem'", 
+  "echo 'Public key: public_key.pem'",
+  "echo",
+  "echo 'Public key contents:'",
+  "cat public_key.pem"
+]

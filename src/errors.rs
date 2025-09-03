@@ -1,5 +1,6 @@
-use privy_api::types::error::ConversionError;
-use solana_sdk::pubkey::ParsePubkeyError;
+pub use privy_api::Error as PrivyApiError;
+pub use privy_api::types::error::ConversionError;
+pub use solana_sdk::pubkey::ParsePubkeyError;
 use thiserror::Error;
 
 #[derive(Error, Debug)]
@@ -31,5 +32,5 @@ pub enum PrivyError {
     Conversion(#[from] ConversionError),
 
     #[error("Error while accessing API: {0}")]
-    Api(#[from] privy_api::Error),
+    Api(#[from] PrivyApiError),
 }
