@@ -49,4 +49,3 @@ pub struct WalletResponse {
     pub hd_path: Option<String>,
     pub public_key: Option<String>,
 }
-

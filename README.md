@@ -75,6 +75,29 @@ PRIVY_WALLET_ID=your_wallet_id
 PRIVY_PUBLIC_KEY=your_solana_public_key
 ```
 
+## Development
+
+### Environment Setup
+
+This project uses [mise](https://mise.jdx.dev/) to manage the development environment, including the Rust toolchain version and environment variables.
+
+1.  **Install mise:** Follow the instructions on the [mise website](https://mise.jdx.dev/getting-started.html).
+2.  **Activate Environment:** Run `mise trust` in the project root to approve the configuration. `mise` will automatically pick up the Rust version from the `rust-toolchain.toml` file.
+
+The `.mise.toml` file contains placeholders for the required environment variables. You can set them there or in a `.env` file for `mise` to load.
+
+### Rust Version Policy
+
+The Rust toolchain version for development and CI will not be less than two major versions behind the current stable release. This ensures a balance between modern language features and ecosystem stability.
+
+### `Cargo.lock` Policy
+
+**Note:** The convention for this has recently changed in Rust.
+
+Previously, many recommended not committing Cargo.lock into the repo for libraries since potential version mismatches would be highlighted earlier, however this opinion is now changing. For that reason, this project **tracks the `Cargo.lock` file**. This ensures that all developers and the CI environment are using the exact same dependency versions, leading to more reproducible builds.
+
+For more, see [this GH issue](https://github.com/rust-lang/cargo/issues/315)
+
 ## License
 
-This project is licensed under the MIT License.
+This project is dual-licensed under MIT and Apache-2.0.

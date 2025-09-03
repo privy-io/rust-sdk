@@ -4,10 +4,8 @@ use base64::{engine::general_purpose::STANDARD, Engine};
 use reqwest::Client;
 
 mod types;
-mod utils;
 
-pub use types::*; 
-pub use utils::*;
+pub use types::*;
 
 impl PrivySigner {
     pub fn new(
@@ -29,7 +27,7 @@ impl PrivySigner {
 
     pub async fn sign(&self, message: &[u8]) -> Result<Vec<u8>, anyhow::Error> {
         let url = format!("{}/wallets/{}/rpc", self.api_base_url, self.wallet_id);
-        
+
         let request = SignTransactionRequest {
             method: "signTransaction",
             caip2: "solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1",
@@ -38,8 +36,9 @@ impl PrivySigner {
                 encoding: "base64",
             },
         };
-        
-        let response = self.client
+
+        let response = self
+            .client
             .post(&url)
             .header("Authorization", self.get_auth_header())
             .header("privy-app-id", &self.app_id)
@@ -48,19 +47,26 @@ impl PrivySigner {
             .send()
             .await
             .map_err(|e| anyhow::anyhow!(e.to_string()))?;
-            
+
         if !response.status().is_success() {
             let status = response.status().as_u16();
             let error_text = response.text().await.unwrap_or_default();
-            return Err(anyhow::anyhow!("Privy API error {}: {}", status, error_text));
+            return Err(anyhow::anyhow!(
+                "Privy API error {}: {}",
+                status,
+                error_text
+            ));
         }
-        
-        let sign_response: SignTransactionResponse = response.json().await
+
+        let sign_response: SignTransactionResponse = response
+            .json()
+            .await
             .map_err(|e| anyhow::anyhow!(e.to_string()))?;
-        
-        let sig_bytes = STANDARD.decode(&sign_response.data.signature)
+
+        let sig_bytes = STANDARD
+            .decode(&sign_response.data.signature)
             .map_err(|e| anyhow::anyhow!(e.to_string()))?;
-        
+
         Ok(sig_bytes)
     }
 
@@ -69,7 +75,8 @@ impl PrivySigner {
         message: &[u8],
     ) -> Result<solana_sdk::signature::Signature, anyhow::Error> {
         let sig = self.sign(message).await?;
-        let sig_bytes: [u8; 64] = sig.try_into()
+        let sig_bytes: [u8; 64] = sig
+            .try_into()
             .map_err(|_| anyhow::anyhow!("Invalid signature length"))?;
         Ok(solana_sdk::signature::Signature::from(sig_bytes))
     }

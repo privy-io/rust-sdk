@@ -1,0 +1,18 @@
+[tools]
+yq = "latest"
+# note: rust-toolchain.toml is an 'idiomatic version file' for rust and mise does
+#       pick it up automatically, but it is currently behind a experimental flag
+rust = "{{ exec(command='yq .toolchain.channel rust-toolchain.toml') }}"
+cargo-binstall = "latest"
+"cargo:bacon" = "latest"
+"cargo:cargo-progenitor" = "latest"
+
+[env]
+_.file = ['.env', '.env.local']
+
+# Privy credentials for running examples
+# You can set these values here, or in a .env.local file that mise will load.
+# PRIVY_APP_ID = ""
+# PRIVY_APP_SECRET = ""
+# PRIVY_WALLET_ID = ""
+# PRIVY_PUBLIC_KEY = ""
