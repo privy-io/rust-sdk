@@ -1,19 +1,31 @@
 [package]
 name = "privy-rust"
 version = "0.1.0"
-edition = "2021"
+rust-version = "1.87"
+edition = "2024"
+license = "MIT OR Apache-2.0"
+
+[workspace]
+members = ["crates/*", "."]
 
 [dependencies]
 solana-sdk = "2.1.9"
-reqwest = { version = "0.11", features = ["json"] }
+privy-api = { path = "crates/privy-api" }
+reqwest = { version = "0.12", features = ["json"] }
 base64 = "0.21"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 tokio = { version = "1", features = ["full"] }
 thiserror = "1.0"
 async-trait = "0.1"
-anyhow = "1.0"
+tracing = "0.1.41"
+progenitor-client = "0.11.0"
 
 [dev-dependencies]
-clap = { version = "4.0", features = ["derive", "env"] }
+anyhow = "1.0"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 dotenv = "0.15"
+
+[[example]]
+name = "basic_usage"
+path = "examples/basic_usage.rs"
