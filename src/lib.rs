@@ -15,6 +15,7 @@ use std::{str::FromStr, time::Duration};
 use base64::{Engine, engine::general_purpose::STANDARD};
 
 pub(crate) mod errors;
+pub(crate) mod keys;
 pub(crate) mod types;
 
 pub use errors::*;
