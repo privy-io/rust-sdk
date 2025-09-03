@@ -624,6 +624,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "delegate"
+version = "0.13.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6178a82cf56c836a3ba61a7935cdb1c49bfaa6fa4327cd5bf554a503087de26b"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 2.0.106",
+]
+
+[[package]]
 name = "derivation-path"
 version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1713,6 +1724,7 @@ dependencies = [
  "anyhow",
  "async-trait",
  "base64 0.21.7",
+ "delegate",
  "dotenv",
  "privy-api",
  "progenitor-client",

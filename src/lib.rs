@@ -1,18 +1,20 @@
 #![deny(clippy::unwrap_used)]
 
+use std::{str::FromStr, time::Duration};
+
+use base64::{Engine, engine::general_purpose::STANDARD};
+use delegate::delegate;
 use privy_api::{
     Client,
     types::{
         SolanaSignMessageRpcInputChainType, SolanaSignMessageRpcInputMethod,
         SolanaSignMessageRpcInputParamsEncoding, WalletRpcBody,
-        builder::{SolanaSignMessageRpcInput, SolanaSignMessageRpcInputParams},
+        builder::{
+            GetWalletsChainType, SolanaSignMessageRpcInput, SolanaSignMessageRpcInputParams,
+        },
     },
 };
 use reqwest::header::{CONTENT_TYPE, HeaderValue};
-
-use std::{str::FromStr, time::Duration};
-
-use base64::{Engine, engine::general_purpose::STANDARD};
 
 pub(crate) mod errors;
 pub(crate) mod keys;
@@ -45,6 +47,22 @@ impl PrivySigner {
             wallet_id,
             client: Client::new_with_client("https://api.privy.io", client_with_custom_defaults),
             public_key,
+        }
+    }
+
+    // this is the crux of the impl, a handy macro that delegates all the
+    // unexciting methods to the inner client automatically. we can do nice
+    // things like auto-populating items on the builders
+    delegate! {
+        to self.client {
+            #[expr($.privy_app_id(&self.app_id))]
+            pub fn authenticate(&self) -> privy_api::builder::Authenticate<'_>;
+
+            #[expr($.privy_app_id(&self.app_id))]
+            pub fn get_wallet(&self) -> privy_api::builder::GetWallet<'_>;
+
+            #[expr($.privy_app_id(&self.app_id))]
+            pub fn get_wallets(&self) -> privy_api::builder::GetWallets<'_>;
         }
     }
 
