@@ -21,6 +21,7 @@ pub(crate) mod types;
 
 pub use errors::*;
 pub use keys::*;
+use serde::Serialize;
 pub use types::*;
 
 impl PrivySigner {
@@ -147,32 +148,13 @@ impl PrivySigner {
     ///
     /// # Errors
     /// This can fail if JSON serialization fails
-    pub fn build_canonical_request(
+    pub fn build_canonical_request<S: Serialize>(
         &self,
         method: Method,
         url: String,
-        body: Option<serde_json::Value>,
-        headers: Option<serde_json::Value>,
-    ) -> Result<String, serde_json::Error> {
-        let builder = PrivySignerBuilder::new(method, url)
-            .body(body.unwrap_or_default())
-            .headers(headers.unwrap_or_default());
-
-        builder.canonicalize()
-    }
-
-    /// Create canonical request data for wallet update operations
-    ///
-    /// # Errors
-    /// This can fail if JSON serialization fails
-    pub fn build_update_wallet_canonical_request(
-        &self,
-        wallet_id: &str,
-        body: serde_json::Value,
+        body: S,
         idempotency_key: Option<String>,
     ) -> Result<String, serde_json::Error> {
-        let url = format!("https://api.privy.io/v1/wallets/{wallet_id}");
-
         let mut headers = serde_json::Map::new();
         headers.insert(
             "privy-app-id".into(),
@@ -185,16 +167,74 @@ impl PrivySigner {
             );
         }
 
-        self.build_canonical_request(
-            Method::PATCH,
-            url,
-            Some(body),
-            Some(serde_json::Value::Object(headers)),
-        )
+        PrivySignerBuilder::new(method, url)
+            .headers(serde_json::Value::Object(headers))
+            .body(body)
+            .canonicalize()
+    }
+
+    /// Create canonical request data for wallet update operations
+    ///
+    /// # Errors
+    /// This can fail if JSON serialization fails
+    pub fn build_update_wallet_canonical_request<S: Serialize>(
+        &self,
+        wallet_id: &str,
+        body: S,
+        idempotency_key: Option<String>,
+    ) -> Result<String, serde_json::Error> {
+        let url = format!("https://api.privy.io/v1/wallets/{wallet_id}");
+        self.build_canonical_request(Method::PATCH, url, Some(body), idempotency_key)
     }
 }
 
 fn get_auth_header(app_id: &str, app_secret: &str) -> String {
     let credentials = format!("{app_id}:{app_secret}");
     format!("Basic {}", STANDARD.encode(credentials))
+}
+
+#[cfg(test)]
+mod tests {
+    use privy_api::types::{
+        PublicKeyOwner,
+        builder::{OwnerInput, UpdateWalletBody},
+    };
+
+    use super::*;
+
+    #[test]
+    fn test_privy_canonical_request() {
+        let signer = PrivySigner::new(
+            "app_id".into(),
+            "app_secret".into(),
+            "wallet_id".into(),
+            "public_key".into(),
+        )
+        .unwrap();
+
+        let update_wallet_body: privy_api::types::UpdateWalletBody = UpdateWalletBody::default()
+            .owner(Some(
+                OwnerInput::default()
+                    .subtype_0(PublicKeyOwner {
+                        public_key: "ABCD".to_string(),
+                    })
+                    .try_into()
+                    .unwrap(),
+            ))
+            .try_into()
+            .unwrap();
+
+        let canonical = signer
+            .build_canonical_request(
+                Method::PATCH,
+                "https://api.privy.io/v1/wallets/clw4cc3a700b811p865d21b7b".to_string(),
+                update_wallet_body,
+                None,
+            )
+            .unwrap();
+        assert_eq!(
+            canonical,
+            r#"{"body":{"owner":{"public_key":"ABCD"}},"headers":{"privy-app-id":"app_id"},"method":"PATCH","url":"https://api.privy.io/v1/wallets/clw4cc3a700b811p865d21b7b","version":1}"#
+        );
+    }
 }

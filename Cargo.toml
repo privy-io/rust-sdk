@@ -24,6 +24,8 @@ delegate = "0.13.4"
 p256 = { version = "0.13.2", features = ["pem", "ecdsa"] }
 futures = "0.3.31"
 serde_json_canonicalizer = "0.3.1"
+sha2 = "0.10.9"
+hex = "0.4"
 
 [dev-dependencies]
 anyhow = "1.0"

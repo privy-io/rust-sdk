@@ -36,24 +36,29 @@ async fn main() -> Result<()> {
 
     let signer = PrivySigner::new(app_id.clone(), app_secret, wallet_id.clone(), public_key)?;
 
+    let wallet = signer.get_wallet().wallet_id(&wallet_id).send().await?;
+
+    tracing::info!("got wallet: {:?}", wallet);
+
+    let key_source = privy_rust::PrivateKeyFromFile("private_key.pem".into());
+    let key = key_source.get_key().await.unwrap();
+    let public_key = key.public_key();
+
     // Create the request body that will be sent using the generated privy-api type
     let update_wallet_body: privy_api::types::UpdateWalletBody = UpdateWalletBody::default()
         .owner(Some(
             OwnerInput::default()
                 .subtype_0(PublicKeyOwner {
-                    public_key: include_str!("../public_key.pem").into(),
+                    public_key: public_key.to_string(),
                 })
                 .try_into()?,
         ))
         .try_into()?;
 
-    // Serialize the typed body to a generic `serde_json::Value`
-    let request_body_json = serde_json::to_value(&update_wallet_body)?;
-
     // Build the canonical request data for signing using the serialized body
     let canonical_data = signer.build_update_wallet_canonical_request(
         &wallet_id,
-        request_body_json,
+        update_wallet_body.clone(),
         // Some(idempotency_key.clone()),
         None,
     )?;
@@ -61,18 +66,17 @@ async fn main() -> Result<()> {
     tracing::info!("canonical request data: {}", canonical_data);
 
     // Sign the canonical request data (UTF-8 bytes)
-    let key = privy_rust::PrivateKeyFromFile("private_key.pem".into());
-    let signature = key
-        .get_key()
-        .await
-        .unwrap()
-        .sign(canonical_data.as_bytes())
-        .await
-        .unwrap();
+    let signature = key_source.sign(canonical_data.as_bytes()).await.unwrap();
 
-    let privy_authorization_signature = STANDARD.encode(signature.to_bytes());
+    // Convert signature to DER format and then base64 encode
+    let der_bytes = signature.to_der();
+    let privy_authorization_signature = STANDARD.encode(&der_bytes);
 
-    tracing::info!("got sig: {:?}", privy_authorization_signature);
+    tracing::debug!(
+        "Generated authorization signature: {} bytes DER -> {} chars base64",
+        der_bytes.len(),
+        privy_authorization_signature.len()
+    );
 
     let wallet = match signer
         .update_wallet()

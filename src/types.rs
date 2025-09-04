@@ -1,4 +1,5 @@
 use privy_api::Client;
+use serde::Serialize;
 
 #[derive(Clone, Debug)]
 pub struct PrivySigner {
@@ -10,7 +11,7 @@ pub struct PrivySigner {
     pub(crate) public_key: String,
 }
 
-#[derive(serde::Serialize)]
+#[derive(serde::Serialize, Debug)]
 pub enum Method {
     PATCH,
     POST,
@@ -20,15 +21,15 @@ pub enum Method {
 }
 
 #[derive(serde::Serialize)]
-pub struct PrivySignerBuilder {
+pub struct PrivySignerBuilder<S: Serialize> {
     version: u32,
     method: Method,
     url: String,
-    body: Option<serde_json::Value>,
+    body: Option<S>,
     headers: Option<serde_json::Value>,
 }
 
-impl PrivySignerBuilder {
+impl<S: Serialize> PrivySignerBuilder<S> {
     #[must_use]
     pub fn new(method: Method, url: String) -> Self {
         Self {
@@ -41,7 +42,7 @@ impl PrivySignerBuilder {
     }
 
     #[must_use]
-    pub fn body(mut self, body: serde_json::Value) -> Self {
+    pub fn body(mut self, body: S) -> Self {
         self.body = Some(body);
         self
     }

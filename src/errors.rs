@@ -34,3 +34,21 @@ pub enum PrivyError {
     #[error("Error while accessing API: {0}")]
     Api(#[from] PrivyApiError),
 }
+
+#[derive(Error, Debug)]
+pub enum KeyError {
+    #[error("Invalid key")]
+    Unknown,
+    #[error("IO error: {0}")]
+    Io(#[from] std::io::Error),
+    #[error("Invalid key format")]
+    InvalidFormat(String),
+}
+
+#[derive(Error, Debug)]
+pub enum SigningError {
+    #[error("Invalid key: {0}")]
+    Key(#[from] KeyError),
+    #[error("Invalid signature")]
+    Unknown,
+}

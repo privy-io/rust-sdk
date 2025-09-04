@@ -1,6 +1,6 @@
 use futures::{Stream, StreamExt};
 use p256::{
-    ecdsa::{Signature, SigningKey, signature::SignerMut},
+    ecdsa::{Signature, SigningKey},
     elliptic_curve::{SecretKey, generic_array::GenericArray},
 };
 use privy_api::types::builder::AuthenticateBody;
@@ -12,10 +12,10 @@ use std::{
 };
 use tokio::sync::RwLock;
 
+use crate::{KeyError, SigningError};
+
 const EXPIRY_BUFFER: Duration = Duration::from_secs(60);
 const SIGNATURE_RESOLUTION_CONCURRENCY: usize = 10;
-
-pub type Error = ();
 
 pub struct AuthorizationContext(Vec<Box<dyn IntoSignatureBoxed>>, usize);
 
@@ -41,13 +41,15 @@ impl AuthorizationContext {
     /// add a `PrivateKey` source which you can set yourself.
     ///
     /// ```rust
-    /// # use privy_rust::{AuthorizationContext, JwtUser, IntoSignature, PrivateKey};
+    /// # use privy_rust::{AuthorizationContext, JwtUser, IntoSignature, PrivateKey, PrivySigner};
     /// # use p256::ecdsa::signature::SignerMut;
     /// # use p256::ecdsa::Signature;
     /// # use p256::elliptic_curve::SecretKey;
     /// # use std::time::Duration;
+    /// # use std::sync::Arc;
     /// # async fn foo() {
-    /// let jwt = JwtUser("test".to_string());
+    /// let privy = PrivySigner::new("app_id".to_string(), "app_secret".to_string(), "wallet_id".to_string(), "public_key".to_string()).unwrap();
+    /// let jwt = JwtUser(Arc::new(privy), "test".to_string());
     /// let key = PrivateKey("test".to_string());
     /// let mut context = AuthorizationContext::new();
     /// context.push(jwt);
@@ -65,17 +67,19 @@ impl AuthorizationContext {
     /// according to the policy set in `AuthorizationContext`.
     ///
     /// ```rust
-    /// # use privy_rust::{AuthorizationContext, JwtUser, IntoSignature};
+    /// # use privy_rust::{AuthorizationContext, JwtUser, IntoSignature, PrivySigner};
     /// # use p256::ecdsa::signature::SignerMut;
     /// # use p256::ecdsa::Signature;
     /// # use p256::elliptic_curve::SecretKey;
     /// # use std::time::Duration;
+    /// # use std::sync::Arc;
     /// # use futures::stream::StreamExt;
     /// # async fn foo() {
-    /// let jwt = JwtUser("test".to_string());
+    /// let privy = PrivySigner::new("app_id".to_string(), "app_secret".to_string(), "wallet_id".to_string(), "public_key".to_string()).unwrap();
+    /// let jwt = JwtUser(Arc::new(privy), "test".to_string());
     /// let mut context = AuthorizationContext::new();
     /// context.push(jwt);
-    /// let key = context.sign(&[0, 1, 2, 3]).await.collect::<Vec<_>>().await;
+    /// let key = context.sign(&[0, 1, 2, 3]).collect::<Vec<_>>().await;
     /// assert_eq!(key.len(), 1);
     /// # }
     /// ```
@@ -84,24 +88,26 @@ impl AuthorizationContext {
     /// failing on the first error.
     ///
     /// ```rust
-    /// # use privy_rust::{AuthorizationContext, JwtUser, IntoSignature};
+    /// # use privy_rust::{AuthorizationContext, JwtUser, IntoSignature, PrivySigner};
     /// # use p256::ecdsa::signature::SignerMut;
     /// # use p256::ecdsa::Signature;
     /// # use p256::elliptic_curve::SecretKey;
     /// # use std::time::Duration;
+    /// # use std::sync::Arc;
     /// # use futures::stream::TryStreamExt;
     /// # async fn foo() {
-    /// let jwt = JwtUser("test".to_string());
+    /// let privy = PrivySigner::new("app_id".to_string(), "app_secret".to_string(), "wallet_id".to_string(), "public_key".to_string()).unwrap();
+    /// let jwt = JwtUser(Arc::new(privy), "test".to_string());
     /// let mut context = AuthorizationContext::new();
     /// context.push(jwt);
-    /// let key = context.sign(&[0, 1, 2, 3]).await.try_collect::<Vec<_>>().await;
+    /// let key = context.sign(&[0, 1, 2, 3]).try_collect::<Vec<_>>().await;
     /// assert!(key.map(|v| v.len() == 1).unwrap_or(false));
     /// # }
     /// ```
     pub fn sign<'a>(
         &'a self,
         message: &'a [u8],
-    ) -> impl Stream<Item = Result<Signature, Error>> + 'a {
+    ) -> impl Stream<Item = Result<Signature, SigningError>> + 'a {
         futures::stream::iter(self.0.iter())
             .map(|key| key.sign_boxed(message))
             .buffer_unordered(self.1)
@@ -113,13 +119,15 @@ impl AuthorizationContext {
     /// valid.
     ///
     /// ```
-    /// # use privy_rust::{AuthorizationContext, JwtUser, IntoSignature};
+    /// # use privy_rust::{AuthorizationContext, JwtUser, IntoSignature, PrivySigner};
     /// # use p256::ecdsa::signature::SignerMut;
     /// # use p256::ecdsa::Signature;
     /// # use p256::elliptic_curve::SecretKey;
     /// # use std::time::Duration;
+    /// # use std::sync::Arc;
     /// # async fn foo() {
-    /// let jwt = JwtUser("test".to_string());
+    /// let privy = PrivySigner::new("app_id".to_string(), "app_secret".to_string(), "wallet_id".to_string(), "public_key".to_string()).unwrap();
+    /// let jwt = JwtUser(Arc::new(privy), "test".to_string());
     /// let key = SecretKey::<p256::NistP256>::from_sec1_pem(&"test".to_string()).unwrap();
     /// let mut context = AuthorizationContext::new();
     /// context.push(jwt);
@@ -128,7 +136,7 @@ impl AuthorizationContext {
     /// assert!(errors.is_empty());
     /// # }
     /// ```
-    pub async fn validate(&self) -> Vec<Error> {
+    pub async fn validate(&self) -> Vec<SigningError> {
         self.sign(&[])
             .filter_map(|r| async move { r.err() })
             .collect::<Vec<_>>()
@@ -139,18 +147,64 @@ impl AuthorizationContext {
 type Key = SecretKey<p256::NistP256>;
 
 pub trait IntoKey {
-    fn get_key(&self) -> impl Future<Output = Result<Key, Error>> + Send;
+    /// Get a key from the `IntoKey` source.
+    fn get_key(&self) -> impl Future<Output = Result<Key, KeyError>> + Send;
 }
 
 pub trait IntoSignature {
-    fn sign(&self, message: &[u8]) -> impl Future<Output = Result<Signature, Error>> + Send;
+    /// Sign a message using deterministic ECDSA.
+    ///
+    /// This method implements a two-step signing process that ensures compatibility
+    /// with Privy's API signature verification:
+    ///
+    /// ## Process Overview
+    ///
+    /// 1. **Message Hashing**: The input message is hashed using SHA-256 to produce
+    ///    a 32-byte digest. This follows the standard practice of hashing messages
+    ///    before signing to ensure security and compatibility.
+    ///
+    /// 2. **Deterministic ECDSA Signing**: The hash is signed using ECDSA P-256
+    ///    with RFC 6979 deterministic k-value generation. This ensures that the
+    ///    same message will always produce the same signature when signed with
+    ///    the same private key.
+    ///
+    /// ## Why Deterministic Signing?
+    ///
+    /// Traditional ECDSA uses random k-values during signature generation, which
+    /// means the same message signed with the same key can produce different valid
+    /// signatures. However, Privy's API expects deterministic signatures.
+    ///
+    /// By using RFC 6979 deterministic k-value generation, we ensure:
+    /// - **Reproducibility**: Same input always produces same signature
+    /// - **Security**: RFC 6979 provides cryptographically secure k-values
+    /// - **Consistency**: Matches the behavior of Privy's other SDKs
+    ///
+    /// ## Example Usage
+    ///
+    /// ```rust
+    /// use privy_rust::{IntoSignature, PrivateKeyFromFile};
+    /// use std::path::PathBuf;
+    ///
+    /// # async fn example() -> Result<(), Box<dyn std::error::Error>> {
+    /// let key_source = PrivateKeyFromFile(PathBuf::from("private_key.pem"));
+    /// let message = b"canonical request data";
+    /// let signature = key_source.sign(message).await?;
+    ///
+    /// // The signature is deterministic - signing the same message again
+    /// // with the same key will produce identical results
+    /// let signature2 = key_source.sign(message).await?;
+    /// assert_eq!(signature, signature2);
+    /// # Ok(())
+    /// # }
+    /// ```
+    fn sign(&self, message: &[u8]) -> impl Future<Output = Result<Signature, SigningError>> + Send;
 }
 
 impl<T> IntoSignature for T
 where
     T: IntoKey + Sync,
 {
-    async fn sign(&self, message: &[u8]) -> Result<Signature, Error> {
+    async fn sign(&self, message: &[u8]) -> Result<Signature, SigningError> {
         let key = self.get_key().await?;
         key.sign(message).await
     }
@@ -167,14 +221,14 @@ trait IntoSignatureBoxed {
     fn sign_boxed<'a>(
         &'a self,
         message: &'a [u8],
-    ) -> Pin<Box<dyn Future<Output = Result<Signature, Error>> + Send + 'a>>;
+    ) -> Pin<Box<dyn Future<Output = Result<Signature, SigningError>> + Send + 'a>>;
 }
 
 impl<T: IntoSignature + 'static> IntoSignatureBoxed for T {
     fn sign_boxed<'a>(
         &'a self,
         message: &'a [u8],
-    ) -> Pin<Box<dyn Future<Output = Result<Signature, Error>> + Send + 'a>> {
+    ) -> Pin<Box<dyn Future<Output = Result<Signature, SigningError>> + Send + 'a>> {
         Box::pin(self.sign(message))
     }
 }
@@ -188,7 +242,7 @@ impl<T: IntoKey + Sync> TimeCachingKey<T> {
 }
 
 impl<T: IntoKey + Sync> IntoKey for TimeCachingKey<T> {
-    async fn get_key(&self) -> Result<Key, Error> {
+    async fn get_key(&self) -> Result<Key, KeyError> {
         {
             let valid = self.1.read().await;
             if let Some((_, key)) = valid.as_ref().filter(|(time, _)| time > &SystemTime::now()) {
@@ -209,10 +263,10 @@ impl<T: IntoKey + Sync> IntoKey for TimeCachingKey<T> {
     }
 }
 
-pub struct JwtUser(Arc<crate::PrivySigner>, pub String);
+pub struct JwtUser(pub Arc<crate::PrivySigner>, pub String);
 
 impl IntoKey for JwtUser {
-    async fn get_key(&self) -> Result<Key, Error> {
+    async fn get_key(&self) -> Result<Key, KeyError> {
         tracing::debug!("getting key from jwt {}", self.1);
 
         let auth = match self
@@ -225,11 +279,11 @@ impl IntoKey for JwtUser {
             Ok(r) => r.into_inner(),
             Err(privy_api::Error::UnexpectedResponse(response)) => {
                 tracing::error!("unexpected response {:?}", response.text().await);
-                return Err(());
+                return Err(KeyError::Unknown);
             }
             Err(e) => {
                 tracing::error!("error {:?}", e);
-                return Err(());
+                return Err(KeyError::Unknown);
             }
         };
 
@@ -246,27 +300,51 @@ impl IntoKey for JwtUser {
 
         Key::from_bytes(GenericArray::from_slice(&key.into_bytes())).map_err(|_| {
             tracing::error!("invalid key");
+            KeyError::Unknown
         })
     }
 }
 
 impl IntoSignature for Key {
-    async fn sign(&self, message: &[u8]) -> Result<Signature, Error> {
-        tracing::debug!("signing with key {:?}", self);
-        let mut sk = SigningKey::from(self.clone());
-        Ok(sk.sign(message))
+    async fn sign(&self, message: &[u8]) -> Result<Signature, SigningError> {
+        use sha2::{Digest, Sha256};
+
+        tracing::debug!(
+            "Starting ECDSA signing process for {} byte message",
+            message.len()
+        );
+
+        // First hash the message with SHA256
+        let mut hasher = Sha256::new();
+        hasher.update(message);
+        let hashed = hasher.finalize();
+
+        tracing::debug!("SHA256 hash computed: {}", hex::encode(&hashed));
+
+        // Sign the hash using deterministic signing (RFC 6979)
+        let signing_key = SigningKey::from(self.clone());
+
+        // Use deterministic prehash signing to ensure consistent signatures
+        use p256::ecdsa::signature::hazmat::PrehashSigner;
+        let signature: Signature = signing_key
+            .sign_prehash(&hashed)
+            .map_err(|_| SigningError::Unknown)?;
+
+        tracing::debug!("ECDSA signature generated using deterministic RFC 6979");
+
+        Ok(signature)
     }
 }
 
 impl IntoKey for &Path {
-    async fn get_key(&self) -> Result<Key, Error> {
-        let key = tokio::fs::read_to_string(self).await.map_err(|_| ())?;
-        SecretKey::<p256::NistP256>::from_sec1_pem(&key).map_err(|_| ())
+    async fn get_key(&self) -> Result<Key, KeyError> {
+        let key = tokio::fs::read_to_string(self).await?;
+        SecretKey::<p256::NistP256>::from_sec1_pem(&key).map_err(|_| KeyError::InvalidFormat(key))
     }
 }
 
 impl IntoSignature for Signature {
-    async fn sign(&self, _message: &[u8]) -> Result<Signature, Error> {
+    async fn sign(&self, _message: &[u8]) -> Result<Signature, SigningError> {
         Ok(*self)
     }
 }
@@ -277,25 +355,30 @@ pub struct PrivateKeyFromFile(pub PathBuf);
 
 pub struct KMSService;
 impl IntoSignature for KMSService {
-    async fn sign(&self, _message: &[u8]) -> Result<Signature, Error> {
+    async fn sign(&self, _message: &[u8]) -> Result<Signature, SigningError> {
         todo!("kms signature")
     }
 }
 
 impl IntoKey for PrivateKey {
-    async fn get_key(&self) -> Result<Key, Error> {
-        SecretKey::<p256::NistP256>::from_sec1_pem(&self.0).map_err(
-            // todo: proper error handling here
-            |_| (),
-        )
+    async fn get_key(&self) -> Result<Key, KeyError> {
+        SecretKey::<p256::NistP256>::from_sec1_pem(&self.0)
+            .map_err(|_| KeyError::InvalidFormat(self.0.to_owned()))
     }
 }
 
 impl IntoKey for PrivateKeyFromFile {
-    async fn get_key(&self) -> Result<Key, Error> {
-        std::fs::read_to_string(&self.0)
-            .map_err(|_| ())
-            .and_then(|s| SecretKey::<p256::NistP256>::from_sec1_pem(&s).map_err(|_| ()))
+    async fn get_key(&self) -> Result<Key, KeyError> {
+        let pem_content = std::fs::read_to_string(&self.0)?;
+
+        let key = SecretKey::<p256::NistP256>::from_sec1_pem(&pem_content).map_err(|e| {
+            tracing::error!("Failed to parse SEC1 PEM: {:?}", e);
+            KeyError::InvalidFormat(pem_content)
+        })?;
+
+        tracing::debug!("Successfully parsed private key from file: {:?}", self.0);
+
+        Ok(key)
     }
 }
 
