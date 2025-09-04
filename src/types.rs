@@ -1,14 +1,29 @@
 use serde::Serialize;
 
+/// The HTTP method used in the request.
+///
+/// Note that `GET` requests do not need
+/// signatures by definition.
 #[derive(serde::Serialize, Debug)]
 pub enum Method {
+    /// `PATCH` requests are used to update an existing resource.
     PATCH,
+    /// `POST` requests are used to create a new resource.
     POST,
+    /// `PUT` requests are used to update an existing resource.
     PUT,
-    GET,
+    /// `GET` requests are used to retrieve an existing resource.
     DELETE,
 }
 
+/// The wallet API request signature input is used
+/// during the signing process as a canonical representation
+/// of the request. Ensure that you serialize this struct
+/// with the `serde_json_canonicalizer` to get the appropriate
+/// RFC-8785 canonicalized string. For more information, see
+/// <https://datatracker.ietf.org/doc/html/rfc8785>
+///
+/// Note: Version is currently hardcoded to 1.
 #[derive(serde::Serialize)]
 pub struct WalletApiRequestSignatureInput<S: Serialize> {
     version: u32,
@@ -19,6 +34,7 @@ pub struct WalletApiRequestSignatureInput<S: Serialize> {
 }
 
 impl<S: Serialize> WalletApiRequestSignatureInput<S> {
+    /// Create a new request builder.
     #[must_use]
     pub fn new(method: Method, url: String) -> Self {
         Self {
@@ -30,12 +46,14 @@ impl<S: Serialize> WalletApiRequestSignatureInput<S> {
         }
     }
 
+    /// Set the request body.
     #[must_use]
     pub fn body(mut self, body: S) -> Self {
         self.body = Some(body);
         self
     }
 
+    /// Set the request headers.
     #[must_use]
     pub fn headers(mut self, headers: serde_json::Value) -> Self {
         self.headers = Some(headers);
@@ -83,7 +101,7 @@ mod tests {
     #[test]
     fn test_key_ordering() {
         let builder =
-            WalletApiRequestSignatureInput::new(Method::GET, "https://example.com".to_string())
+            WalletApiRequestSignatureInput::new(Method::POST, "https://example.com".to_string())
                 .body(json!({
                     "z_last": "last",
                     "a_first": "first",

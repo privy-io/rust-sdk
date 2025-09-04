@@ -18,6 +18,17 @@ use crate::{KeyError, SigningError};
 const EXPIRY_BUFFER: Duration = Duration::from_secs(60);
 const SIGNATURE_RESOLUTION_CONCURRENCY: usize = 10;
 
+/// A context for signing messages. Any keys added to the context will be
+/// automatically added to the list of signatories for requests to the Privy API
+/// that require authorization.
+///
+/// The context accepts anything that implements `IntoSignature`, which by
+/// extension includes anything that implements `IntoKey`. This allows you to
+/// create a context that includes keys from a variety of sources, such as
+/// files, JWTs, or KMS services.
+///
+/// For usage information, see the `AuthorizationContext::sign` and
+/// `AuthorizationContext::push` methods.
 pub struct AuthorizationContext(Vec<Box<dyn IntoSignatureBoxed>>, usize);
 
 impl Default for AuthorizationContext {
@@ -27,6 +38,7 @@ impl Default for AuthorizationContext {
 }
 
 impl AuthorizationContext {
+    /// Create a new `AuthorizationContext` with the default concurrency.
     #[must_use]
     pub fn new() -> Self {
         Self(Vec::default(), SIGNATURE_RESOLUTION_CONCURRENCY)
@@ -147,11 +159,13 @@ impl AuthorizationContext {
 
 type Key = SecretKey<p256::NistP256>;
 
+/// A trait for getting a key from a source. See `IntoKey::get_key` for more details.
 pub trait IntoKey {
     /// Get a key from the `IntoKey` source.
     fn get_key(&self) -> impl Future<Output = Result<Key, KeyError>> + Send;
 }
 
+/// A trait for signing messages. See `IntoSignature::sign` for more details.
 pub trait IntoSignature {
     /// Sign a message using deterministic ECDSA.
     ///
@@ -212,10 +226,6 @@ where
     }
 }
 
-pub trait ExpiringKey: IntoKey {
-    fn expires_at(&self) -> SystemTime;
-}
-
 /// Rust has a concept of 'object safety' and `IntoSignature` is not object safe.
 /// What we can do, however, is to blanket impl `IntoSignatureBoxed` for all types
 /// that implement `IntoSignature`.
@@ -235,9 +245,32 @@ impl<T: IntoSignature + 'static> IntoSignatureBoxed for T {
     }
 }
 
+/// A wrapper type that caches the output of something that implements `IntoKey`
+/// for a period of time. For example, `JwtUser` implements `IntoKey`, and the
+/// request returns an expiry time. This wrapper will cache the key for the
+/// specified time, avoiding repeated requests to the API.
+///
+/// TODO: impl
+///
+/// # Usage
+/// ```
+/// # use privy_rust::{IntoKey, JwtUser, TimeCachingKey};
+/// # use std::time::Duration;
+/// # use std::sync::Arc;
+/// # use p256::ecdsa::signature::SignerMut;
+/// # use p256::ecdsa::Signature;
+/// # use p256::elliptic_curve::SecretKey;
+/// # async fn foo() {
+/// let privy = PrivyClient::new("app_id".to_string(), "app_secret".to_string()).unwrap();
+/// let jwt = JwtUser(Arc::new(privy), "test".to_string());
+/// let key = TimeCachingKey::new(jwt);
+/// let key = key.get_key().await.unwrap();
+/// # }
+/// ```
 pub struct TimeCachingKey<T: IntoKey>(T, Arc<RwLock<Option<(SystemTime, Key)>>>);
 
 impl<T: IntoKey + Sync> TimeCachingKey<T> {
+    /// Create a new `TimeCachingKey` from anything that implements `IntoKey`.
     pub fn new(key: T) -> Self {
         Self(key, Arc::new(RwLock::new(None)))
     }
@@ -265,6 +298,14 @@ impl<T: IntoKey + Sync> IntoKey for TimeCachingKey<T> {
     }
 }
 
+/// A key that is sourced from the user identified by the provided JWT.
+///
+/// This is used in JWT-based authentication. When attempting to sign,
+/// the JWT is used to retrieve the user's key from the Privy API.
+///
+/// # Errors
+/// This provider can fail if the JWT is invalid, does not match a user,
+/// or if the API returns an error.
 pub struct JwtUser(pub Arc<crate::PrivyClient>, pub String);
 
 impl IntoKey for JwtUser {
@@ -353,10 +394,22 @@ impl IntoSignature for Signature {
     }
 }
 
+/// A raw private key in SEC1 PEM format.
+///
+/// # Errors
+/// This provider can fail if the key is not in the expected format.
 pub struct PrivateKey(pub String);
 
+/// An `IntoKey` implementation that reads a private key from a file on disk.
+/// This key is assumed to be in the SEC1 PEM format.
+///
+/// # Errors
+/// This provider can fail if the file is not found or if the file
+/// is not in the expected format.
 pub struct PrivateKeyFromFile(pub PathBuf);
 
+/// An example implementation of `IntoSignature` that calls out to
+/// an arbitrary KMS service to retrieve a key.
 pub struct KMSService;
 impl IntoSignature for KMSService {
     async fn sign(&self, _message: &[u8]) -> Result<Signature, SigningError> {
@@ -366,23 +419,17 @@ impl IntoSignature for KMSService {
 
 impl IntoKey for PrivateKey {
     async fn get_key(&self) -> Result<Key, KeyError> {
-        SecretKey::<p256::NistP256>::from_sec1_pem(&self.0)
-            .map_err(|_| KeyError::InvalidFormat(self.0.clone()))
+        SecretKey::<p256::NistP256>::from_sec1_pem(&self.0).map_err(|e| {
+            tracing::error!("Failed to parse SEC1 PEM: {:?}", e);
+            KeyError::InvalidFormat(self.0.clone())
+        })
     }
 }
 
 impl IntoKey for PrivateKeyFromFile {
     async fn get_key(&self) -> Result<Key, KeyError> {
         let pem_content = std::fs::read_to_string(&self.0)?;
-
-        let key = SecretKey::<p256::NistP256>::from_sec1_pem(&pem_content).map_err(|e| {
-            tracing::error!("Failed to parse SEC1 PEM: {:?}", e);
-            KeyError::InvalidFormat(pem_content)
-        })?;
-
-        tracing::debug!("Successfully parsed private key from file: {:?}", self.0);
-
-        Ok(key)
+        PrivateKey(pem_content).get_key().await
     }
 }
 

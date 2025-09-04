@@ -70,36 +70,47 @@ impl PrivyClient {
     // things like auto-populating items on the builders
     delegate! {
         to self.client {
+            /// Authenticate a user using a JWT
             #[expr($.privy_app_id(&self.app_id))]
             #[must_use] pub fn authenticate(&self) -> privy_api::builder::Authenticate<'_>;
 
+            /// Get a wallet
             #[expr($.privy_app_id(&self.app_id))]
             #[must_use] pub fn get_wallet(&self) -> privy_api::builder::GetWallet<'_>;
 
+            /// Get a list of wallets
             #[expr($.privy_app_id(&self.app_id))]
             #[must_use] pub fn get_wallets(&self) -> privy_api::builder::GetWallets<'_>;
 
+            /// Create a new wallet
             #[expr($.privy_app_id(&self.app_id))]
             #[must_use] pub fn create_wallet(&self) -> privy_api::builder::CreateWallet<'_>;
 
+            /// Update a wallet
             #[expr($.privy_app_id(&self.app_id))]
             #[must_use] pub fn update_wallet(&self) -> privy_api::builder::UpdateWallet<'_>;
 
+            /// Create a new user
             #[expr($.privy_app_id(&self.app_id))]
             #[must_use] pub fn create_user(&self) -> privy_api::builder::CreateUser<'_>;
 
+            /// Get a user
             #[expr($.privy_app_id(&self.app_id))]
             #[must_use] pub fn get_user(&self) -> privy_api::builder::GetUser<'_>;
 
+            /// Get a list of users
             #[expr($.privy_app_id(&self.app_id))]
             #[must_use] pub fn get_users(&self) -> privy_api::builder::GetUsers<'_>;
 
+            /// Delete a user
             #[expr($.privy_app_id(&self.app_id))]
             #[must_use] pub fn delete_user(&self) -> privy_api::builder::DeleteUser<'_>;
 
+            /// Search for users
             #[expr($.privy_app_id(&self.app_id))]
             #[must_use] pub fn search_users(&self) -> privy_api::builder::SearchUsers<'_>;
 
+            /// Create a new user wallet
             #[expr($.privy_app_id(&self.app_id))]
             #[must_use] pub fn create_user_wallet(&self) -> privy_api::builder::CreateUserWallet<'_>;
         }
