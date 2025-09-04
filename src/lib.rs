@@ -176,7 +176,7 @@ impl PrivySigner {
             );
         }
 
-        PrivySignerBuilder::new(method, url)
+        WalletApiRequestSignatureInput::new(method, url)
             .headers(serde_json::Value::Object(headers))
             .body(body)
             .canonicalize()

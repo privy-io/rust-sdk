@@ -21,7 +21,7 @@ pub enum Method {
 }
 
 #[derive(serde::Serialize)]
-pub struct PrivySignerBuilder<S: Serialize> {
+pub struct WalletApiRequestSignatureInput<S: Serialize> {
     version: u32,
     method: Method,
     url: String,
@@ -29,7 +29,7 @@ pub struct PrivySignerBuilder<S: Serialize> {
     headers: Option<serde_json::Value>,
 }
 
-impl<S: Serialize> PrivySignerBuilder<S> {
+impl<S: Serialize> WalletApiRequestSignatureInput<S> {
     #[must_use]
     pub fn new(method: Method, url: String) -> Self {
         Self {
@@ -71,7 +71,7 @@ mod tests {
 
     #[test]
     fn test_canonicalization_matches_docs_example() {
-        let builder = PrivySignerBuilder::new(
+        let builder = WalletApiRequestSignatureInput::new(
             Method::PATCH,
             "https://api.privy.io/v1/wallets/clw4cc3a700b811p865d21b7b".to_string(),
         )
@@ -93,16 +93,17 @@ mod tests {
 
     #[test]
     fn test_key_ordering() {
-        let builder = PrivySignerBuilder::new(Method::GET, "https://example.com".to_string())
-            .body(json!({
-                "z_last": "last",
-                "a_first": "first",
-                "m_middle": "middle"
-            }))
-            .headers(json!({
-                "z-header": "last",
-                "a-header": "first"
-            }));
+        let builder =
+            WalletApiRequestSignatureInput::new(Method::GET, "https://example.com".to_string())
+                .body(json!({
+                    "z_last": "last",
+                    "a_first": "first",
+                    "m_middle": "middle"
+                }))
+                .headers(json!({
+                    "z-header": "last",
+                    "a-header": "first"
+                }));
 
         let canonical = builder
             .canonicalize()
@@ -115,13 +116,14 @@ mod tests {
 
     #[test]
     fn test_nested_object_sorting() {
-        let builder = PrivySignerBuilder::new(Method::POST, "https://example.com".to_string())
-            .body(json!({
-                "outer": {
-                    "z_inner": "last",
-                    "a_inner": "first"
-                }
-            }));
+        let builder =
+            WalletApiRequestSignatureInput::new(Method::POST, "https://example.com".to_string())
+                .body(json!({
+                    "outer": {
+                        "z_inner": "last",
+                        "a_inner": "first"
+                    }
+                }));
 
         let canonical = builder
             .canonicalize()
@@ -133,10 +135,11 @@ mod tests {
 
     #[test]
     fn test_array_preservation() {
-        let builder = PrivySignerBuilder::new(Method::POST, "https://example.com".to_string())
-            .body(json!({
-                "items": ["third", "first", "second"]
-            }));
+        let builder =
+            WalletApiRequestSignatureInput::new(Method::POST, "https://example.com".to_string())
+                .body(json!({
+                    "items": ["third", "first", "second"]
+                }));
 
         let canonical = builder
             .canonicalize()
