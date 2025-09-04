@@ -1,0 +1,91 @@
+{
+	"paths": {
+		"/v1/users": {
+			"post": {
+				"operationId": "createUser"
+			},
+			"get": {
+				"operationId": "getUsers"
+			}
+		},
+		"/v1/users/{user_id}": {
+			"get": {
+				"operationId": "getUser"
+			},
+			"delete": {
+				"operationId": "deleteUser"
+			}
+		},
+		"/v1/users/search": {
+			"post": {
+				"operationId": "searchUsers"
+			}
+		},
+		"/v1/users/{user_id}/wallets": {
+			"post": {
+				"operationId": "createUserWallet"
+			}
+		},
+		"/v1/wallets": {
+			"post": {
+				"operationId": "createWallet"
+			},
+			"get": {
+				"operationId": "getWallets"
+			}
+		},
+		"/v1/wallets/{wallet_id}/rpc": {
+			"post": {
+				"operationId": "walletRpc"
+			}
+		},
+		"/v1/wallets/{wallet_id}": {
+			"get": {
+				"operationId": "getWallet"
+			},
+			"patch": {
+				"operationId": "updateWallet"
+			}
+		},
+		"/v1/wallets/{wallet_id}/raw_sign": {
+			"post": {
+				"operationId": "rawSign"
+			}
+		},
+		"/v1/wallets/{wallet_id}/balance": {
+			"get": {
+				"operationId": "getWalletBalance"
+			}
+		},
+		"/v1/wallets/{wallet_id}/transactions": {
+			"get": {
+				"operationId": "walletTransactions"
+			}
+		},
+		"/v1/wallets/authenticate": {
+			"post": {
+				"operationId": "authenticate"
+			}
+		},
+		"/v1/wallets/import/init": {
+			"post": {
+				"operationId": "walletImportInit"
+			}
+		},
+		"/v1/wallets/import/submit": {
+			"post": {
+				"operationId": "walletImportSubmit"
+			}
+		},
+		"/v1/wallets/{wallet_id}/export": {
+			"post": {
+				"operationId": "walletExport"
+			}
+		},
+		"/v1/transactions/{transaction_id}": {
+			"get": {
+				"operationId": "getTransaction"
+			}
+		}
+	}
+}

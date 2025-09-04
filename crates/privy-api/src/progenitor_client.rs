@@ -138,7 +138,7 @@ where
     /// #       request: reqwest::Request,
     /// #       info: &OperationInfo,
     /// #   ) -> reqwest::Result<reqwest::Response> {
-    /// self.client().execute(request).await
+    ///         self.client().execute(request).await
     /// #   }
     /// # }
     /// ```

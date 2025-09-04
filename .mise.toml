@@ -1,5 +1,6 @@
 [tools]
 yq = "latest"
+jq = "latest"
 # note: rust-toolchain.toml is an 'idiomatic version file' for rust and mise does
 #       pick it up automatically, but it is currently behind a experimental flag
 rust = "{{ exec(command='yq .toolchain.channel rust-toolchain.toml') }}"
@@ -17,13 +18,19 @@ _.file = ['.env', '.env.local']
 # PRIVY_WALLET_ID = ""
 # PRIVY_PUBLIC_KEY = ""
 
+[tasks.pull-openapi]
+description = "Pull the latest OpenAPI spec from the Privy API repo and apply our overlay"
+run = [
+  "curl https://api.privy.io/v1/openapi.json | jq -s '.[0] * .[1]' openapi.overlay.json - > openapi.json",
+]
+
 [tasks.gen-p256-key]
 description = "Generate P-256 key pair for Privy wallet owner"
 run = [
   "openssl ecparam -genkey -name prime256v1 -noout -out private_key.pem",
   "openssl ec -in private_key.pem -pubout -out public_key.pem",
   "echo 'Generated P-256 key pair:'",
-  "echo 'Private key: private_key.pem'", 
+  "echo 'Private key: private_key.pem'",
   "echo 'Public key: public_key.pem'",
   "echo",
   "echo 'Public key contents:'",

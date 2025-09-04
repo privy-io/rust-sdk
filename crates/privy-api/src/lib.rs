@@ -948,6 +948,1345 @@ pub mod types {
                 })
         }
     }
+    #[doc = "`CreateUserWalletBody`"]
+    #[doc = r""]
+    #[doc = r" <details><summary>JSON schema</summary>"]
+    #[doc = r""]
+    #[doc = r" ```json"]
+    #[doc = "{"]
+    #[doc = "  \"type\": \"object\","]
+    #[doc = "  \"required\": ["]
+    #[doc = "    \"wallets\""]
+    #[doc = "  ],"]
+    #[doc = "  \"properties\": {"]
+    #[doc = "    \"wallets\": {"]
+    #[doc = "      \"type\": \"array\","]
+    #[doc = "      \"items\": {"]
+    #[doc = "        \"type\": \"object\","]
+    #[doc = "        \"required\": ["]
+    #[doc = "          \"chain_type\""]
+    #[doc = "        ],"]
+    #[doc = "        \"properties\": {"]
+    #[doc = "          \"additional_signers\": {"]
+    #[doc = "            \"type\": \"array\","]
+    #[doc = "            \"items\": {"]
+    #[doc = "              \"type\": \"object\","]
+    #[doc = "              \"required\": ["]
+    #[doc = "                \"signer_id\""]
+    #[doc = "              ],"]
+    #[doc = "              \"properties\": {"]
+    #[doc = "                \"override_policy_ids\": {"]
+    #[doc = "                  \"type\": \"array\","]
+    #[doc = "                  \"items\": {"]
+    #[doc = "                    \"type\": \"string\""]
+    #[doc = "                  },"]
+    #[doc = "                  \"maxItems\": 1"]
+    #[doc = "                },"]
+    #[doc = "                \"signer_id\": {"]
+    #[doc = "                  \"type\": \"string\""]
+    #[doc = "                }"]
+    #[doc = "              },"]
+    #[doc = "              \"additionalProperties\": false"]
+    #[doc = "            }"]
+    #[doc = "          },"]
+    #[doc = "          \"chain_type\": {"]
+    #[doc = "            \"anyOf\": ["]
+    #[doc = "              {"]
+    #[doc = "                \"type\": \"string\","]
+    #[doc = "                \"enum\": ["]
+    #[doc = "                  \"cosmos\""]
+    #[doc = "                ]"]
+    #[doc = "              },"]
+    #[doc = "              {"]
+    #[doc = "                \"type\": \"string\","]
+    #[doc = "                \"enum\": ["]
+    #[doc = "                  \"stellar\""]
+    #[doc = "                ]"]
+    #[doc = "              },"]
+    #[doc = "              {"]
+    #[doc = "                \"type\": \"string\","]
+    #[doc = "                \"enum\": ["]
+    #[doc = "                  \"sui\""]
+    #[doc = "                ]"]
+    #[doc = "              },"]
+    #[doc = "              {"]
+    #[doc = "                \"type\": \"string\","]
+    #[doc = "                \"enum\": ["]
+    #[doc = "                  \"tron\""]
+    #[doc = "                ]"]
+    #[doc = "              },"]
+    #[doc = "              {"]
+    #[doc = "                \"type\": \"string\","]
+    #[doc = "                \"enum\": ["]
+    #[doc = "                  \"bitcoin-segwit\""]
+    #[doc = "                ]"]
+    #[doc = "              },"]
+    #[doc = "              {"]
+    #[doc = "                \"type\": \"string\","]
+    #[doc = "                \"enum\": ["]
+    #[doc = "                  \"near\""]
+    #[doc = "                ]"]
+    #[doc = "              },"]
+    #[doc = "              {"]
+    #[doc = "                \"type\": \"string\","]
+    #[doc = "                \"enum\": ["]
+    #[doc = "                  \"ton\""]
+    #[doc = "                ]"]
+    #[doc = "              },"]
+    #[doc = "              {"]
+    #[doc = "                \"type\": \"string\","]
+    #[doc = "                \"enum\": ["]
+    #[doc = "                  \"starknet\""]
+    #[doc = "                ]"]
+    #[doc = "              },"]
+    #[doc = "              {"]
+    #[doc = "                \"type\": \"string\","]
+    #[doc = "                \"enum\": ["]
+    #[doc = "                  \"spark\""]
+    #[doc = "                ]"]
+    #[doc = "              },"]
+    #[doc = "              {"]
+    #[doc = "                \"type\": \"string\","]
+    #[doc = "                \"enum\": ["]
+    #[doc = "                  \"solana\""]
+    #[doc = "                ]"]
+    #[doc = "              },"]
+    #[doc = "              {"]
+    #[doc = "                \"type\": \"string\","]
+    #[doc = "                \"enum\": ["]
+    #[doc = "                  \"ethereum\""]
+    #[doc = "                ]"]
+    #[doc = "              }"]
+    #[doc = "            ]"]
+    #[doc = "          },"]
+    #[doc = "          \"create_smart_wallet\": {"]
+    #[doc = "            \"type\": \"boolean\""]
+    #[doc = "          },"]
+    #[doc = "          \"policy_ids\": {"]
+    #[doc = "            \"type\": \"array\","]
+    #[doc = "            \"items\": {"]
+    #[doc = "              \"type\": \"string\""]
+    #[doc = "            },"]
+    #[doc = "            \"maxItems\": 1"]
+    #[doc = "          }"]
+    #[doc = "        },"]
+    #[doc = "        \"additionalProperties\": false"]
+    #[doc = "      }"]
+    #[doc = "    }"]
+    #[doc = "  }"]
+    #[doc = "}"]
+    #[doc = r" ```"]
+    #[doc = r" </details>"]
+    #[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+    pub struct CreateUserWalletBody {
+        pub wallets: ::std::vec::Vec<CreateUserWalletBodyWalletsItem>,
+    }
+    impl ::std::convert::From<&CreateUserWalletBody> for CreateUserWalletBody {
+        fn from(value: &CreateUserWalletBody) -> Self {
+            value.clone()
+        }
+    }
+    impl CreateUserWalletBody {
+        pub fn builder() -> builder::CreateUserWalletBody {
+            Default::default()
+        }
+    }
+    #[doc = "`CreateUserWalletBodyWalletsItem`"]
+    #[doc = r""]
+    #[doc = r" <details><summary>JSON schema</summary>"]
+    #[doc = r""]
+    #[doc = r" ```json"]
+    #[doc = "{"]
+    #[doc = "  \"type\": \"object\","]
+    #[doc = "  \"required\": ["]
+    #[doc = "    \"chain_type\""]
+    #[doc = "  ],"]
+    #[doc = "  \"properties\": {"]
+    #[doc = "    \"additional_signers\": {"]
+    #[doc = "      \"type\": \"array\","]
+    #[doc = "      \"items\": {"]
+    #[doc = "        \"type\": \"object\","]
+    #[doc = "        \"required\": ["]
+    #[doc = "          \"signer_id\""]
+    #[doc = "        ],"]
+    #[doc = "        \"properties\": {"]
+    #[doc = "          \"override_policy_ids\": {"]
+    #[doc = "            \"type\": \"array\","]
+    #[doc = "            \"items\": {"]
+    #[doc = "              \"type\": \"string\""]
+    #[doc = "            },"]
+    #[doc = "            \"maxItems\": 1"]
+    #[doc = "          },"]
+    #[doc = "          \"signer_id\": {"]
+    #[doc = "            \"type\": \"string\""]
+    #[doc = "          }"]
+    #[doc = "        },"]
+    #[doc = "        \"additionalProperties\": false"]
+    #[doc = "      }"]
+    #[doc = "    },"]
+    #[doc = "    \"chain_type\": {"]
+    #[doc = "      \"anyOf\": ["]
+    #[doc = "        {"]
+    #[doc = "          \"type\": \"string\","]
+    #[doc = "          \"enum\": ["]
+    #[doc = "            \"cosmos\""]
+    #[doc = "          ]"]
+    #[doc = "        },"]
+    #[doc = "        {"]
+    #[doc = "          \"type\": \"string\","]
+    #[doc = "          \"enum\": ["]
+    #[doc = "            \"stellar\""]
+    #[doc = "          ]"]
+    #[doc = "        },"]
+    #[doc = "        {"]
+    #[doc = "          \"type\": \"string\","]
+    #[doc = "          \"enum\": ["]
+    #[doc = "            \"sui\""]
+    #[doc = "          ]"]
+    #[doc = "        },"]
+    #[doc = "        {"]
+    #[doc = "          \"type\": \"string\","]
+    #[doc = "          \"enum\": ["]
+    #[doc = "            \"tron\""]
+    #[doc = "          ]"]
+    #[doc = "        },"]
+    #[doc = "        {"]
+    #[doc = "          \"type\": \"string\","]
+    #[doc = "          \"enum\": ["]
+    #[doc = "            \"bitcoin-segwit\""]
+    #[doc = "          ]"]
+    #[doc = "        },"]
+    #[doc = "        {"]
+    #[doc = "          \"type\": \"string\","]
+    #[doc = "          \"enum\": ["]
+    #[doc = "            \"near\""]
+    #[doc = "          ]"]
+    #[doc = "        },"]
+    #[doc = "        {"]
+    #[doc = "          \"type\": \"string\","]
+    #[doc = "          \"enum\": ["]
+    #[doc = "            \"ton\""]
+    #[doc = "          ]"]
+    #[doc = "        },"]
+    #[doc = "        {"]
+    #[doc = "          \"type\": \"string\","]
+    #[doc = "          \"enum\": ["]
+    #[doc = "            \"starknet\""]
+    #[doc = "          ]"]
+    #[doc = "        },"]
+    #[doc = "        {"]
+    #[doc = "          \"type\": \"string\","]
+    #[doc = "          \"enum\": ["]
+    #[doc = "            \"spark\""]
+    #[doc = "          ]"]
+    #[doc = "        },"]
+    #[doc = "        {"]
+    #[doc = "          \"type\": \"string\","]
+    #[doc = "          \"enum\": ["]
+    #[doc = "            \"solana\""]
+    #[doc = "          ]"]
+    #[doc = "        },"]
+    #[doc = "        {"]
+    #[doc = "          \"type\": \"string\","]
+    #[doc = "          \"enum\": ["]
+    #[doc = "            \"ethereum\""]
+    #[doc = "          ]"]
+    #[doc = "        }"]
+    #[doc = "      ]"]
+    #[doc = "    },"]
+    #[doc = "    \"create_smart_wallet\": {"]
+    #[doc = "      \"type\": \"boolean\""]
+    #[doc = "    },"]
+    #[doc = "    \"policy_ids\": {"]
+    #[doc = "      \"type\": \"array\","]
+    #[doc = "      \"items\": {"]
+    #[doc = "        \"type\": \"string\""]
+    #[doc = "      },"]
+    #[doc = "      \"maxItems\": 1"]
+    #[doc = "    }"]
+    #[doc = "  },"]
+    #[doc = "  \"additionalProperties\": false"]
+    #[doc = "}"]
+    #[doc = r" ```"]
+    #[doc = r" </details>"]
+    #[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+    #[serde(deny_unknown_fields)]
+    pub struct CreateUserWalletBodyWalletsItem {
+        #[serde(default, skip_serializing_if = "::std::vec::Vec::is_empty")]
+        pub additional_signers:
+            ::std::vec::Vec<CreateUserWalletBodyWalletsItemAdditionalSignersItem>,
+        pub chain_type: CreateUserWalletBodyWalletsItemChainType,
+        #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
+        pub create_smart_wallet: ::std::option::Option<bool>,
+        #[serde(default, skip_serializing_if = "::std::vec::Vec::is_empty")]
+        pub policy_ids: ::std::vec::Vec<::std::string::String>,
+    }
+    impl ::std::convert::From<&CreateUserWalletBodyWalletsItem> for CreateUserWalletBodyWalletsItem {
+        fn from(value: &CreateUserWalletBodyWalletsItem) -> Self {
+            value.clone()
+        }
+    }
+    impl CreateUserWalletBodyWalletsItem {
+        pub fn builder() -> builder::CreateUserWalletBodyWalletsItem {
+            Default::default()
+        }
+    }
+    #[doc = "`CreateUserWalletBodyWalletsItemAdditionalSignersItem`"]
+    #[doc = r""]
+    #[doc = r" <details><summary>JSON schema</summary>"]
+    #[doc = r""]
+    #[doc = r" ```json"]
+    #[doc = "{"]
+    #[doc = "  \"type\": \"object\","]
+    #[doc = "  \"required\": ["]
+    #[doc = "    \"signer_id\""]
+    #[doc = "  ],"]
+    #[doc = "  \"properties\": {"]
+    #[doc = "    \"override_policy_ids\": {"]
+    #[doc = "      \"type\": \"array\","]
+    #[doc = "      \"items\": {"]
+    #[doc = "        \"type\": \"string\""]
+    #[doc = "      },"]
+    #[doc = "      \"maxItems\": 1"]
+    #[doc = "    },"]
+    #[doc = "    \"signer_id\": {"]
+    #[doc = "      \"type\": \"string\""]
+    #[doc = "    }"]
+    #[doc = "  },"]
+    #[doc = "  \"additionalProperties\": false"]
+    #[doc = "}"]
+    #[doc = r" ```"]
+    #[doc = r" </details>"]
+    #[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+    #[serde(deny_unknown_fields)]
+    pub struct CreateUserWalletBodyWalletsItemAdditionalSignersItem {
+        #[serde(default, skip_serializing_if = "::std::vec::Vec::is_empty")]
+        pub override_policy_ids: ::std::vec::Vec<::std::string::String>,
+        pub signer_id: ::std::string::String,
+    }
+    impl ::std::convert::From<&CreateUserWalletBodyWalletsItemAdditionalSignersItem>
+        for CreateUserWalletBodyWalletsItemAdditionalSignersItem
+    {
+        fn from(value: &CreateUserWalletBodyWalletsItemAdditionalSignersItem) -> Self {
+            value.clone()
+        }
+    }
+    impl CreateUserWalletBodyWalletsItemAdditionalSignersItem {
+        pub fn builder() -> builder::CreateUserWalletBodyWalletsItemAdditionalSignersItem {
+            Default::default()
+        }
+    }
+    #[doc = "`CreateUserWalletBodyWalletsItemChainType`"]
+    #[doc = r""]
+    #[doc = r" <details><summary>JSON schema</summary>"]
+    #[doc = r""]
+    #[doc = r" ```json"]
+    #[doc = "{"]
+    #[doc = "  \"anyOf\": ["]
+    #[doc = "    {"]
+    #[doc = "      \"type\": \"string\","]
+    #[doc = "      \"enum\": ["]
+    #[doc = "        \"cosmos\""]
+    #[doc = "      ]"]
+    #[doc = "    },"]
+    #[doc = "    {"]
+    #[doc = "      \"type\": \"string\","]
+    #[doc = "      \"enum\": ["]
+    #[doc = "        \"stellar\""]
+    #[doc = "      ]"]
+    #[doc = "    },"]
+    #[doc = "    {"]
+    #[doc = "      \"type\": \"string\","]
+    #[doc = "      \"enum\": ["]
+    #[doc = "        \"sui\""]
+    #[doc = "      ]"]
+    #[doc = "    },"]
+    #[doc = "    {"]
+    #[doc = "      \"type\": \"string\","]
+    #[doc = "      \"enum\": ["]
+    #[doc = "        \"tron\""]
+    #[doc = "      ]"]
+    #[doc = "    },"]
+    #[doc = "    {"]
+    #[doc = "      \"type\": \"string\","]
+    #[doc = "      \"enum\": ["]
+    #[doc = "        \"bitcoin-segwit\""]
+    #[doc = "      ]"]
+    #[doc = "    },"]
+    #[doc = "    {"]
+    #[doc = "      \"type\": \"string\","]
+    #[doc = "      \"enum\": ["]
+    #[doc = "        \"near\""]
+    #[doc = "      ]"]
+    #[doc = "    },"]
+    #[doc = "    {"]
+    #[doc = "      \"type\": \"string\","]
+    #[doc = "      \"enum\": ["]
+    #[doc = "        \"ton\""]
+    #[doc = "      ]"]
+    #[doc = "    },"]
+    #[doc = "    {"]
+    #[doc = "      \"type\": \"string\","]
+    #[doc = "      \"enum\": ["]
+    #[doc = "        \"starknet\""]
+    #[doc = "      ]"]
+    #[doc = "    },"]
+    #[doc = "    {"]
+    #[doc = "      \"type\": \"string\","]
+    #[doc = "      \"enum\": ["]
+    #[doc = "        \"spark\""]
+    #[doc = "      ]"]
+    #[doc = "    },"]
+    #[doc = "    {"]
+    #[doc = "      \"type\": \"string\","]
+    #[doc = "      \"enum\": ["]
+    #[doc = "        \"solana\""]
+    #[doc = "      ]"]
+    #[doc = "    },"]
+    #[doc = "    {"]
+    #[doc = "      \"type\": \"string\","]
+    #[doc = "      \"enum\": ["]
+    #[doc = "        \"ethereum\""]
+    #[doc = "      ]"]
+    #[doc = "    }"]
+    #[doc = "  ]"]
+    #[doc = "}"]
+    #[doc = r" ```"]
+    #[doc = r" </details>"]
+    #[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+    pub struct CreateUserWalletBodyWalletsItemChainType {
+        #[serde(
+            flatten,
+            default,
+            skip_serializing_if = "::std::option::Option::is_none"
+        )]
+        pub subtype_0: ::std::option::Option<CreateUserWalletBodyWalletsItemChainTypeSubtype0>,
+        #[serde(
+            flatten,
+            default,
+            skip_serializing_if = "::std::option::Option::is_none"
+        )]
+        pub subtype_1: ::std::option::Option<CreateUserWalletBodyWalletsItemChainTypeSubtype1>,
+        #[serde(
+            flatten,
+            default,
+            skip_serializing_if = "::std::option::Option::is_none"
+        )]
+        pub subtype_2: ::std::option::Option<CreateUserWalletBodyWalletsItemChainTypeSubtype2>,
+        #[serde(
+            flatten,
+            default,
+            skip_serializing_if = "::std::option::Option::is_none"
+        )]
+        pub subtype_3: ::std::option::Option<CreateUserWalletBodyWalletsItemChainTypeSubtype3>,
+        #[serde(
+            flatten,
+            default,
+            skip_serializing_if = "::std::option::Option::is_none"
+        )]
+        pub subtype_4: ::std::option::Option<CreateUserWalletBodyWalletsItemChainTypeSubtype4>,
+        #[serde(
+            flatten,
+            default,
+            skip_serializing_if = "::std::option::Option::is_none"
+        )]
+        pub subtype_5: ::std::option::Option<CreateUserWalletBodyWalletsItemChainTypeSubtype5>,
+        #[serde(
+            flatten,
+            default,
+            skip_serializing_if = "::std::option::Option::is_none"
+        )]
+        pub subtype_6: ::std::option::Option<CreateUserWalletBodyWalletsItemChainTypeSubtype6>,
+        #[serde(
+            flatten,
+            default,
+            skip_serializing_if = "::std::option::Option::is_none"
+        )]
+        pub subtype_7: ::std::option::Option<CreateUserWalletBodyWalletsItemChainTypeSubtype7>,
+        #[serde(
+            flatten,
+            default,
+            skip_serializing_if = "::std::option::Option::is_none"
+        )]
+        pub subtype_8: ::std::option::Option<CreateUserWalletBodyWalletsItemChainTypeSubtype8>,
+        #[serde(
+            flatten,
+            default,
+            skip_serializing_if = "::std::option::Option::is_none"
+        )]
+        pub subtype_9: ::std::option::Option<CreateUserWalletBodyWalletsItemChainTypeSubtype9>,
+        #[serde(
+            flatten,
+            default,
+            skip_serializing_if = "::std::option::Option::is_none"
+        )]
+        pub subtype_10: ::std::option::Option<CreateUserWalletBodyWalletsItemChainTypeSubtype10>,
+    }
+    impl ::std::convert::From<&CreateUserWalletBodyWalletsItemChainType>
+        for CreateUserWalletBodyWalletsItemChainType
+    {
+        fn from(value: &CreateUserWalletBodyWalletsItemChainType) -> Self {
+            value.clone()
+        }
+    }
+    impl ::std::default::Default for CreateUserWalletBodyWalletsItemChainType {
+        fn default() -> Self {
+            Self {
+                subtype_0: Default::default(),
+                subtype_1: Default::default(),
+                subtype_2: Default::default(),
+                subtype_3: Default::default(),
+                subtype_4: Default::default(),
+                subtype_5: Default::default(),
+                subtype_6: Default::default(),
+                subtype_7: Default::default(),
+                subtype_8: Default::default(),
+                subtype_9: Default::default(),
+                subtype_10: Default::default(),
+            }
+        }
+    }
+    impl CreateUserWalletBodyWalletsItemChainType {
+        pub fn builder() -> builder::CreateUserWalletBodyWalletsItemChainType {
+            Default::default()
+        }
+    }
+    #[doc = "`CreateUserWalletBodyWalletsItemChainTypeSubtype0`"]
+    #[doc = r""]
+    #[doc = r" <details><summary>JSON schema</summary>"]
+    #[doc = r""]
+    #[doc = r" ```json"]
+    #[doc = "{"]
+    #[doc = "  \"type\": \"string\","]
+    #[doc = "  \"enum\": ["]
+    #[doc = "    \"cosmos\""]
+    #[doc = "  ]"]
+    #[doc = "}"]
+    #[doc = r" ```"]
+    #[doc = r" </details>"]
+    #[derive(
+        :: serde :: Deserialize,
+        :: serde :: Serialize,
+        Clone,
+        Copy,
+        Debug,
+        Eq,
+        Hash,
+        Ord,
+        PartialEq,
+        PartialOrd,
+    )]
+    pub enum CreateUserWalletBodyWalletsItemChainTypeSubtype0 {
+        #[serde(rename = "cosmos")]
+        Cosmos,
+    }
+    impl ::std::convert::From<&Self> for CreateUserWalletBodyWalletsItemChainTypeSubtype0 {
+        fn from(value: &CreateUserWalletBodyWalletsItemChainTypeSubtype0) -> Self {
+            value.clone()
+        }
+    }
+    impl ::std::fmt::Display for CreateUserWalletBodyWalletsItemChainTypeSubtype0 {
+        fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+            match *self {
+                Self::Cosmos => f.write_str("cosmos"),
+            }
+        }
+    }
+    impl ::std::str::FromStr for CreateUserWalletBodyWalletsItemChainTypeSubtype0 {
+        type Err = self::error::ConversionError;
+        fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+            match value {
+                "cosmos" => Ok(Self::Cosmos),
+                _ => Err("invalid value".into()),
+            }
+        }
+    }
+    impl ::std::convert::TryFrom<&str> for CreateUserWalletBodyWalletsItemChainTypeSubtype0 {
+        type Error = self::error::ConversionError;
+        fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+            value.parse()
+        }
+    }
+    impl ::std::convert::TryFrom<&::std::string::String>
+        for CreateUserWalletBodyWalletsItemChainTypeSubtype0
+    {
+        type Error = self::error::ConversionError;
+        fn try_from(
+            value: &::std::string::String,
+        ) -> ::std::result::Result<Self, self::error::ConversionError> {
+            value.parse()
+        }
+    }
+    impl ::std::convert::TryFrom<::std::string::String>
+        for CreateUserWalletBodyWalletsItemChainTypeSubtype0
+    {
+        type Error = self::error::ConversionError;
+        fn try_from(
+            value: ::std::string::String,
+        ) -> ::std::result::Result<Self, self::error::ConversionError> {
+            value.parse()
+        }
+    }
+    #[doc = "`CreateUserWalletBodyWalletsItemChainTypeSubtype1`"]
+    #[doc = r""]
+    #[doc = r" <details><summary>JSON schema</summary>"]
+    #[doc = r""]
+    #[doc = r" ```json"]
+    #[doc = "{"]
+    #[doc = "  \"type\": \"string\","]
+    #[doc = "  \"enum\": ["]
+    #[doc = "    \"stellar\""]
+    #[doc = "  ]"]
+    #[doc = "}"]
+    #[doc = r" ```"]
+    #[doc = r" </details>"]
+    #[derive(
+        :: serde :: Deserialize,
+        :: serde :: Serialize,
+        Clone,
+        Copy,
+        Debug,
+        Eq,
+        Hash,
+        Ord,
+        PartialEq,
+        PartialOrd,
+    )]
+    pub enum CreateUserWalletBodyWalletsItemChainTypeSubtype1 {
+        #[serde(rename = "stellar")]
+        Stellar,
+    }
+    impl ::std::convert::From<&Self> for CreateUserWalletBodyWalletsItemChainTypeSubtype1 {
+        fn from(value: &CreateUserWalletBodyWalletsItemChainTypeSubtype1) -> Self {
+            value.clone()
+        }
+    }
+    impl ::std::fmt::Display for CreateUserWalletBodyWalletsItemChainTypeSubtype1 {
+        fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+            match *self {
+                Self::Stellar => f.write_str("stellar"),
+            }
+        }
+    }
+    impl ::std::str::FromStr for CreateUserWalletBodyWalletsItemChainTypeSubtype1 {
+        type Err = self::error::ConversionError;
+        fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+            match value {
+                "stellar" => Ok(Self::Stellar),
+                _ => Err("invalid value".into()),
+            }
+        }
+    }
+    impl ::std::convert::TryFrom<&str> for CreateUserWalletBodyWalletsItemChainTypeSubtype1 {
+        type Error = self::error::ConversionError;
+        fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+            value.parse()
+        }
+    }
+    impl ::std::convert::TryFrom<&::std::string::String>
+        for CreateUserWalletBodyWalletsItemChainTypeSubtype1
+    {
+        type Error = self::error::ConversionError;
+        fn try_from(
+            value: &::std::string::String,
+        ) -> ::std::result::Result<Self, self::error::ConversionError> {
+            value.parse()
+        }
+    }
+    impl ::std::convert::TryFrom<::std::string::String>
+        for CreateUserWalletBodyWalletsItemChainTypeSubtype1
+    {
+        type Error = self::error::ConversionError;
+        fn try_from(
+            value: ::std::string::String,
+        ) -> ::std::result::Result<Self, self::error::ConversionError> {
+            value.parse()
+        }
+    }
+    #[doc = "`CreateUserWalletBodyWalletsItemChainTypeSubtype10`"]
+    #[doc = r""]
+    #[doc = r" <details><summary>JSON schema</summary>"]
+    #[doc = r""]
+    #[doc = r" ```json"]
+    #[doc = "{"]
+    #[doc = "  \"type\": \"string\","]
+    #[doc = "  \"enum\": ["]
+    #[doc = "    \"ethereum\""]
+    #[doc = "  ]"]
+    #[doc = "}"]
+    #[doc = r" ```"]
+    #[doc = r" </details>"]
+    #[derive(
+        :: serde :: Deserialize,
+        :: serde :: Serialize,
+        Clone,
+        Copy,
+        Debug,
+        Eq,
+        Hash,
+        Ord,
+        PartialEq,
+        PartialOrd,
+    )]
+    pub enum CreateUserWalletBodyWalletsItemChainTypeSubtype10 {
+        #[serde(rename = "ethereum")]
+        Ethereum,
+    }
+    impl ::std::convert::From<&Self> for CreateUserWalletBodyWalletsItemChainTypeSubtype10 {
+        fn from(value: &CreateUserWalletBodyWalletsItemChainTypeSubtype10) -> Self {
+            value.clone()
+        }
+    }
+    impl ::std::fmt::Display for CreateUserWalletBodyWalletsItemChainTypeSubtype10 {
+        fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+            match *self {
+                Self::Ethereum => f.write_str("ethereum"),
+            }
+        }
+    }
+    impl ::std::str::FromStr for CreateUserWalletBodyWalletsItemChainTypeSubtype10 {
+        type Err = self::error::ConversionError;
+        fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+            match value {
+                "ethereum" => Ok(Self::Ethereum),
+                _ => Err("invalid value".into()),
+            }
+        }
+    }
+    impl ::std::convert::TryFrom<&str> for CreateUserWalletBodyWalletsItemChainTypeSubtype10 {
+        type Error = self::error::ConversionError;
+        fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+            value.parse()
+        }
+    }
+    impl ::std::convert::TryFrom<&::std::string::String>
+        for CreateUserWalletBodyWalletsItemChainTypeSubtype10
+    {
+        type Error = self::error::ConversionError;
+        fn try_from(
+            value: &::std::string::String,
+        ) -> ::std::result::Result<Self, self::error::ConversionError> {
+            value.parse()
+        }
+    }
+    impl ::std::convert::TryFrom<::std::string::String>
+        for CreateUserWalletBodyWalletsItemChainTypeSubtype10
+    {
+        type Error = self::error::ConversionError;
+        fn try_from(
+            value: ::std::string::String,
+        ) -> ::std::result::Result<Self, self::error::ConversionError> {
+            value.parse()
+        }
+    }
+    #[doc = "`CreateUserWalletBodyWalletsItemChainTypeSubtype2`"]
+    #[doc = r""]
+    #[doc = r" <details><summary>JSON schema</summary>"]
+    #[doc = r""]
+    #[doc = r" ```json"]
+    #[doc = "{"]
+    #[doc = "  \"type\": \"string\","]
+    #[doc = "  \"enum\": ["]
+    #[doc = "    \"sui\""]
+    #[doc = "  ]"]
+    #[doc = "}"]
+    #[doc = r" ```"]
+    #[doc = r" </details>"]
+    #[derive(
+        :: serde :: Deserialize,
+        :: serde :: Serialize,
+        Clone,
+        Copy,
+        Debug,
+        Eq,
+        Hash,
+        Ord,
+        PartialEq,
+        PartialOrd,
+    )]
+    pub enum CreateUserWalletBodyWalletsItemChainTypeSubtype2 {
+        #[serde(rename = "sui")]
+        Sui,
+    }
+    impl ::std::convert::From<&Self> for CreateUserWalletBodyWalletsItemChainTypeSubtype2 {
+        fn from(value: &CreateUserWalletBodyWalletsItemChainTypeSubtype2) -> Self {
+            value.clone()
+        }
+    }
+    impl ::std::fmt::Display for CreateUserWalletBodyWalletsItemChainTypeSubtype2 {
+        fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+            match *self {
+                Self::Sui => f.write_str("sui"),
+            }
+        }
+    }
+    impl ::std::str::FromStr for CreateUserWalletBodyWalletsItemChainTypeSubtype2 {
+        type Err = self::error::ConversionError;
+        fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+            match value {
+                "sui" => Ok(Self::Sui),
+                _ => Err("invalid value".into()),
+            }
+        }
+    }
+    impl ::std::convert::TryFrom<&str> for CreateUserWalletBodyWalletsItemChainTypeSubtype2 {
+        type Error = self::error::ConversionError;
+        fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+            value.parse()
+        }
+    }
+    impl ::std::convert::TryFrom<&::std::string::String>
+        for CreateUserWalletBodyWalletsItemChainTypeSubtype2
+    {
+        type Error = self::error::ConversionError;
+        fn try_from(
+            value: &::std::string::String,
+        ) -> ::std::result::Result<Self, self::error::ConversionError> {
+            value.parse()
+        }
+    }
+    impl ::std::convert::TryFrom<::std::string::String>
+        for CreateUserWalletBodyWalletsItemChainTypeSubtype2
+    {
+        type Error = self::error::ConversionError;
+        fn try_from(
+            value: ::std::string::String,
+        ) -> ::std::result::Result<Self, self::error::ConversionError> {
+            value.parse()
+        }
+    }
+    #[doc = "`CreateUserWalletBodyWalletsItemChainTypeSubtype3`"]
+    #[doc = r""]
+    #[doc = r" <details><summary>JSON schema</summary>"]
+    #[doc = r""]
+    #[doc = r" ```json"]
+    #[doc = "{"]
+    #[doc = "  \"type\": \"string\","]
+    #[doc = "  \"enum\": ["]
+    #[doc = "    \"tron\""]
+    #[doc = "  ]"]
+    #[doc = "}"]
+    #[doc = r" ```"]
+    #[doc = r" </details>"]
+    #[derive(
+        :: serde :: Deserialize,
+        :: serde :: Serialize,
+        Clone,
+        Copy,
+        Debug,
+        Eq,
+        Hash,
+        Ord,
+        PartialEq,
+        PartialOrd,
+    )]
+    pub enum CreateUserWalletBodyWalletsItemChainTypeSubtype3 {
+        #[serde(rename = "tron")]
+        Tron,
+    }
+    impl ::std::convert::From<&Self> for CreateUserWalletBodyWalletsItemChainTypeSubtype3 {
+        fn from(value: &CreateUserWalletBodyWalletsItemChainTypeSubtype3) -> Self {
+            value.clone()
+        }
+    }
+    impl ::std::fmt::Display for CreateUserWalletBodyWalletsItemChainTypeSubtype3 {
+        fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+            match *self {
+                Self::Tron => f.write_str("tron"),
+            }
+        }
+    }
+    impl ::std::str::FromStr for CreateUserWalletBodyWalletsItemChainTypeSubtype3 {
+        type Err = self::error::ConversionError;
+        fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+            match value {
+                "tron" => Ok(Self::Tron),
+                _ => Err("invalid value".into()),
+            }
+        }
+    }
+    impl ::std::convert::TryFrom<&str> for CreateUserWalletBodyWalletsItemChainTypeSubtype3 {
+        type Error = self::error::ConversionError;
+        fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+            value.parse()
+        }
+    }
+    impl ::std::convert::TryFrom<&::std::string::String>
+        for CreateUserWalletBodyWalletsItemChainTypeSubtype3
+    {
+        type Error = self::error::ConversionError;
+        fn try_from(
+            value: &::std::string::String,
+        ) -> ::std::result::Result<Self, self::error::ConversionError> {
+            value.parse()
+        }
+    }
+    impl ::std::convert::TryFrom<::std::string::String>
+        for CreateUserWalletBodyWalletsItemChainTypeSubtype3
+    {
+        type Error = self::error::ConversionError;
+        fn try_from(
+            value: ::std::string::String,
+        ) -> ::std::result::Result<Self, self::error::ConversionError> {
+            value.parse()
+        }
+    }
+    #[doc = "`CreateUserWalletBodyWalletsItemChainTypeSubtype4`"]
+    #[doc = r""]
+    #[doc = r" <details><summary>JSON schema</summary>"]
+    #[doc = r""]
+    #[doc = r" ```json"]
+    #[doc = "{"]
+    #[doc = "  \"type\": \"string\","]
+    #[doc = "  \"enum\": ["]
+    #[doc = "    \"bitcoin-segwit\""]
+    #[doc = "  ]"]
+    #[doc = "}"]
+    #[doc = r" ```"]
+    #[doc = r" </details>"]
+    #[derive(
+        :: serde :: Deserialize,
+        :: serde :: Serialize,
+        Clone,
+        Copy,
+        Debug,
+        Eq,
+        Hash,
+        Ord,
+        PartialEq,
+        PartialOrd,
+    )]
+    pub enum CreateUserWalletBodyWalletsItemChainTypeSubtype4 {
+        #[serde(rename = "bitcoin-segwit")]
+        BitcoinSegwit,
+    }
+    impl ::std::convert::From<&Self> for CreateUserWalletBodyWalletsItemChainTypeSubtype4 {
+        fn from(value: &CreateUserWalletBodyWalletsItemChainTypeSubtype4) -> Self {
+            value.clone()
+        }
+    }
+    impl ::std::fmt::Display for CreateUserWalletBodyWalletsItemChainTypeSubtype4 {
+        fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+            match *self {
+                Self::BitcoinSegwit => f.write_str("bitcoin-segwit"),
+            }
+        }
+    }
+    impl ::std::str::FromStr for CreateUserWalletBodyWalletsItemChainTypeSubtype4 {
+        type Err = self::error::ConversionError;
+        fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+            match value {
+                "bitcoin-segwit" => Ok(Self::BitcoinSegwit),
+                _ => Err("invalid value".into()),
+            }
+        }
+    }
+    impl ::std::convert::TryFrom<&str> for CreateUserWalletBodyWalletsItemChainTypeSubtype4 {
+        type Error = self::error::ConversionError;
+        fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+            value.parse()
+        }
+    }
+    impl ::std::convert::TryFrom<&::std::string::String>
+        for CreateUserWalletBodyWalletsItemChainTypeSubtype4
+    {
+        type Error = self::error::ConversionError;
+        fn try_from(
+            value: &::std::string::String,
+        ) -> ::std::result::Result<Self, self::error::ConversionError> {
+            value.parse()
+        }
+    }
+    impl ::std::convert::TryFrom<::std::string::String>
+        for CreateUserWalletBodyWalletsItemChainTypeSubtype4
+    {
+        type Error = self::error::ConversionError;
+        fn try_from(
+            value: ::std::string::String,
+        ) -> ::std::result::Result<Self, self::error::ConversionError> {
+            value.parse()
+        }
+    }
+    #[doc = "`CreateUserWalletBodyWalletsItemChainTypeSubtype5`"]
+    #[doc = r""]
+    #[doc = r" <details><summary>JSON schema</summary>"]
+    #[doc = r""]
+    #[doc = r" ```json"]
+    #[doc = "{"]
+    #[doc = "  \"type\": \"string\","]
+    #[doc = "  \"enum\": ["]
+    #[doc = "    \"near\""]
+    #[doc = "  ]"]
+    #[doc = "}"]
+    #[doc = r" ```"]
+    #[doc = r" </details>"]
+    #[derive(
+        :: serde :: Deserialize,
+        :: serde :: Serialize,
+        Clone,
+        Copy,
+        Debug,
+        Eq,
+        Hash,
+        Ord,
+        PartialEq,
+        PartialOrd,
+    )]
+    pub enum CreateUserWalletBodyWalletsItemChainTypeSubtype5 {
+        #[serde(rename = "near")]
+        Near,
+    }
+    impl ::std::convert::From<&Self> for CreateUserWalletBodyWalletsItemChainTypeSubtype5 {
+        fn from(value: &CreateUserWalletBodyWalletsItemChainTypeSubtype5) -> Self {
+            value.clone()
+        }
+    }
+    impl ::std::fmt::Display for CreateUserWalletBodyWalletsItemChainTypeSubtype5 {
+        fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+            match *self {
+                Self::Near => f.write_str("near"),
+            }
+        }
+    }
+    impl ::std::str::FromStr for CreateUserWalletBodyWalletsItemChainTypeSubtype5 {
+        type Err = self::error::ConversionError;
+        fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+            match value {
+                "near" => Ok(Self::Near),
+                _ => Err("invalid value".into()),
+            }
+        }
+    }
+    impl ::std::convert::TryFrom<&str> for CreateUserWalletBodyWalletsItemChainTypeSubtype5 {
+        type Error = self::error::ConversionError;
+        fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+            value.parse()
+        }
+    }
+    impl ::std::convert::TryFrom<&::std::string::String>
+        for CreateUserWalletBodyWalletsItemChainTypeSubtype5
+    {
+        type Error = self::error::ConversionError;
+        fn try_from(
+            value: &::std::string::String,
+        ) -> ::std::result::Result<Self, self::error::ConversionError> {
+            value.parse()
+        }
+    }
+    impl ::std::convert::TryFrom<::std::string::String>
+        for CreateUserWalletBodyWalletsItemChainTypeSubtype5
+    {
+        type Error = self::error::ConversionError;
+        fn try_from(
+            value: ::std::string::String,
+        ) -> ::std::result::Result<Self, self::error::ConversionError> {
+            value.parse()
+        }
+    }
+    #[doc = "`CreateUserWalletBodyWalletsItemChainTypeSubtype6`"]
+    #[doc = r""]
+    #[doc = r" <details><summary>JSON schema</summary>"]
+    #[doc = r""]
+    #[doc = r" ```json"]
+    #[doc = "{"]
+    #[doc = "  \"type\": \"string\","]
+    #[doc = "  \"enum\": ["]
+    #[doc = "    \"ton\""]
+    #[doc = "  ]"]
+    #[doc = "}"]
+    #[doc = r" ```"]
+    #[doc = r" </details>"]
+    #[derive(
+        :: serde :: Deserialize,
+        :: serde :: Serialize,
+        Clone,
+        Copy,
+        Debug,
+        Eq,
+        Hash,
+        Ord,
+        PartialEq,
+        PartialOrd,
+    )]
+    pub enum CreateUserWalletBodyWalletsItemChainTypeSubtype6 {
+        #[serde(rename = "ton")]
+        Ton,
+    }
+    impl ::std::convert::From<&Self> for CreateUserWalletBodyWalletsItemChainTypeSubtype6 {
+        fn from(value: &CreateUserWalletBodyWalletsItemChainTypeSubtype6) -> Self {
+            value.clone()
+        }
+    }
+    impl ::std::fmt::Display for CreateUserWalletBodyWalletsItemChainTypeSubtype6 {
+        fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+            match *self {
+                Self::Ton => f.write_str("ton"),
+            }
+        }
+    }
+    impl ::std::str::FromStr for CreateUserWalletBodyWalletsItemChainTypeSubtype6 {
+        type Err = self::error::ConversionError;
+        fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+            match value {
+                "ton" => Ok(Self::Ton),
+                _ => Err("invalid value".into()),
+            }
+        }
+    }
+    impl ::std::convert::TryFrom<&str> for CreateUserWalletBodyWalletsItemChainTypeSubtype6 {
+        type Error = self::error::ConversionError;
+        fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+            value.parse()
+        }
+    }
+    impl ::std::convert::TryFrom<&::std::string::String>
+        for CreateUserWalletBodyWalletsItemChainTypeSubtype6
+    {
+        type Error = self::error::ConversionError;
+        fn try_from(
+            value: &::std::string::String,
+        ) -> ::std::result::Result<Self, self::error::ConversionError> {
+            value.parse()
+        }
+    }
+    impl ::std::convert::TryFrom<::std::string::String>
+        for CreateUserWalletBodyWalletsItemChainTypeSubtype6
+    {
+        type Error = self::error::ConversionError;
+        fn try_from(
+            value: ::std::string::String,
+        ) -> ::std::result::Result<Self, self::error::ConversionError> {
+            value.parse()
+        }
+    }
+    #[doc = "`CreateUserWalletBodyWalletsItemChainTypeSubtype7`"]
+    #[doc = r""]
+    #[doc = r" <details><summary>JSON schema</summary>"]
+    #[doc = r""]
+    #[doc = r" ```json"]
+    #[doc = "{"]
+    #[doc = "  \"type\": \"string\","]
+    #[doc = "  \"enum\": ["]
+    #[doc = "    \"starknet\""]
+    #[doc = "  ]"]
+    #[doc = "}"]
+    #[doc = r" ```"]
+    #[doc = r" </details>"]
+    #[derive(
+        :: serde :: Deserialize,
+        :: serde :: Serialize,
+        Clone,
+        Copy,
+        Debug,
+        Eq,
+        Hash,
+        Ord,
+        PartialEq,
+        PartialOrd,
+    )]
+    pub enum CreateUserWalletBodyWalletsItemChainTypeSubtype7 {
+        #[serde(rename = "starknet")]
+        Starknet,
+    }
+    impl ::std::convert::From<&Self> for CreateUserWalletBodyWalletsItemChainTypeSubtype7 {
+        fn from(value: &CreateUserWalletBodyWalletsItemChainTypeSubtype7) -> Self {
+            value.clone()
+        }
+    }
+    impl ::std::fmt::Display for CreateUserWalletBodyWalletsItemChainTypeSubtype7 {
+        fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+            match *self {
+                Self::Starknet => f.write_str("starknet"),
+            }
+        }
+    }
+    impl ::std::str::FromStr for CreateUserWalletBodyWalletsItemChainTypeSubtype7 {
+        type Err = self::error::ConversionError;
+        fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+            match value {
+                "starknet" => Ok(Self::Starknet),
+                _ => Err("invalid value".into()),
+            }
+        }
+    }
+    impl ::std::convert::TryFrom<&str> for CreateUserWalletBodyWalletsItemChainTypeSubtype7 {
+        type Error = self::error::ConversionError;
+        fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+            value.parse()
+        }
+    }
+    impl ::std::convert::TryFrom<&::std::string::String>
+        for CreateUserWalletBodyWalletsItemChainTypeSubtype7
+    {
+        type Error = self::error::ConversionError;
+        fn try_from(
+            value: &::std::string::String,
+        ) -> ::std::result::Result<Self, self::error::ConversionError> {
+            value.parse()
+        }
+    }
+    impl ::std::convert::TryFrom<::std::string::String>
+        for CreateUserWalletBodyWalletsItemChainTypeSubtype7
+    {
+        type Error = self::error::ConversionError;
+        fn try_from(
+            value: ::std::string::String,
+        ) -> ::std::result::Result<Self, self::error::ConversionError> {
+            value.parse()
+        }
+    }
+    #[doc = "`CreateUserWalletBodyWalletsItemChainTypeSubtype8`"]
+    #[doc = r""]
+    #[doc = r" <details><summary>JSON schema</summary>"]
+    #[doc = r""]
+    #[doc = r" ```json"]
+    #[doc = "{"]
+    #[doc = "  \"type\": \"string\","]
+    #[doc = "  \"enum\": ["]
+    #[doc = "    \"spark\""]
+    #[doc = "  ]"]
+    #[doc = "}"]
+    #[doc = r" ```"]
+    #[doc = r" </details>"]
+    #[derive(
+        :: serde :: Deserialize,
+        :: serde :: Serialize,
+        Clone,
+        Copy,
+        Debug,
+        Eq,
+        Hash,
+        Ord,
+        PartialEq,
+        PartialOrd,
+    )]
+    pub enum CreateUserWalletBodyWalletsItemChainTypeSubtype8 {
+        #[serde(rename = "spark")]
+        Spark,
+    }
+    impl ::std::convert::From<&Self> for CreateUserWalletBodyWalletsItemChainTypeSubtype8 {
+        fn from(value: &CreateUserWalletBodyWalletsItemChainTypeSubtype8) -> Self {
+            value.clone()
+        }
+    }
+    impl ::std::fmt::Display for CreateUserWalletBodyWalletsItemChainTypeSubtype8 {
+        fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+            match *self {
+                Self::Spark => f.write_str("spark"),
+            }
+        }
+    }
+    impl ::std::str::FromStr for CreateUserWalletBodyWalletsItemChainTypeSubtype8 {
+        type Err = self::error::ConversionError;
+        fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+            match value {
+                "spark" => Ok(Self::Spark),
+                _ => Err("invalid value".into()),
+            }
+        }
+    }
+    impl ::std::convert::TryFrom<&str> for CreateUserWalletBodyWalletsItemChainTypeSubtype8 {
+        type Error = self::error::ConversionError;
+        fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+            value.parse()
+        }
+    }
+    impl ::std::convert::TryFrom<&::std::string::String>
+        for CreateUserWalletBodyWalletsItemChainTypeSubtype8
+    {
+        type Error = self::error::ConversionError;
+        fn try_from(
+            value: &::std::string::String,
+        ) -> ::std::result::Result<Self, self::error::ConversionError> {
+            value.parse()
+        }
+    }
+    impl ::std::convert::TryFrom<::std::string::String>
+        for CreateUserWalletBodyWalletsItemChainTypeSubtype8
+    {
+        type Error = self::error::ConversionError;
+        fn try_from(
+            value: ::std::string::String,
+        ) -> ::std::result::Result<Self, self::error::ConversionError> {
+            value.parse()
+        }
+    }
+    #[doc = "`CreateUserWalletBodyWalletsItemChainTypeSubtype9`"]
+    #[doc = r""]
+    #[doc = r" <details><summary>JSON schema</summary>"]
+    #[doc = r""]
+    #[doc = r" ```json"]
+    #[doc = "{"]
+    #[doc = "  \"type\": \"string\","]
+    #[doc = "  \"enum\": ["]
+    #[doc = "    \"solana\""]
+    #[doc = "  ]"]
+    #[doc = "}"]
+    #[doc = r" ```"]
+    #[doc = r" </details>"]
+    #[derive(
+        :: serde :: Deserialize,
+        :: serde :: Serialize,
+        Clone,
+        Copy,
+        Debug,
+        Eq,
+        Hash,
+        Ord,
+        PartialEq,
+        PartialOrd,
+    )]
+    pub enum CreateUserWalletBodyWalletsItemChainTypeSubtype9 {
+        #[serde(rename = "solana")]
+        Solana,
+    }
+    impl ::std::convert::From<&Self> for CreateUserWalletBodyWalletsItemChainTypeSubtype9 {
+        fn from(value: &CreateUserWalletBodyWalletsItemChainTypeSubtype9) -> Self {
+            value.clone()
+        }
+    }
+    impl ::std::fmt::Display for CreateUserWalletBodyWalletsItemChainTypeSubtype9 {
+        fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+            match *self {
+                Self::Solana => f.write_str("solana"),
+            }
+        }
+    }
+    impl ::std::str::FromStr for CreateUserWalletBodyWalletsItemChainTypeSubtype9 {
+        type Err = self::error::ConversionError;
+        fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+            match value {
+                "solana" => Ok(Self::Solana),
+                _ => Err("invalid value".into()),
+            }
+        }
+    }
+    impl ::std::convert::TryFrom<&str> for CreateUserWalletBodyWalletsItemChainTypeSubtype9 {
+        type Error = self::error::ConversionError;
+        fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+            value.parse()
+        }
+    }
+    impl ::std::convert::TryFrom<&::std::string::String>
+        for CreateUserWalletBodyWalletsItemChainTypeSubtype9
+    {
+        type Error = self::error::ConversionError;
+        fn try_from(
+            value: &::std::string::String,
+        ) -> ::std::result::Result<Self, self::error::ConversionError> {
+            value.parse()
+        }
+    }
+    impl ::std::convert::TryFrom<::std::string::String>
+        for CreateUserWalletBodyWalletsItemChainTypeSubtype9
+    {
+        type Error = self::error::ConversionError;
+        fn try_from(
+            value: ::std::string::String,
+        ) -> ::std::result::Result<Self, self::error::ConversionError> {
+            value.parse()
+        }
+    }
     #[doc = "`CreateWalletBody`"]
     #[doc = r""]
     #[doc = r" <details><summary>JSON schema</summary>"]
@@ -25155,6 +26494,135 @@ pub mod types {
             value.clone()
         }
     }
+    #[doc = "`SearchUsersBody`"]
+    #[doc = r""]
+    #[doc = r" <details><summary>JSON schema</summary>"]
+    #[doc = r""]
+    #[doc = r" ```json"]
+    #[doc = "{"]
+    #[doc = "  \"anyOf\": ["]
+    #[doc = "    {"]
+    #[doc = "      \"type\": \"object\","]
+    #[doc = "      \"required\": ["]
+    #[doc = "        \"search_term\""]
+    #[doc = "      ],"]
+    #[doc = "      \"properties\": {"]
+    #[doc = "        \"search_term\": {"]
+    #[doc = "          \"type\": \"string\""]
+    #[doc = "        }"]
+    #[doc = "      }"]
+    #[doc = "    },"]
+    #[doc = "    {"]
+    #[doc = "      \"type\": \"object\","]
+    #[doc = "      \"required\": ["]
+    #[doc = "        \"emails\","]
+    #[doc = "        \"phoneNumbers\","]
+    #[doc = "        \"walletAddresses\""]
+    #[doc = "      ],"]
+    #[doc = "      \"properties\": {"]
+    #[doc = "        \"emails\": {"]
+    #[doc = "          \"type\": \"array\","]
+    #[doc = "          \"items\": {"]
+    #[doc = "            \"type\": \"string\","]
+    #[doc = "            \"format\": \"email\""]
+    #[doc = "          }"]
+    #[doc = "        },"]
+    #[doc = "        \"phoneNumbers\": {"]
+    #[doc = "          \"type\": \"array\","]
+    #[doc = "          \"items\": {"]
+    #[doc = "            \"type\": \"string\""]
+    #[doc = "          }"]
+    #[doc = "        },"]
+    #[doc = "        \"walletAddresses\": {"]
+    #[doc = "          \"type\": \"array\","]
+    #[doc = "          \"items\": {"]
+    #[doc = "            \"anyOf\": ["]
+    #[doc = "              {"]
+    #[doc = "                \"type\": \"string\""]
+    #[doc = "              },"]
+    #[doc = "              {"]
+    #[doc = "                \"type\": \"string\""]
+    #[doc = "              }"]
+    #[doc = "            ]"]
+    #[doc = "          }"]
+    #[doc = "        }"]
+    #[doc = "      }"]
+    #[doc = "    }"]
+    #[doc = "  ]"]
+    #[doc = "}"]
+    #[doc = r" ```"]
+    #[doc = r" </details>"]
+    #[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+    #[serde(untagged)]
+    pub enum SearchUsersBody {
+        Variant0 {
+            search_term: ::std::string::String,
+        },
+        Variant1 {
+            emails: ::std::vec::Vec<::std::string::String>,
+            #[serde(rename = "phoneNumbers")]
+            phone_numbers: ::std::vec::Vec<::std::string::String>,
+            #[serde(rename = "walletAddresses")]
+            wallet_addresses: ::std::vec::Vec<SearchUsersBodyVariant1WalletAddressesItem>,
+        },
+    }
+    impl ::std::convert::From<&Self> for SearchUsersBody {
+        fn from(value: &SearchUsersBody) -> Self {
+            value.clone()
+        }
+    }
+    #[doc = "`SearchUsersBodyVariant1WalletAddressesItem`"]
+    #[doc = r""]
+    #[doc = r" <details><summary>JSON schema</summary>"]
+    #[doc = r""]
+    #[doc = r" ```json"]
+    #[doc = "{"]
+    #[doc = "  \"anyOf\": ["]
+    #[doc = "    {"]
+    #[doc = "      \"type\": \"string\""]
+    #[doc = "    },"]
+    #[doc = "    {"]
+    #[doc = "      \"type\": \"string\""]
+    #[doc = "    }"]
+    #[doc = "  ]"]
+    #[doc = "}"]
+    #[doc = r" ```"]
+    #[doc = r" </details>"]
+    #[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+    pub struct SearchUsersBodyVariant1WalletAddressesItem {
+        #[serde(
+            flatten,
+            default,
+            skip_serializing_if = "::std::option::Option::is_none"
+        )]
+        pub subtype_0: ::std::option::Option<::std::string::String>,
+        #[serde(
+            flatten,
+            default,
+            skip_serializing_if = "::std::option::Option::is_none"
+        )]
+        pub subtype_1: ::std::option::Option<::std::string::String>,
+    }
+    impl ::std::convert::From<&SearchUsersBodyVariant1WalletAddressesItem>
+        for SearchUsersBodyVariant1WalletAddressesItem
+    {
+        fn from(value: &SearchUsersBodyVariant1WalletAddressesItem) -> Self {
+            value.clone()
+        }
+    }
+    impl ::std::default::Default for SearchUsersBodyVariant1WalletAddressesItem {
+        fn default() -> Self {
+            Self {
+                subtype_0: Default::default(),
+                subtype_1: Default::default(),
+            }
+        }
+    }
+    impl SearchUsersBodyVariant1WalletAddressesItem {
+        pub fn builder() -> builder::SearchUsersBodyVariant1WalletAddressesItem {
+            Default::default()
+        }
+    }
     #[doc = "`SmsMfaMethod`"]
     #[doc = r""]
     #[doc = r" <details><summary>JSON schema</summary>"]
@@ -32235,6 +33703,456 @@ pub mod types {
                 Self {
                     override_policy_ids: Ok(value.override_policy_ids),
                     signer_id: Ok(value.signer_id),
+                }
+            }
+        }
+        #[derive(Clone, Debug)]
+        pub struct CreateUserWalletBody {
+            wallets: ::std::result::Result<
+                ::std::vec::Vec<super::CreateUserWalletBodyWalletsItem>,
+                ::std::string::String,
+            >,
+        }
+        impl ::std::default::Default for CreateUserWalletBody {
+            fn default() -> Self {
+                Self {
+                    wallets: Err("no value supplied for wallets".to_string()),
+                }
+            }
+        }
+        impl CreateUserWalletBody {
+            pub fn wallets<T>(mut self, value: T) -> Self
+            where
+                T: ::std::convert::TryInto<::std::vec::Vec<super::CreateUserWalletBodyWalletsItem>>,
+                T::Error: ::std::fmt::Display,
+            {
+                self.wallets = value
+                    .try_into()
+                    .map_err(|e| format!("error converting supplied value for wallets: {}", e));
+                self
+            }
+        }
+        impl ::std::convert::TryFrom<CreateUserWalletBody> for super::CreateUserWalletBody {
+            type Error = super::error::ConversionError;
+            fn try_from(
+                value: CreateUserWalletBody,
+            ) -> ::std::result::Result<Self, super::error::ConversionError> {
+                Ok(Self {
+                    wallets: value.wallets?,
+                })
+            }
+        }
+        impl ::std::convert::From<super::CreateUserWalletBody> for CreateUserWalletBody {
+            fn from(value: super::CreateUserWalletBody) -> Self {
+                Self {
+                    wallets: Ok(value.wallets),
+                }
+            }
+        }
+        #[derive(Clone, Debug)]
+        pub struct CreateUserWalletBodyWalletsItem {
+            additional_signers: ::std::result::Result<
+                ::std::vec::Vec<super::CreateUserWalletBodyWalletsItemAdditionalSignersItem>,
+                ::std::string::String,
+            >,
+            chain_type: ::std::result::Result<
+                super::CreateUserWalletBodyWalletsItemChainType,
+                ::std::string::String,
+            >,
+            create_smart_wallet:
+                ::std::result::Result<::std::option::Option<bool>, ::std::string::String>,
+            policy_ids: ::std::result::Result<
+                ::std::vec::Vec<::std::string::String>,
+                ::std::string::String,
+            >,
+        }
+        impl ::std::default::Default for CreateUserWalletBodyWalletsItem {
+            fn default() -> Self {
+                Self {
+                    additional_signers: Ok(Default::default()),
+                    chain_type: Err("no value supplied for chain_type".to_string()),
+                    create_smart_wallet: Ok(Default::default()),
+                    policy_ids: Ok(Default::default()),
+                }
+            }
+        }
+        impl CreateUserWalletBodyWalletsItem {
+            pub fn additional_signers<T>(mut self, value: T) -> Self
+            where
+                T: ::std::convert::TryInto<
+                    ::std::vec::Vec<super::CreateUserWalletBodyWalletsItemAdditionalSignersItem>,
+                >,
+                T::Error: ::std::fmt::Display,
+            {
+                self.additional_signers = value.try_into().map_err(|e| {
+                    format!(
+                        "error converting supplied value for additional_signers: {}",
+                        e
+                    )
+                });
+                self
+            }
+            pub fn chain_type<T>(mut self, value: T) -> Self
+            where
+                T: ::std::convert::TryInto<super::CreateUserWalletBodyWalletsItemChainType>,
+                T::Error: ::std::fmt::Display,
+            {
+                self.chain_type = value
+                    .try_into()
+                    .map_err(|e| format!("error converting supplied value for chain_type: {}", e));
+                self
+            }
+            pub fn create_smart_wallet<T>(mut self, value: T) -> Self
+            where
+                T: ::std::convert::TryInto<::std::option::Option<bool>>,
+                T::Error: ::std::fmt::Display,
+            {
+                self.create_smart_wallet = value.try_into().map_err(|e| {
+                    format!(
+                        "error converting supplied value for create_smart_wallet: {}",
+                        e
+                    )
+                });
+                self
+            }
+            pub fn policy_ids<T>(mut self, value: T) -> Self
+            where
+                T: ::std::convert::TryInto<::std::vec::Vec<::std::string::String>>,
+                T::Error: ::std::fmt::Display,
+            {
+                self.policy_ids = value
+                    .try_into()
+                    .map_err(|e| format!("error converting supplied value for policy_ids: {}", e));
+                self
+            }
+        }
+        impl ::std::convert::TryFrom<CreateUserWalletBodyWalletsItem>
+            for super::CreateUserWalletBodyWalletsItem
+        {
+            type Error = super::error::ConversionError;
+            fn try_from(
+                value: CreateUserWalletBodyWalletsItem,
+            ) -> ::std::result::Result<Self, super::error::ConversionError> {
+                Ok(Self {
+                    additional_signers: value.additional_signers?,
+                    chain_type: value.chain_type?,
+                    create_smart_wallet: value.create_smart_wallet?,
+                    policy_ids: value.policy_ids?,
+                })
+            }
+        }
+        impl ::std::convert::From<super::CreateUserWalletBodyWalletsItem>
+            for CreateUserWalletBodyWalletsItem
+        {
+            fn from(value: super::CreateUserWalletBodyWalletsItem) -> Self {
+                Self {
+                    additional_signers: Ok(value.additional_signers),
+                    chain_type: Ok(value.chain_type),
+                    create_smart_wallet: Ok(value.create_smart_wallet),
+                    policy_ids: Ok(value.policy_ids),
+                }
+            }
+        }
+        #[derive(Clone, Debug)]
+        pub struct CreateUserWalletBodyWalletsItemAdditionalSignersItem {
+            override_policy_ids: ::std::result::Result<
+                ::std::vec::Vec<::std::string::String>,
+                ::std::string::String,
+            >,
+            signer_id: ::std::result::Result<::std::string::String, ::std::string::String>,
+        }
+        impl ::std::default::Default for CreateUserWalletBodyWalletsItemAdditionalSignersItem {
+            fn default() -> Self {
+                Self {
+                    override_policy_ids: Ok(Default::default()),
+                    signer_id: Err("no value supplied for signer_id".to_string()),
+                }
+            }
+        }
+        impl CreateUserWalletBodyWalletsItemAdditionalSignersItem {
+            pub fn override_policy_ids<T>(mut self, value: T) -> Self
+            where
+                T: ::std::convert::TryInto<::std::vec::Vec<::std::string::String>>,
+                T::Error: ::std::fmt::Display,
+            {
+                self.override_policy_ids = value.try_into().map_err(|e| {
+                    format!(
+                        "error converting supplied value for override_policy_ids: {}",
+                        e
+                    )
+                });
+                self
+            }
+            pub fn signer_id<T>(mut self, value: T) -> Self
+            where
+                T: ::std::convert::TryInto<::std::string::String>,
+                T::Error: ::std::fmt::Display,
+            {
+                self.signer_id = value
+                    .try_into()
+                    .map_err(|e| format!("error converting supplied value for signer_id: {}", e));
+                self
+            }
+        }
+        impl ::std::convert::TryFrom<CreateUserWalletBodyWalletsItemAdditionalSignersItem>
+            for super::CreateUserWalletBodyWalletsItemAdditionalSignersItem
+        {
+            type Error = super::error::ConversionError;
+            fn try_from(
+                value: CreateUserWalletBodyWalletsItemAdditionalSignersItem,
+            ) -> ::std::result::Result<Self, super::error::ConversionError> {
+                Ok(Self {
+                    override_policy_ids: value.override_policy_ids?,
+                    signer_id: value.signer_id?,
+                })
+            }
+        }
+        impl ::std::convert::From<super::CreateUserWalletBodyWalletsItemAdditionalSignersItem>
+            for CreateUserWalletBodyWalletsItemAdditionalSignersItem
+        {
+            fn from(value: super::CreateUserWalletBodyWalletsItemAdditionalSignersItem) -> Self {
+                Self {
+                    override_policy_ids: Ok(value.override_policy_ids),
+                    signer_id: Ok(value.signer_id),
+                }
+            }
+        }
+        #[derive(Clone, Debug)]
+        pub struct CreateUserWalletBodyWalletsItemChainType {
+            subtype_0: ::std::result::Result<
+                ::std::option::Option<super::CreateUserWalletBodyWalletsItemChainTypeSubtype0>,
+                ::std::string::String,
+            >,
+            subtype_1: ::std::result::Result<
+                ::std::option::Option<super::CreateUserWalletBodyWalletsItemChainTypeSubtype1>,
+                ::std::string::String,
+            >,
+            subtype_2: ::std::result::Result<
+                ::std::option::Option<super::CreateUserWalletBodyWalletsItemChainTypeSubtype2>,
+                ::std::string::String,
+            >,
+            subtype_3: ::std::result::Result<
+                ::std::option::Option<super::CreateUserWalletBodyWalletsItemChainTypeSubtype3>,
+                ::std::string::String,
+            >,
+            subtype_4: ::std::result::Result<
+                ::std::option::Option<super::CreateUserWalletBodyWalletsItemChainTypeSubtype4>,
+                ::std::string::String,
+            >,
+            subtype_5: ::std::result::Result<
+                ::std::option::Option<super::CreateUserWalletBodyWalletsItemChainTypeSubtype5>,
+                ::std::string::String,
+            >,
+            subtype_6: ::std::result::Result<
+                ::std::option::Option<super::CreateUserWalletBodyWalletsItemChainTypeSubtype6>,
+                ::std::string::String,
+            >,
+            subtype_7: ::std::result::Result<
+                ::std::option::Option<super::CreateUserWalletBodyWalletsItemChainTypeSubtype7>,
+                ::std::string::String,
+            >,
+            subtype_8: ::std::result::Result<
+                ::std::option::Option<super::CreateUserWalletBodyWalletsItemChainTypeSubtype8>,
+                ::std::string::String,
+            >,
+            subtype_9: ::std::result::Result<
+                ::std::option::Option<super::CreateUserWalletBodyWalletsItemChainTypeSubtype9>,
+                ::std::string::String,
+            >,
+            subtype_10: ::std::result::Result<
+                ::std::option::Option<super::CreateUserWalletBodyWalletsItemChainTypeSubtype10>,
+                ::std::string::String,
+            >,
+        }
+        impl ::std::default::Default for CreateUserWalletBodyWalletsItemChainType {
+            fn default() -> Self {
+                Self {
+                    subtype_0: Ok(Default::default()),
+                    subtype_1: Ok(Default::default()),
+                    subtype_2: Ok(Default::default()),
+                    subtype_3: Ok(Default::default()),
+                    subtype_4: Ok(Default::default()),
+                    subtype_5: Ok(Default::default()),
+                    subtype_6: Ok(Default::default()),
+                    subtype_7: Ok(Default::default()),
+                    subtype_8: Ok(Default::default()),
+                    subtype_9: Ok(Default::default()),
+                    subtype_10: Ok(Default::default()),
+                }
+            }
+        }
+        impl CreateUserWalletBodyWalletsItemChainType {
+            pub fn subtype_0<T>(mut self, value: T) -> Self
+            where
+                T: ::std::convert::TryInto<
+                    ::std::option::Option<super::CreateUserWalletBodyWalletsItemChainTypeSubtype0>,
+                >,
+                T::Error: ::std::fmt::Display,
+            {
+                self.subtype_0 = value
+                    .try_into()
+                    .map_err(|e| format!("error converting supplied value for subtype_0: {}", e));
+                self
+            }
+            pub fn subtype_1<T>(mut self, value: T) -> Self
+            where
+                T: ::std::convert::TryInto<
+                    ::std::option::Option<super::CreateUserWalletBodyWalletsItemChainTypeSubtype1>,
+                >,
+                T::Error: ::std::fmt::Display,
+            {
+                self.subtype_1 = value
+                    .try_into()
+                    .map_err(|e| format!("error converting supplied value for subtype_1: {}", e));
+                self
+            }
+            pub fn subtype_2<T>(mut self, value: T) -> Self
+            where
+                T: ::std::convert::TryInto<
+                    ::std::option::Option<super::CreateUserWalletBodyWalletsItemChainTypeSubtype2>,
+                >,
+                T::Error: ::std::fmt::Display,
+            {
+                self.subtype_2 = value
+                    .try_into()
+                    .map_err(|e| format!("error converting supplied value for subtype_2: {}", e));
+                self
+            }
+            pub fn subtype_3<T>(mut self, value: T) -> Self
+            where
+                T: ::std::convert::TryInto<
+                    ::std::option::Option<super::CreateUserWalletBodyWalletsItemChainTypeSubtype3>,
+                >,
+                T::Error: ::std::fmt::Display,
+            {
+                self.subtype_3 = value
+                    .try_into()
+                    .map_err(|e| format!("error converting supplied value for subtype_3: {}", e));
+                self
+            }
+            pub fn subtype_4<T>(mut self, value: T) -> Self
+            where
+                T: ::std::convert::TryInto<
+                    ::std::option::Option<super::CreateUserWalletBodyWalletsItemChainTypeSubtype4>,
+                >,
+                T::Error: ::std::fmt::Display,
+            {
+                self.subtype_4 = value
+                    .try_into()
+                    .map_err(|e| format!("error converting supplied value for subtype_4: {}", e));
+                self
+            }
+            pub fn subtype_5<T>(mut self, value: T) -> Self
+            where
+                T: ::std::convert::TryInto<
+                    ::std::option::Option<super::CreateUserWalletBodyWalletsItemChainTypeSubtype5>,
+                >,
+                T::Error: ::std::fmt::Display,
+            {
+                self.subtype_5 = value
+                    .try_into()
+                    .map_err(|e| format!("error converting supplied value for subtype_5: {}", e));
+                self
+            }
+            pub fn subtype_6<T>(mut self, value: T) -> Self
+            where
+                T: ::std::convert::TryInto<
+                    ::std::option::Option<super::CreateUserWalletBodyWalletsItemChainTypeSubtype6>,
+                >,
+                T::Error: ::std::fmt::Display,
+            {
+                self.subtype_6 = value
+                    .try_into()
+                    .map_err(|e| format!("error converting supplied value for subtype_6: {}", e));
+                self
+            }
+            pub fn subtype_7<T>(mut self, value: T) -> Self
+            where
+                T: ::std::convert::TryInto<
+                    ::std::option::Option<super::CreateUserWalletBodyWalletsItemChainTypeSubtype7>,
+                >,
+                T::Error: ::std::fmt::Display,
+            {
+                self.subtype_7 = value
+                    .try_into()
+                    .map_err(|e| format!("error converting supplied value for subtype_7: {}", e));
+                self
+            }
+            pub fn subtype_8<T>(mut self, value: T) -> Self
+            where
+                T: ::std::convert::TryInto<
+                    ::std::option::Option<super::CreateUserWalletBodyWalletsItemChainTypeSubtype8>,
+                >,
+                T::Error: ::std::fmt::Display,
+            {
+                self.subtype_8 = value
+                    .try_into()
+                    .map_err(|e| format!("error converting supplied value for subtype_8: {}", e));
+                self
+            }
+            pub fn subtype_9<T>(mut self, value: T) -> Self
+            where
+                T: ::std::convert::TryInto<
+                    ::std::option::Option<super::CreateUserWalletBodyWalletsItemChainTypeSubtype9>,
+                >,
+                T::Error: ::std::fmt::Display,
+            {
+                self.subtype_9 = value
+                    .try_into()
+                    .map_err(|e| format!("error converting supplied value for subtype_9: {}", e));
+                self
+            }
+            pub fn subtype_10<T>(mut self, value: T) -> Self
+            where
+                T: ::std::convert::TryInto<
+                    ::std::option::Option<super::CreateUserWalletBodyWalletsItemChainTypeSubtype10>,
+                >,
+                T::Error: ::std::fmt::Display,
+            {
+                self.subtype_10 = value
+                    .try_into()
+                    .map_err(|e| format!("error converting supplied value for subtype_10: {}", e));
+                self
+            }
+        }
+        impl ::std::convert::TryFrom<CreateUserWalletBodyWalletsItemChainType>
+            for super::CreateUserWalletBodyWalletsItemChainType
+        {
+            type Error = super::error::ConversionError;
+            fn try_from(
+                value: CreateUserWalletBodyWalletsItemChainType,
+            ) -> ::std::result::Result<Self, super::error::ConversionError> {
+                Ok(Self {
+                    subtype_0: value.subtype_0?,
+                    subtype_1: value.subtype_1?,
+                    subtype_2: value.subtype_2?,
+                    subtype_3: value.subtype_3?,
+                    subtype_4: value.subtype_4?,
+                    subtype_5: value.subtype_5?,
+                    subtype_6: value.subtype_6?,
+                    subtype_7: value.subtype_7?,
+                    subtype_8: value.subtype_8?,
+                    subtype_9: value.subtype_9?,
+                    subtype_10: value.subtype_10?,
+                })
+            }
+        }
+        impl ::std::convert::From<super::CreateUserWalletBodyWalletsItemChainType>
+            for CreateUserWalletBodyWalletsItemChainType
+        {
+            fn from(value: super::CreateUserWalletBodyWalletsItemChainType) -> Self {
+                Self {
+                    subtype_0: Ok(value.subtype_0),
+                    subtype_1: Ok(value.subtype_1),
+                    subtype_2: Ok(value.subtype_2),
+                    subtype_3: Ok(value.subtype_3),
+                    subtype_4: Ok(value.subtype_4),
+                    subtype_5: Ok(value.subtype_5),
+                    subtype_6: Ok(value.subtype_6),
+                    subtype_7: Ok(value.subtype_7),
+                    subtype_8: Ok(value.subtype_8),
+                    subtype_9: Ok(value.subtype_9),
+                    subtype_10: Ok(value.subtype_10),
                 }
             }
         }
@@ -44296,6 +46214,70 @@ pub mod types {
             }
         }
         #[derive(Clone, Debug)]
+        pub struct SearchUsersBodyVariant1WalletAddressesItem {
+            subtype_0: ::std::result::Result<
+                ::std::option::Option<::std::string::String>,
+                ::std::string::String,
+            >,
+            subtype_1: ::std::result::Result<
+                ::std::option::Option<::std::string::String>,
+                ::std::string::String,
+            >,
+        }
+        impl ::std::default::Default for SearchUsersBodyVariant1WalletAddressesItem {
+            fn default() -> Self {
+                Self {
+                    subtype_0: Ok(Default::default()),
+                    subtype_1: Ok(Default::default()),
+                }
+            }
+        }
+        impl SearchUsersBodyVariant1WalletAddressesItem {
+            pub fn subtype_0<T>(mut self, value: T) -> Self
+            where
+                T: ::std::convert::TryInto<::std::option::Option<::std::string::String>>,
+                T::Error: ::std::fmt::Display,
+            {
+                self.subtype_0 = value
+                    .try_into()
+                    .map_err(|e| format!("error converting supplied value for subtype_0: {}", e));
+                self
+            }
+            pub fn subtype_1<T>(mut self, value: T) -> Self
+            where
+                T: ::std::convert::TryInto<::std::option::Option<::std::string::String>>,
+                T::Error: ::std::fmt::Display,
+            {
+                self.subtype_1 = value
+                    .try_into()
+                    .map_err(|e| format!("error converting supplied value for subtype_1: {}", e));
+                self
+            }
+        }
+        impl ::std::convert::TryFrom<SearchUsersBodyVariant1WalletAddressesItem>
+            for super::SearchUsersBodyVariant1WalletAddressesItem
+        {
+            type Error = super::error::ConversionError;
+            fn try_from(
+                value: SearchUsersBodyVariant1WalletAddressesItem,
+            ) -> ::std::result::Result<Self, super::error::ConversionError> {
+                Ok(Self {
+                    subtype_0: value.subtype_0?,
+                    subtype_1: value.subtype_1?,
+                })
+            }
+        }
+        impl ::std::convert::From<super::SearchUsersBodyVariant1WalletAddressesItem>
+            for SearchUsersBodyVariant1WalletAddressesItem
+        {
+            fn from(value: super::SearchUsersBodyVariant1WalletAddressesItem) -> Self {
+                Self {
+                    subtype_0: Ok(value.subtype_0),
+                    subtype_1: Ok(value.subtype_1),
+                }
+            }
+        }
+        #[derive(Clone, Debug)]
         pub struct SmsMfaMethod {
             type_: ::std::result::Result<super::SmsMfaMethodType, ::std::string::String>,
             verified_at: ::std::result::Result<f64, ::std::string::String>,
@@ -47233,6 +49215,30 @@ impl ClientInfo<()> for Client {
 }
 impl ClientHooks<()> for &Client {}
 impl Client {
+    #[doc = "Gets Users\n\nGet all users in your app.\n\nSends a `GET` request to `/v1/users`\n\n```ignore\nlet response = client.get_users()\n    .cursor(cursor)\n    .limit(limit)\n    .privy_app_id(privy_app_id)\n    .send()\n    .await;\n```"]
+    pub fn get_users(&self) -> builder::GetUsers<'_> {
+        builder::GetUsers::new(self)
+    }
+    #[doc = "Create User\n\nCreate a new user with linked accounts. Optionally pre-generate embedded wallets for the user.\n\nSends a `POST` request to `/v1/users`\n\n```ignore\nlet response = client.create_user()\n    .privy_app_id(privy_app_id)\n    .body(body)\n    .send()\n    .await;\n```"]
+    pub fn create_user(&self) -> builder::CreateUser<'_> {
+        builder::CreateUser::new(self)
+    }
+    #[doc = "Get User\n\nGet a user by user ID.\n\nSends a `GET` request to `/v1/users/{user_id}`\n\n```ignore\nlet response = client.get_user()\n    .user_id(user_id)\n    .privy_app_id(privy_app_id)\n    .send()\n    .await;\n```"]
+    pub fn get_user(&self) -> builder::GetUser<'_> {
+        builder::GetUser::new(self)
+    }
+    #[doc = "Delete User\n\nDelete a user by user ID.\n\nSends a `DELETE` request to `/v1/users/{user_id}`\n\n```ignore\nlet response = client.delete_user()\n    .user_id(user_id)\n    .privy_app_id(privy_app_id)\n    .send()\n    .await;\n```"]
+    pub fn delete_user(&self) -> builder::DeleteUser<'_> {
+        builder::DeleteUser::new(self)
+    }
+    #[doc = "Search Users by Search Term\n\nSearch users by search term, emails, phone numbers, or wallet addresses.\n\nSends a `POST` request to `/v1/users/search`\n\n```ignore\nlet response = client.search_users()\n    .privy_app_id(privy_app_id)\n    .body(body)\n    .send()\n    .await;\n```"]
+    pub fn search_users(&self) -> builder::SearchUsers<'_> {
+        builder::SearchUsers::new(self)
+    }
+    #[doc = "Create Embedded Wallet\n\nCreates an embedded wallet for an existing user.\n\nSends a `POST` request to `/v1/users/{user_id}/wallets`\n\n```ignore\nlet response = client.create_user_wallet()\n    .user_id(user_id)\n    .privy_app_id(privy_app_id)\n    .body(body)\n    .send()\n    .await;\n```"]
+    pub fn create_user_wallet(&self) -> builder::CreateUserWallet<'_> {
+        builder::CreateUserWallet::new(self)
+    }
     #[doc = "Get all wallets\n\nGet all wallets in your app.\n\nSends a `GET` request to `/v1/wallets`\n\n```ignore\nlet response = client.get_wallets()\n    .chain_type(chain_type)\n    .cursor(cursor)\n    .limit(limit)\n    .user_id(user_id)\n    .privy_app_id(privy_app_id)\n    .send()\n    .await;\n```"]
     pub fn get_wallets(&self) -> builder::GetWallets<'_> {
         builder::GetWallets::new(self)
@@ -47281,17 +49287,9 @@ impl Client {
     pub fn wallet_export(&self) -> builder::WalletExport<'_> {
         builder::WalletExport::new(self)
     }
-    #[doc = "Gets Users\n\nGet all users in your app.\n\nSends a `GET` request to `/v1/users`\n\n```ignore\nlet response = client.get_users()\n    .cursor(cursor)\n    .limit(limit)\n    .privy_app_id(privy_app_id)\n    .send()\n    .await;\n```"]
-    pub fn get_users(&self) -> builder::GetUsers<'_> {
-        builder::GetUsers::new(self)
-    }
-    #[doc = "Create User\n\nCreate a new user with linked accounts. Optionally pre-generate embedded wallets for the user.\n\nSends a `POST` request to `/v1/users`\n\n```ignore\nlet response = client.create_user()\n    .privy_app_id(privy_app_id)\n    .body(body)\n    .send()\n    .await;\n```"]
-    pub fn create_user(&self) -> builder::CreateUser<'_> {
-        builder::CreateUser::new(self)
-    }
-    #[doc = "Get User\n\nGet a user by user ID.\n\nSends a `GET` request to `/v1/users/{user_id}`\n\n```ignore\nlet response = client.get_user()\n    .user_id(user_id)\n    .privy_app_id(privy_app_id)\n    .send()\n    .await;\n```"]
-    pub fn get_user(&self) -> builder::GetUser<'_> {
-        builder::GetUser::new(self)
+    #[doc = "Get Transaction\n\nGet a transaction by transaction ID.\n\nSends a `GET` request to `/v1/transactions/{transaction_id}`\n\n```ignore\nlet response = client.get_transaction()\n    .transaction_id(transaction_id)\n    .privy_app_id(privy_app_id)\n    .send()\n    .await;\n```"]
+    pub fn get_transaction(&self) -> builder::GetTransaction<'_> {
+        builder::GetTransaction::new(self)
     }
 }
 #[doc = r" Types for composing operation parameters."]
@@ -47303,6 +49301,502 @@ pub mod builder {
         encode_path, ByteStream, ClientHooks, ClientInfo, Error, OperationInfo, RequestBuilderExt,
         ResponseValue,
     };
+    #[doc = "Builder for [`Client::get_users`]\n\n[`Client::get_users`]: super::Client::get_users"]
+    #[derive(Debug, Clone)]
+    pub struct GetUsers<'a> {
+        client: &'a super::Client,
+        cursor: Result<Option<types::GetUsersCursor>, String>,
+        limit: Result<Option<f64>, String>,
+        privy_app_id: Result<::std::string::String, String>,
+    }
+    impl<'a> GetUsers<'a> {
+        pub fn new(client: &'a super::Client) -> Self {
+            Self {
+                client: client,
+                cursor: Ok(None),
+                limit: Ok(None),
+                privy_app_id: Err("privy_app_id was not initialized".to_string()),
+            }
+        }
+        pub fn cursor<V>(mut self, value: V) -> Self
+        where
+            V: std::convert::TryInto<types::GetUsersCursor>,
+        {
+            self.cursor = value
+                .try_into()
+                .map(Some)
+                .map_err(|_| "conversion to `GetUsersCursor` for cursor failed".to_string());
+            self
+        }
+        pub fn limit<V>(mut self, value: V) -> Self
+        where
+            V: std::convert::TryInto<f64>,
+        {
+            self.limit = value
+                .try_into()
+                .map(Some)
+                .map_err(|_| "conversion to `f64` for limit failed".to_string());
+            self
+        }
+        pub fn privy_app_id<V>(mut self, value: V) -> Self
+        where
+            V: std::convert::TryInto<::std::string::String>,
+        {
+            self.privy_app_id = value.try_into().map_err(|_| {
+                "conversion to `:: std :: string :: String` for privy_app_id failed".to_string()
+            });
+            self
+        }
+        #[doc = "Sends a `GET` request to `/v1/users`"]
+        pub async fn send(self) -> Result<ResponseValue<types::GetUsersResponse>, Error<()>> {
+            let Self {
+                client,
+                cursor,
+                limit,
+                privy_app_id,
+            } = self;
+            let cursor = cursor.map_err(Error::InvalidRequest)?;
+            let limit = limit.map_err(Error::InvalidRequest)?;
+            let privy_app_id = privy_app_id.map_err(Error::InvalidRequest)?;
+            let url = format!("{}/v1/users", client.baseurl,);
+            let mut header_map = ::reqwest::header::HeaderMap::with_capacity(2usize);
+            header_map.append(
+                ::reqwest::header::HeaderName::from_static("api-version"),
+                ::reqwest::header::HeaderValue::from_static(super::Client::api_version()),
+            );
+            header_map.append("privy-app-id", privy_app_id.to_string().try_into()?);
+            #[allow(unused_mut)]
+            let mut request = client
+                .client
+                .get(url)
+                .header(
+                    ::reqwest::header::ACCEPT,
+                    ::reqwest::header::HeaderValue::from_static("application/json"),
+                )
+                .query(&progenitor_client::QueryParam::new("cursor", &cursor))
+                .query(&progenitor_client::QueryParam::new("limit", &limit))
+                .headers(header_map)
+                .build()?;
+            let info = OperationInfo {
+                operation_id: "get_users",
+            };
+            client.pre(&mut request, &info).await?;
+            let result = client.exec(request, &info).await;
+            client.post(&result, &info).await?;
+            let response = result?;
+            match response.status().as_u16() {
+                200u16 => ResponseValue::from_response(response).await,
+                _ => Err(Error::UnexpectedResponse(response)),
+            }
+        }
+    }
+    #[doc = "Builder for [`Client::create_user`]\n\n[`Client::create_user`]: super::Client::create_user"]
+    #[derive(Debug, Clone)]
+    pub struct CreateUser<'a> {
+        client: &'a super::Client,
+        privy_app_id: Result<::std::string::String, String>,
+        body: Result<types::builder::CreateUserBody, String>,
+    }
+    impl<'a> CreateUser<'a> {
+        pub fn new(client: &'a super::Client) -> Self {
+            Self {
+                client: client,
+                privy_app_id: Err("privy_app_id was not initialized".to_string()),
+                body: Ok(::std::default::Default::default()),
+            }
+        }
+        pub fn privy_app_id<V>(mut self, value: V) -> Self
+        where
+            V: std::convert::TryInto<::std::string::String>,
+        {
+            self.privy_app_id = value.try_into().map_err(|_| {
+                "conversion to `:: std :: string :: String` for privy_app_id failed".to_string()
+            });
+            self
+        }
+        pub fn body<V>(mut self, value: V) -> Self
+        where
+            V: std::convert::TryInto<types::CreateUserBody>,
+            <V as std::convert::TryInto<types::CreateUserBody>>::Error: std::fmt::Display,
+        {
+            self.body = value
+                .try_into()
+                .map(From::from)
+                .map_err(|s| format!("conversion to `CreateUserBody` for body failed: {}", s));
+            self
+        }
+        pub fn body_map<F>(mut self, f: F) -> Self
+        where
+            F: std::ops::FnOnce(types::builder::CreateUserBody) -> types::builder::CreateUserBody,
+        {
+            self.body = self.body.map(f);
+            self
+        }
+        #[doc = "Sends a `POST` request to `/v1/users`"]
+        pub async fn send(self) -> Result<ResponseValue<types::User>, Error<()>> {
+            let Self {
+                client,
+                privy_app_id,
+                body,
+            } = self;
+            let privy_app_id = privy_app_id.map_err(Error::InvalidRequest)?;
+            let body = body
+                .and_then(|v| types::CreateUserBody::try_from(v).map_err(|e| e.to_string()))
+                .map_err(Error::InvalidRequest)?;
+            let url = format!("{}/v1/users", client.baseurl,);
+            let mut header_map = ::reqwest::header::HeaderMap::with_capacity(2usize);
+            header_map.append(
+                ::reqwest::header::HeaderName::from_static("api-version"),
+                ::reqwest::header::HeaderValue::from_static(super::Client::api_version()),
+            );
+            header_map.append("privy-app-id", privy_app_id.to_string().try_into()?);
+            #[allow(unused_mut)]
+            let mut request = client
+                .client
+                .post(url)
+                .header(
+                    ::reqwest::header::ACCEPT,
+                    ::reqwest::header::HeaderValue::from_static("application/json"),
+                )
+                .json(&body)
+                .headers(header_map)
+                .build()?;
+            let info = OperationInfo {
+                operation_id: "create_user",
+            };
+            client.pre(&mut request, &info).await?;
+            let result = client.exec(request, &info).await;
+            client.post(&result, &info).await?;
+            let response = result?;
+            match response.status().as_u16() {
+                200u16 => ResponseValue::from_response(response).await,
+                _ => Err(Error::UnexpectedResponse(response)),
+            }
+        }
+    }
+    #[doc = "Builder for [`Client::get_user`]\n\n[`Client::get_user`]: super::Client::get_user"]
+    #[derive(Debug, Clone)]
+    pub struct GetUser<'a> {
+        client: &'a super::Client,
+        user_id: Result<::std::string::String, String>,
+        privy_app_id: Result<::std::string::String, String>,
+    }
+    impl<'a> GetUser<'a> {
+        pub fn new(client: &'a super::Client) -> Self {
+            Self {
+                client: client,
+                user_id: Err("user_id was not initialized".to_string()),
+                privy_app_id: Err("privy_app_id was not initialized".to_string()),
+            }
+        }
+        pub fn user_id<V>(mut self, value: V) -> Self
+        where
+            V: std::convert::TryInto<::std::string::String>,
+        {
+            self.user_id = value.try_into().map_err(|_| {
+                "conversion to `:: std :: string :: String` for user_id failed".to_string()
+            });
+            self
+        }
+        pub fn privy_app_id<V>(mut self, value: V) -> Self
+        where
+            V: std::convert::TryInto<::std::string::String>,
+        {
+            self.privy_app_id = value.try_into().map_err(|_| {
+                "conversion to `:: std :: string :: String` for privy_app_id failed".to_string()
+            });
+            self
+        }
+        #[doc = "Sends a `GET` request to `/v1/users/{user_id}`"]
+        pub async fn send(self) -> Result<ResponseValue<types::User>, Error<()>> {
+            let Self {
+                client,
+                user_id,
+                privy_app_id,
+            } = self;
+            let user_id = user_id.map_err(Error::InvalidRequest)?;
+            let privy_app_id = privy_app_id.map_err(Error::InvalidRequest)?;
+            let url = format!(
+                "{}/v1/users/{}",
+                client.baseurl,
+                encode_path(&user_id.to_string()),
+            );
+            let mut header_map = ::reqwest::header::HeaderMap::with_capacity(2usize);
+            header_map.append(
+                ::reqwest::header::HeaderName::from_static("api-version"),
+                ::reqwest::header::HeaderValue::from_static(super::Client::api_version()),
+            );
+            header_map.append("privy-app-id", privy_app_id.to_string().try_into()?);
+            #[allow(unused_mut)]
+            let mut request = client
+                .client
+                .get(url)
+                .header(
+                    ::reqwest::header::ACCEPT,
+                    ::reqwest::header::HeaderValue::from_static("application/json"),
+                )
+                .headers(header_map)
+                .build()?;
+            let info = OperationInfo {
+                operation_id: "get_user",
+            };
+            client.pre(&mut request, &info).await?;
+            let result = client.exec(request, &info).await;
+            client.post(&result, &info).await?;
+            let response = result?;
+            match response.status().as_u16() {
+                200u16 => ResponseValue::from_response(response).await,
+                _ => Err(Error::UnexpectedResponse(response)),
+            }
+        }
+    }
+    #[doc = "Builder for [`Client::delete_user`]\n\n[`Client::delete_user`]: super::Client::delete_user"]
+    #[derive(Debug, Clone)]
+    pub struct DeleteUser<'a> {
+        client: &'a super::Client,
+        user_id: Result<::std::string::String, String>,
+        privy_app_id: Result<::std::string::String, String>,
+    }
+    impl<'a> DeleteUser<'a> {
+        pub fn new(client: &'a super::Client) -> Self {
+            Self {
+                client: client,
+                user_id: Err("user_id was not initialized".to_string()),
+                privy_app_id: Err("privy_app_id was not initialized".to_string()),
+            }
+        }
+        pub fn user_id<V>(mut self, value: V) -> Self
+        where
+            V: std::convert::TryInto<::std::string::String>,
+        {
+            self.user_id = value.try_into().map_err(|_| {
+                "conversion to `:: std :: string :: String` for user_id failed".to_string()
+            });
+            self
+        }
+        pub fn privy_app_id<V>(mut self, value: V) -> Self
+        where
+            V: std::convert::TryInto<::std::string::String>,
+        {
+            self.privy_app_id = value.try_into().map_err(|_| {
+                "conversion to `:: std :: string :: String` for privy_app_id failed".to_string()
+            });
+            self
+        }
+        #[doc = "Sends a `DELETE` request to `/v1/users/{user_id}`"]
+        pub async fn send(self) -> Result<ResponseValue<()>, Error<ByteStream>> {
+            let Self {
+                client,
+                user_id,
+                privy_app_id,
+            } = self;
+            let user_id = user_id.map_err(Error::InvalidRequest)?;
+            let privy_app_id = privy_app_id.map_err(Error::InvalidRequest)?;
+            let url = format!(
+                "{}/v1/users/{}",
+                client.baseurl,
+                encode_path(&user_id.to_string()),
+            );
+            let mut header_map = ::reqwest::header::HeaderMap::with_capacity(2usize);
+            header_map.append(
+                ::reqwest::header::HeaderName::from_static("api-version"),
+                ::reqwest::header::HeaderValue::from_static(super::Client::api_version()),
+            );
+            header_map.append("privy-app-id", privy_app_id.to_string().try_into()?);
+            #[allow(unused_mut)]
+            let mut request = client.client.delete(url).headers(header_map).build()?;
+            let info = OperationInfo {
+                operation_id: "delete_user",
+            };
+            client.pre(&mut request, &info).await?;
+            let result = client.exec(request, &info).await;
+            client.post(&result, &info).await?;
+            let response = result?;
+            match response.status().as_u16() {
+                204u16 => Ok(ResponseValue::empty(response)),
+                404u16 => Err(Error::ErrorResponse(ResponseValue::stream(response))),
+                _ => Err(Error::UnexpectedResponse(response)),
+            }
+        }
+    }
+    #[doc = "Builder for [`Client::search_users`]\n\n[`Client::search_users`]: super::Client::search_users"]
+    #[derive(Debug, Clone)]
+    pub struct SearchUsers<'a> {
+        client: &'a super::Client,
+        privy_app_id: Result<::std::string::String, String>,
+        body: Result<types::SearchUsersBody, String>,
+    }
+    impl<'a> SearchUsers<'a> {
+        pub fn new(client: &'a super::Client) -> Self {
+            Self {
+                client: client,
+                privy_app_id: Err("privy_app_id was not initialized".to_string()),
+                body: Err("body was not initialized".to_string()),
+            }
+        }
+        pub fn privy_app_id<V>(mut self, value: V) -> Self
+        where
+            V: std::convert::TryInto<::std::string::String>,
+        {
+            self.privy_app_id = value.try_into().map_err(|_| {
+                "conversion to `:: std :: string :: String` for privy_app_id failed".to_string()
+            });
+            self
+        }
+        pub fn body<V>(mut self, value: V) -> Self
+        where
+            V: std::convert::TryInto<types::SearchUsersBody>,
+        {
+            self.body = value
+                .try_into()
+                .map_err(|_| "conversion to `SearchUsersBody` for body failed".to_string());
+            self
+        }
+        #[doc = "Sends a `POST` request to `/v1/users/search`"]
+        pub async fn send(self) -> Result<ResponseValue<types::User>, Error<()>> {
+            let Self {
+                client,
+                privy_app_id,
+                body,
+            } = self;
+            let privy_app_id = privy_app_id.map_err(Error::InvalidRequest)?;
+            let body = body.map_err(Error::InvalidRequest)?;
+            let url = format!("{}/v1/users/search", client.baseurl,);
+            let mut header_map = ::reqwest::header::HeaderMap::with_capacity(2usize);
+            header_map.append(
+                ::reqwest::header::HeaderName::from_static("api-version"),
+                ::reqwest::header::HeaderValue::from_static(super::Client::api_version()),
+            );
+            header_map.append("privy-app-id", privy_app_id.to_string().try_into()?);
+            #[allow(unused_mut)]
+            let mut request = client
+                .client
+                .post(url)
+                .header(
+                    ::reqwest::header::ACCEPT,
+                    ::reqwest::header::HeaderValue::from_static("application/json"),
+                )
+                .json(&body)
+                .headers(header_map)
+                .build()?;
+            let info = OperationInfo {
+                operation_id: "search_users",
+            };
+            client.pre(&mut request, &info).await?;
+            let result = client.exec(request, &info).await;
+            client.post(&result, &info).await?;
+            let response = result?;
+            match response.status().as_u16() {
+                200u16 => ResponseValue::from_response(response).await,
+                _ => Err(Error::UnexpectedResponse(response)),
+            }
+        }
+    }
+    #[doc = "Builder for [`Client::create_user_wallet`]\n\n[`Client::create_user_wallet`]: super::Client::create_user_wallet"]
+    #[derive(Debug, Clone)]
+    pub struct CreateUserWallet<'a> {
+        client: &'a super::Client,
+        user_id: Result<::std::string::String, String>,
+        privy_app_id: Result<::std::string::String, String>,
+        body: Result<types::builder::CreateUserWalletBody, String>,
+    }
+    impl<'a> CreateUserWallet<'a> {
+        pub fn new(client: &'a super::Client) -> Self {
+            Self {
+                client: client,
+                user_id: Err("user_id was not initialized".to_string()),
+                privy_app_id: Err("privy_app_id was not initialized".to_string()),
+                body: Ok(::std::default::Default::default()),
+            }
+        }
+        pub fn user_id<V>(mut self, value: V) -> Self
+        where
+            V: std::convert::TryInto<::std::string::String>,
+        {
+            self.user_id = value.try_into().map_err(|_| {
+                "conversion to `:: std :: string :: String` for user_id failed".to_string()
+            });
+            self
+        }
+        pub fn privy_app_id<V>(mut self, value: V) -> Self
+        where
+            V: std::convert::TryInto<::std::string::String>,
+        {
+            self.privy_app_id = value.try_into().map_err(|_| {
+                "conversion to `:: std :: string :: String` for privy_app_id failed".to_string()
+            });
+            self
+        }
+        pub fn body<V>(mut self, value: V) -> Self
+        where
+            V: std::convert::TryInto<types::CreateUserWalletBody>,
+            <V as std::convert::TryInto<types::CreateUserWalletBody>>::Error: std::fmt::Display,
+        {
+            self.body = value.try_into().map(From::from).map_err(|s| {
+                format!(
+                    "conversion to `CreateUserWalletBody` for body failed: {}",
+                    s
+                )
+            });
+            self
+        }
+        pub fn body_map<F>(mut self, f: F) -> Self
+        where
+            F: std::ops::FnOnce(
+                types::builder::CreateUserWalletBody,
+            ) -> types::builder::CreateUserWalletBody,
+        {
+            self.body = self.body.map(f);
+            self
+        }
+        #[doc = "Sends a `POST` request to `/v1/users/{user_id}/wallets`"]
+        pub async fn send(self) -> Result<ResponseValue<types::User>, Error<()>> {
+            let Self {
+                client,
+                user_id,
+                privy_app_id,
+                body,
+            } = self;
+            let user_id = user_id.map_err(Error::InvalidRequest)?;
+            let privy_app_id = privy_app_id.map_err(Error::InvalidRequest)?;
+            let body = body
+                .and_then(|v| types::CreateUserWalletBody::try_from(v).map_err(|e| e.to_string()))
+                .map_err(Error::InvalidRequest)?;
+            let url = format!(
+                "{}/v1/users/{}/wallets",
+                client.baseurl,
+                encode_path(&user_id.to_string()),
+            );
+            let mut header_map = ::reqwest::header::HeaderMap::with_capacity(2usize);
+            header_map.append(
+                ::reqwest::header::HeaderName::from_static("api-version"),
+                ::reqwest::header::HeaderValue::from_static(super::Client::api_version()),
+            );
+            header_map.append("privy-app-id", privy_app_id.to_string().try_into()?);
+            #[allow(unused_mut)]
+            let mut request = client
+                .client
+                .post(url)
+                .header(
+                    ::reqwest::header::ACCEPT,
+                    ::reqwest::header::HeaderValue::from_static("application/json"),
+                )
+                .json(&body)
+                .headers(header_map)
+                .build()?;
+            let info = OperationInfo {
+                operation_id: "create_user_wallet",
+            };
+            client.pre(&mut request, &info).await?;
+            let result = client.exec(request, &info).await;
+            client.post(&result, &info).await?;
+            let response = result?;
+            match response.status().as_u16() {
+                200u16 => ResponseValue::from_response(response).await,
+                _ => Err(Error::UnexpectedResponse(response)),
+            }
+        }
+    }
     #[doc = "Builder for [`Client::get_wallets`]\n\n[`Client::get_wallets`]: super::Client::get_wallets"]
     #[derive(Debug, Clone)]
     pub struct GetWallets<'a> {
@@ -48613,200 +51107,27 @@ pub mod builder {
             }
         }
     }
-    #[doc = "Builder for [`Client::get_users`]\n\n[`Client::get_users`]: super::Client::get_users"]
+    #[doc = "Builder for [`Client::get_transaction`]\n\n[`Client::get_transaction`]: super::Client::get_transaction"]
     #[derive(Debug, Clone)]
-    pub struct GetUsers<'a> {
+    pub struct GetTransaction<'a> {
         client: &'a super::Client,
-        cursor: Result<Option<types::GetUsersCursor>, String>,
-        limit: Result<Option<f64>, String>,
+        transaction_id: Result<::std::string::String, String>,
         privy_app_id: Result<::std::string::String, String>,
     }
-    impl<'a> GetUsers<'a> {
+    impl<'a> GetTransaction<'a> {
         pub fn new(client: &'a super::Client) -> Self {
             Self {
                 client: client,
-                cursor: Ok(None),
-                limit: Ok(None),
+                transaction_id: Err("transaction_id was not initialized".to_string()),
                 privy_app_id: Err("privy_app_id was not initialized".to_string()),
             }
         }
-        pub fn cursor<V>(mut self, value: V) -> Self
-        where
-            V: std::convert::TryInto<types::GetUsersCursor>,
-        {
-            self.cursor = value
-                .try_into()
-                .map(Some)
-                .map_err(|_| "conversion to `GetUsersCursor` for cursor failed".to_string());
-            self
-        }
-        pub fn limit<V>(mut self, value: V) -> Self
-        where
-            V: std::convert::TryInto<f64>,
-        {
-            self.limit = value
-                .try_into()
-                .map(Some)
-                .map_err(|_| "conversion to `f64` for limit failed".to_string());
-            self
-        }
-        pub fn privy_app_id<V>(mut self, value: V) -> Self
+        pub fn transaction_id<V>(mut self, value: V) -> Self
         where
             V: std::convert::TryInto<::std::string::String>,
         {
-            self.privy_app_id = value.try_into().map_err(|_| {
-                "conversion to `:: std :: string :: String` for privy_app_id failed".to_string()
-            });
-            self
-        }
-        #[doc = "Sends a `GET` request to `/v1/users`"]
-        pub async fn send(self) -> Result<ResponseValue<types::GetUsersResponse>, Error<()>> {
-            let Self {
-                client,
-                cursor,
-                limit,
-                privy_app_id,
-            } = self;
-            let cursor = cursor.map_err(Error::InvalidRequest)?;
-            let limit = limit.map_err(Error::InvalidRequest)?;
-            let privy_app_id = privy_app_id.map_err(Error::InvalidRequest)?;
-            let url = format!("{}/v1/users", client.baseurl,);
-            let mut header_map = ::reqwest::header::HeaderMap::with_capacity(2usize);
-            header_map.append(
-                ::reqwest::header::HeaderName::from_static("api-version"),
-                ::reqwest::header::HeaderValue::from_static(super::Client::api_version()),
-            );
-            header_map.append("privy-app-id", privy_app_id.to_string().try_into()?);
-            #[allow(unused_mut)]
-            let mut request = client
-                .client
-                .get(url)
-                .header(
-                    ::reqwest::header::ACCEPT,
-                    ::reqwest::header::HeaderValue::from_static("application/json"),
-                )
-                .query(&progenitor_client::QueryParam::new("cursor", &cursor))
-                .query(&progenitor_client::QueryParam::new("limit", &limit))
-                .headers(header_map)
-                .build()?;
-            let info = OperationInfo {
-                operation_id: "get_users",
-            };
-            client.pre(&mut request, &info).await?;
-            let result = client.exec(request, &info).await;
-            client.post(&result, &info).await?;
-            let response = result?;
-            match response.status().as_u16() {
-                200u16 => ResponseValue::from_response(response).await,
-                _ => Err(Error::UnexpectedResponse(response)),
-            }
-        }
-    }
-    #[doc = "Builder for [`Client::create_user`]\n\n[`Client::create_user`]: super::Client::create_user"]
-    #[derive(Debug, Clone)]
-    pub struct CreateUser<'a> {
-        client: &'a super::Client,
-        privy_app_id: Result<::std::string::String, String>,
-        body: Result<types::builder::CreateUserBody, String>,
-    }
-    impl<'a> CreateUser<'a> {
-        pub fn new(client: &'a super::Client) -> Self {
-            Self {
-                client: client,
-                privy_app_id: Err("privy_app_id was not initialized".to_string()),
-                body: Ok(::std::default::Default::default()),
-            }
-        }
-        pub fn privy_app_id<V>(mut self, value: V) -> Self
-        where
-            V: std::convert::TryInto<::std::string::String>,
-        {
-            self.privy_app_id = value.try_into().map_err(|_| {
-                "conversion to `:: std :: string :: String` for privy_app_id failed".to_string()
-            });
-            self
-        }
-        pub fn body<V>(mut self, value: V) -> Self
-        where
-            V: std::convert::TryInto<types::CreateUserBody>,
-            <V as std::convert::TryInto<types::CreateUserBody>>::Error: std::fmt::Display,
-        {
-            self.body = value
-                .try_into()
-                .map(From::from)
-                .map_err(|s| format!("conversion to `CreateUserBody` for body failed: {}", s));
-            self
-        }
-        pub fn body_map<F>(mut self, f: F) -> Self
-        where
-            F: std::ops::FnOnce(types::builder::CreateUserBody) -> types::builder::CreateUserBody,
-        {
-            self.body = self.body.map(f);
-            self
-        }
-        #[doc = "Sends a `POST` request to `/v1/users`"]
-        pub async fn send(self) -> Result<ResponseValue<types::User>, Error<()>> {
-            let Self {
-                client,
-                privy_app_id,
-                body,
-            } = self;
-            let privy_app_id = privy_app_id.map_err(Error::InvalidRequest)?;
-            let body = body
-                .and_then(|v| types::CreateUserBody::try_from(v).map_err(|e| e.to_string()))
-                .map_err(Error::InvalidRequest)?;
-            let url = format!("{}/v1/users", client.baseurl,);
-            let mut header_map = ::reqwest::header::HeaderMap::with_capacity(2usize);
-            header_map.append(
-                ::reqwest::header::HeaderName::from_static("api-version"),
-                ::reqwest::header::HeaderValue::from_static(super::Client::api_version()),
-            );
-            header_map.append("privy-app-id", privy_app_id.to_string().try_into()?);
-            #[allow(unused_mut)]
-            let mut request = client
-                .client
-                .post(url)
-                .header(
-                    ::reqwest::header::ACCEPT,
-                    ::reqwest::header::HeaderValue::from_static("application/json"),
-                )
-                .json(&body)
-                .headers(header_map)
-                .build()?;
-            let info = OperationInfo {
-                operation_id: "create_user",
-            };
-            client.pre(&mut request, &info).await?;
-            let result = client.exec(request, &info).await;
-            client.post(&result, &info).await?;
-            let response = result?;
-            match response.status().as_u16() {
-                200u16 => ResponseValue::from_response(response).await,
-                _ => Err(Error::UnexpectedResponse(response)),
-            }
-        }
-    }
-    #[doc = "Builder for [`Client::get_user`]\n\n[`Client::get_user`]: super::Client::get_user"]
-    #[derive(Debug, Clone)]
-    pub struct GetUser<'a> {
-        client: &'a super::Client,
-        user_id: Result<::std::string::String, String>,
-        privy_app_id: Result<::std::string::String, String>,
-    }
-    impl<'a> GetUser<'a> {
-        pub fn new(client: &'a super::Client) -> Self {
-            Self {
-                client: client,
-                user_id: Err("user_id was not initialized".to_string()),
-                privy_app_id: Err("privy_app_id was not initialized".to_string()),
-            }
-        }
-        pub fn user_id<V>(mut self, value: V) -> Self
-        where
-            V: std::convert::TryInto<::std::string::String>,
-        {
-            self.user_id = value.try_into().map_err(|_| {
-                "conversion to `:: std :: string :: String` for user_id failed".to_string()
+            self.transaction_id = value.try_into().map_err(|_| {
+                "conversion to `:: std :: string :: String` for transaction_id failed".to_string()
             });
             self
         }
@@ -48819,19 +51140,19 @@ pub mod builder {
             });
             self
         }
-        #[doc = "Sends a `GET` request to `/v1/users/{user_id}`"]
-        pub async fn send(self) -> Result<ResponseValue<types::User>, Error<()>> {
+        #[doc = "Sends a `GET` request to `/v1/transactions/{transaction_id}`"]
+        pub async fn send(self) -> Result<ResponseValue<types::Transaction>, Error<()>> {
             let Self {
                 client,
-                user_id,
+                transaction_id,
                 privy_app_id,
             } = self;
-            let user_id = user_id.map_err(Error::InvalidRequest)?;
+            let transaction_id = transaction_id.map_err(Error::InvalidRequest)?;
             let privy_app_id = privy_app_id.map_err(Error::InvalidRequest)?;
             let url = format!(
-                "{}/v1/users/{}",
+                "{}/v1/transactions/{}",
                 client.baseurl,
-                encode_path(&user_id.to_string()),
+                encode_path(&transaction_id.to_string()),
             );
             let mut header_map = ::reqwest::header::HeaderMap::with_capacity(2usize);
             header_map.append(
@@ -48850,7 +51171,7 @@ pub mod builder {
                 .headers(header_map)
                 .build()?;
             let info = OperationInfo {
-                operation_id: "get_user",
+                operation_id: "get_transaction",
             };
             client.pre(&mut request, &info).await?;
             let result = client.exec(request, &info).await;

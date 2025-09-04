@@ -88,6 +88,15 @@ impl PrivySigner {
 
             #[expr($.privy_app_id(&self.app_id))]
             #[must_use] pub fn get_users(&self) -> privy_api::builder::GetUsers<'_>;
+
+            #[expr($.privy_app_id(&self.app_id))]
+            #[must_use] pub fn delete_user(&self) -> privy_api::builder::DeleteUser<'_>;
+
+            #[expr($.privy_app_id(&self.app_id))]
+            #[must_use] pub fn search_users(&self) -> privy_api::builder::SearchUsers<'_>;
+
+            #[expr($.privy_app_id(&self.app_id))]
+            #[must_use] pub fn create_user_wallet(&self) -> privy_api::builder::CreateUserWallet<'_>;
         }
     }
 
