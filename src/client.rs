@@ -9,7 +9,10 @@ use privy_api::Client;
 use reqwest::header::{CONTENT_TYPE, HeaderValue};
 use serde::Serialize;
 
-use crate::{Method, PrivyCreateError, WalletApiRequestSignatureInput, get_auth_header};
+use crate::{
+    Method, PrivyCreateError, WalletApiRequestSignatureInput, get_auth_header,
+    wallet::{Chain, Wallet},
+};
 
 /// Privy client for interacting with the Privy API.
 ///
@@ -157,5 +160,30 @@ impl PrivyClient {
     ) -> Result<String, serde_json::Error> {
         let url = format!("https://api.privy.io/v1/wallets/{wallet_id}");
         self.build_canonical_request(Method::PATCH, url, Some(body), idempotency_key)
+    }
+
+    /// Create a typed wallet for blockchain-specific operations.
+    ///
+    /// The public key will be populated lazily on first access.
+    ///
+    /// # Arguments
+    ///
+    /// * `wallet_id` - The Privy wallet ID
+    ///
+    /// # Example
+    ///
+    /// ```no_run
+    /// # use privy_rust::{PrivyClient, wallet::{Wallet, Solana, Ethereum}};
+    /// # let client = PrivyClient::new("app_id".to_string(), "app_secret".to_string())?;
+    /// // Create a Solana wallet
+    /// let solana_wallet = client.wallet::<Solana>("wallet_id");
+    ///
+    /// // Create an Ethereum wallet
+    /// let ethereum_wallet = client.wallet::<Ethereum>("wallet_id");
+    /// # Ok::<(), Box<dyn std::error::Error>>(())
+    /// ```
+    #[must_use]
+    pub fn wallet<T: Chain>(&self, wallet_id: &str) -> Wallet<T> {
+        Wallet::new(self.clone(), wallet_id.to_string())
     }
 }

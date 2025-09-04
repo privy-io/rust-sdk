@@ -7,6 +7,7 @@ rust = "{{ exec(command='yq .toolchain.channel rust-toolchain.toml') }}"
 cargo-binstall = "latest"
 "cargo:bacon" = "latest"
 "cargo:cargo-progenitor" = "latest"
+"cargo:cargo-duplicates" = "latest"
 
 [env]
 _.file = ['.env', '.env.local']

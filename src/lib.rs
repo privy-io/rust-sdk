@@ -7,6 +7,7 @@
 use base64::{Engine, engine::general_purpose::STANDARD};
 
 pub mod client;
+pub mod wallet;
 
 pub(crate) mod errors;
 pub(crate) mod keys;

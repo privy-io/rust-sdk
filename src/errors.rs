@@ -1,7 +1,6 @@
 #![allow(missing_docs)]
 
 pub use privy_api::{Error as PrivyApiError, types::error::ConversionError};
-pub use solana_sdk::pubkey::ParsePubkeyError;
 use thiserror::Error;
 
 #[derive(Error, Debug)]
@@ -19,9 +18,6 @@ pub enum PrivyError {
 
     #[error("Hex parsing failed: {0}")]
     HexParsing(#[from] std::num::ParseIntError),
-
-    #[error("Solana pubkey parsing failed: {0}")]
-    SolanaPubkey(#[from] ParsePubkeyError),
 
     #[error("Invalid signature length: expected 64 bytes")]
     InvalidSignatureLength,

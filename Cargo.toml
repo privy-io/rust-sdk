@@ -8,8 +8,31 @@ license = "MIT OR Apache-2.0"
 [workspace]
 members = ["crates/*", "."]
 
+[features]
+default = []
+solana = ["solana-sdk"]
+ethereum = [
+  "alloy-chains",
+  "alloy-core",
+  "alloy-signer",
+  "alloy-consensus",
+  "alloy-primitives",
+  "alloy-sol-types",
+]
+
 [dependencies]
-solana-sdk = "2.1.9"
+# typed solana
+solana-sdk = {version = "3", optional = true}
+
+
+# typed eth
+alloy-chains = {version = "0.2.9", optional = true}
+alloy-core = { version = "1.3.1", features = ["dyn-abi"], optional = true }
+alloy-signer = { version = "1.0.30", features = ["eip712"], optional = true }
+alloy-consensus = {version = "1.0.30", optional = true}
+alloy-primitives = {version = "1.3.1", optional = true}
+alloy-sol-types = {version = "1.3.1", optional = true}
+
 privy-api = { path = "crates/privy-api" }
 reqwest = { version = "0.12", features = ["json"] }
 base64 = "0.21"
@@ -39,3 +62,13 @@ tracing-test = "0.2.5"
 doc-scrape-examples = true
 name = "get_wallets"
 path = "examples/get_wallets.rs"
+
+[[example]]
+required-features = ["solana"]
+name = "solana"
+path = "examples/solana.rs"
+
+[[example]]
+name = "typed_wallets"
+required-features = ["ethereum", "solana"]
+path = "examples/typed_wallets.rs"
