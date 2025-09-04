@@ -538,6 +538,416 @@ pub mod types {
             Self::Variant1(value)
         }
     }
+    #[doc = "`CreateUserBody`"]
+    #[doc = r""]
+    #[doc = r" <details><summary>JSON schema</summary>"]
+    #[doc = r""]
+    #[doc = r" ```json"]
+    #[doc = "{"]
+    #[doc = "  \"examples\": ["]
+    #[doc = "    {"]
+    #[doc = "      \"linked_accounts\": ["]
+    #[doc = "        {"]
+    #[doc = "          \"address\": \"tom.bombadill@privy.io\","]
+    #[doc = "          \"type\": \"email\""]
+    #[doc = "        }"]
+    #[doc = "      ]"]
+    #[doc = "    }"]
+    #[doc = "  ],"]
+    #[doc = "  \"type\": \"object\","]
+    #[doc = "  \"required\": ["]
+    #[doc = "    \"linked_accounts\""]
+    #[doc = "  ],"]
+    #[doc = "  \"properties\": {"]
+    #[doc = "    \"custom_metadata\": {"]
+    #[doc = "      \"$ref\": \"#/components/schemas/CustomMetadata\""]
+    #[doc = "    },"]
+    #[doc = "    \"linked_accounts\": {"]
+    #[doc = "      \"type\": \"array\","]
+    #[doc = "      \"items\": {"]
+    #[doc = "        \"$ref\": \"#/components/schemas/LinkedAccountInput\""]
+    #[doc = "      }"]
+    #[doc = "    },"]
+    #[doc = "    \"wallets\": {"]
+    #[doc = "      \"description\": \"Wallets to create for the user.\","]
+    #[doc = "      \"type\": \"array\","]
+    #[doc = "      \"items\": {"]
+    #[doc = "        \"type\": \"object\","]
+    #[doc = "        \"required\": ["]
+    #[doc = "          \"chain_type\""]
+    #[doc = "        ],"]
+    #[doc = "        \"properties\": {"]
+    #[doc = "          \"additional_signers\": {"]
+    #[doc = "            \"description\": \"Additional signers for the wallet.\","]
+    #[doc = "            \"type\": \"array\","]
+    #[doc = "            \"items\": {"]
+    #[doc = "              \"type\": \"object\","]
+    #[doc = "              \"required\": ["]
+    #[doc = "                \"signer_id\""]
+    #[doc = "              ],"]
+    #[doc = "              \"properties\": {"]
+    #[doc = "                \"override_policy_ids\": {"]
+    #[doc = "                  \"description\": \"The array of policy IDs that will be applied to wallet requests. If specified, this will override the base policy IDs set on the wallet. Currently, only one policy is supported per signer.\","]
+    #[doc = "                  \"type\": \"array\","]
+    #[doc = "                  \"items\": {"]
+    #[doc = "                    \"type\": \"string\","]
+    #[doc = "                    \"maxLength\": 24,"]
+    #[doc = "                    \"minLength\": 24"]
+    #[doc = "                  }"]
+    #[doc = "                },"]
+    #[doc = "                \"signer_id\": {"]
+    #[doc = "                  \"description\": \"The key quorum ID for the signer.\","]
+    #[doc = "                  \"type\": \"string\""]
+    #[doc = "                }"]
+    #[doc = "              }"]
+    #[doc = "            }"]
+    #[doc = "          },"]
+    #[doc = "          \"chain_type\": {"]
+    #[doc = "            \"$ref\": \"#/components/schemas/WalletChainType\""]
+    #[doc = "          },"]
+    #[doc = "          \"create_smart_wallet\": {"]
+    #[doc = "            \"description\": \"Create a smart wallet with this wallet as the signer. Only supported for wallets with `chain_type: \\\"ethereum\\\"`.\","]
+    #[doc = "            \"type\": \"boolean\""]
+    #[doc = "          },"]
+    #[doc = "          \"policy_ids\": {"]
+    #[doc = "            \"description\": \"Policy IDs to enforce on the wallet. Currently, only one policy is supported per wallet.\","]
+    #[doc = "            \"type\": \"array\","]
+    #[doc = "            \"items\": {"]
+    #[doc = "              \"type\": \"string\","]
+    #[doc = "              \"maxLength\": 24,"]
+    #[doc = "              \"minLength\": 24"]
+    #[doc = "            },"]
+    #[doc = "            \"maxItems\": 1"]
+    #[doc = "          }"]
+    #[doc = "        }"]
+    #[doc = "      }"]
+    #[doc = "    }"]
+    #[doc = "  }"]
+    #[doc = "}"]
+    #[doc = r" ```"]
+    #[doc = r" </details>"]
+    #[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+    pub struct CreateUserBody {
+        #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
+        pub custom_metadata: ::std::option::Option<CustomMetadata>,
+        pub linked_accounts: ::std::vec::Vec<LinkedAccountInput>,
+        #[doc = "Wallets to create for the user."]
+        #[serde(default, skip_serializing_if = "::std::vec::Vec::is_empty")]
+        pub wallets: ::std::vec::Vec<CreateUserBodyWalletsItem>,
+    }
+    impl ::std::convert::From<&CreateUserBody> for CreateUserBody {
+        fn from(value: &CreateUserBody) -> Self {
+            value.clone()
+        }
+    }
+    impl CreateUserBody {
+        pub fn builder() -> builder::CreateUserBody {
+            Default::default()
+        }
+    }
+    #[doc = "`CreateUserBodyWalletsItem`"]
+    #[doc = r""]
+    #[doc = r" <details><summary>JSON schema</summary>"]
+    #[doc = r""]
+    #[doc = r" ```json"]
+    #[doc = "{"]
+    #[doc = "  \"type\": \"object\","]
+    #[doc = "  \"required\": ["]
+    #[doc = "    \"chain_type\""]
+    #[doc = "  ],"]
+    #[doc = "  \"properties\": {"]
+    #[doc = "    \"additional_signers\": {"]
+    #[doc = "      \"description\": \"Additional signers for the wallet.\","]
+    #[doc = "      \"type\": \"array\","]
+    #[doc = "      \"items\": {"]
+    #[doc = "        \"type\": \"object\","]
+    #[doc = "        \"required\": ["]
+    #[doc = "          \"signer_id\""]
+    #[doc = "        ],"]
+    #[doc = "        \"properties\": {"]
+    #[doc = "          \"override_policy_ids\": {"]
+    #[doc = "            \"description\": \"The array of policy IDs that will be applied to wallet requests. If specified, this will override the base policy IDs set on the wallet. Currently, only one policy is supported per signer.\","]
+    #[doc = "            \"type\": \"array\","]
+    #[doc = "            \"items\": {"]
+    #[doc = "              \"type\": \"string\","]
+    #[doc = "              \"maxLength\": 24,"]
+    #[doc = "              \"minLength\": 24"]
+    #[doc = "            }"]
+    #[doc = "          },"]
+    #[doc = "          \"signer_id\": {"]
+    #[doc = "            \"description\": \"The key quorum ID for the signer.\","]
+    #[doc = "            \"type\": \"string\""]
+    #[doc = "          }"]
+    #[doc = "        }"]
+    #[doc = "      }"]
+    #[doc = "    },"]
+    #[doc = "    \"chain_type\": {"]
+    #[doc = "      \"$ref\": \"#/components/schemas/WalletChainType\""]
+    #[doc = "    },"]
+    #[doc = "    \"create_smart_wallet\": {"]
+    #[doc = "      \"description\": \"Create a smart wallet with this wallet as the signer. Only supported for wallets with `chain_type: \\\"ethereum\\\"`.\","]
+    #[doc = "      \"type\": \"boolean\""]
+    #[doc = "    },"]
+    #[doc = "    \"policy_ids\": {"]
+    #[doc = "      \"description\": \"Policy IDs to enforce on the wallet. Currently, only one policy is supported per wallet.\","]
+    #[doc = "      \"type\": \"array\","]
+    #[doc = "      \"items\": {"]
+    #[doc = "        \"type\": \"string\","]
+    #[doc = "        \"maxLength\": 24,"]
+    #[doc = "        \"minLength\": 24"]
+    #[doc = "      },"]
+    #[doc = "      \"maxItems\": 1"]
+    #[doc = "    }"]
+    #[doc = "  }"]
+    #[doc = "}"]
+    #[doc = r" ```"]
+    #[doc = r" </details>"]
+    #[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+    pub struct CreateUserBodyWalletsItem {
+        #[doc = "Additional signers for the wallet."]
+        #[serde(default, skip_serializing_if = "::std::vec::Vec::is_empty")]
+        pub additional_signers: ::std::vec::Vec<CreateUserBodyWalletsItemAdditionalSignersItem>,
+        pub chain_type: WalletChainType,
+        #[doc = "Create a smart wallet with this wallet as the signer. Only supported for wallets with `chain_type: \"ethereum\"`."]
+        #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
+        pub create_smart_wallet: ::std::option::Option<bool>,
+        #[doc = "Policy IDs to enforce on the wallet. Currently, only one policy is supported per wallet."]
+        #[serde(default, skip_serializing_if = "::std::vec::Vec::is_empty")]
+        pub policy_ids: ::std::vec::Vec<CreateUserBodyWalletsItemPolicyIdsItem>,
+    }
+    impl ::std::convert::From<&CreateUserBodyWalletsItem> for CreateUserBodyWalletsItem {
+        fn from(value: &CreateUserBodyWalletsItem) -> Self {
+            value.clone()
+        }
+    }
+    impl CreateUserBodyWalletsItem {
+        pub fn builder() -> builder::CreateUserBodyWalletsItem {
+            Default::default()
+        }
+    }
+    #[doc = "`CreateUserBodyWalletsItemAdditionalSignersItem`"]
+    #[doc = r""]
+    #[doc = r" <details><summary>JSON schema</summary>"]
+    #[doc = r""]
+    #[doc = r" ```json"]
+    #[doc = "{"]
+    #[doc = "  \"type\": \"object\","]
+    #[doc = "  \"required\": ["]
+    #[doc = "    \"signer_id\""]
+    #[doc = "  ],"]
+    #[doc = "  \"properties\": {"]
+    #[doc = "    \"override_policy_ids\": {"]
+    #[doc = "      \"description\": \"The array of policy IDs that will be applied to wallet requests. If specified, this will override the base policy IDs set on the wallet. Currently, only one policy is supported per signer.\","]
+    #[doc = "      \"type\": \"array\","]
+    #[doc = "      \"items\": {"]
+    #[doc = "        \"type\": \"string\","]
+    #[doc = "        \"maxLength\": 24,"]
+    #[doc = "        \"minLength\": 24"]
+    #[doc = "      }"]
+    #[doc = "    },"]
+    #[doc = "    \"signer_id\": {"]
+    #[doc = "      \"description\": \"The key quorum ID for the signer.\","]
+    #[doc = "      \"type\": \"string\""]
+    #[doc = "    }"]
+    #[doc = "  }"]
+    #[doc = "}"]
+    #[doc = r" ```"]
+    #[doc = r" </details>"]
+    #[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+    pub struct CreateUserBodyWalletsItemAdditionalSignersItem {
+        #[doc = "The array of policy IDs that will be applied to wallet requests. If specified, this will override the base policy IDs set on the wallet. Currently, only one policy is supported per signer."]
+        #[serde(default, skip_serializing_if = "::std::vec::Vec::is_empty")]
+        pub override_policy_ids:
+            ::std::vec::Vec<CreateUserBodyWalletsItemAdditionalSignersItemOverridePolicyIdsItem>,
+        #[doc = "The key quorum ID for the signer."]
+        pub signer_id: ::std::string::String,
+    }
+    impl ::std::convert::From<&CreateUserBodyWalletsItemAdditionalSignersItem>
+        for CreateUserBodyWalletsItemAdditionalSignersItem
+    {
+        fn from(value: &CreateUserBodyWalletsItemAdditionalSignersItem) -> Self {
+            value.clone()
+        }
+    }
+    impl CreateUserBodyWalletsItemAdditionalSignersItem {
+        pub fn builder() -> builder::CreateUserBodyWalletsItemAdditionalSignersItem {
+            Default::default()
+        }
+    }
+    #[doc = "`CreateUserBodyWalletsItemAdditionalSignersItemOverridePolicyIdsItem`"]
+    #[doc = r""]
+    #[doc = r" <details><summary>JSON schema</summary>"]
+    #[doc = r""]
+    #[doc = r" ```json"]
+    #[doc = "{"]
+    #[doc = "  \"type\": \"string\","]
+    #[doc = "  \"maxLength\": 24,"]
+    #[doc = "  \"minLength\": 24"]
+    #[doc = "}"]
+    #[doc = r" ```"]
+    #[doc = r" </details>"]
+    #[derive(:: serde :: Serialize, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+    #[serde(transparent)]
+    pub struct CreateUserBodyWalletsItemAdditionalSignersItemOverridePolicyIdsItem(
+        ::std::string::String,
+    );
+    impl ::std::ops::Deref for CreateUserBodyWalletsItemAdditionalSignersItemOverridePolicyIdsItem {
+        type Target = ::std::string::String;
+        fn deref(&self) -> &::std::string::String {
+            &self.0
+        }
+    }
+    impl ::std::convert::From<CreateUserBodyWalletsItemAdditionalSignersItemOverridePolicyIdsItem>
+        for ::std::string::String
+    {
+        fn from(
+            value: CreateUserBodyWalletsItemAdditionalSignersItemOverridePolicyIdsItem,
+        ) -> Self {
+            value.0
+        }
+    }
+    impl ::std::convert::From<&CreateUserBodyWalletsItemAdditionalSignersItemOverridePolicyIdsItem>
+        for CreateUserBodyWalletsItemAdditionalSignersItemOverridePolicyIdsItem
+    {
+        fn from(
+            value: &CreateUserBodyWalletsItemAdditionalSignersItemOverridePolicyIdsItem,
+        ) -> Self {
+            value.clone()
+        }
+    }
+    impl ::std::str::FromStr for CreateUserBodyWalletsItemAdditionalSignersItemOverridePolicyIdsItem {
+        type Err = self::error::ConversionError;
+        fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+            if value.chars().count() > 24usize {
+                return Err("longer than 24 characters".into());
+            }
+            if value.chars().count() < 24usize {
+                return Err("shorter than 24 characters".into());
+            }
+            Ok(Self(value.to_string()))
+        }
+    }
+    impl ::std::convert::TryFrom<&str>
+        for CreateUserBodyWalletsItemAdditionalSignersItemOverridePolicyIdsItem
+    {
+        type Error = self::error::ConversionError;
+        fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+            value.parse()
+        }
+    }
+    impl ::std::convert::TryFrom<&::std::string::String>
+        for CreateUserBodyWalletsItemAdditionalSignersItemOverridePolicyIdsItem
+    {
+        type Error = self::error::ConversionError;
+        fn try_from(
+            value: &::std::string::String,
+        ) -> ::std::result::Result<Self, self::error::ConversionError> {
+            value.parse()
+        }
+    }
+    impl ::std::convert::TryFrom<::std::string::String>
+        for CreateUserBodyWalletsItemAdditionalSignersItemOverridePolicyIdsItem
+    {
+        type Error = self::error::ConversionError;
+        fn try_from(
+            value: ::std::string::String,
+        ) -> ::std::result::Result<Self, self::error::ConversionError> {
+            value.parse()
+        }
+    }
+    impl<'de> ::serde::Deserialize<'de>
+        for CreateUserBodyWalletsItemAdditionalSignersItemOverridePolicyIdsItem
+    {
+        fn deserialize<D>(deserializer: D) -> ::std::result::Result<Self, D::Error>
+        where
+            D: ::serde::Deserializer<'de>,
+        {
+            ::std::string::String::deserialize(deserializer)?
+                .parse()
+                .map_err(|e: self::error::ConversionError| {
+                    <D::Error as ::serde::de::Error>::custom(e.to_string())
+                })
+        }
+    }
+    #[doc = "`CreateUserBodyWalletsItemPolicyIdsItem`"]
+    #[doc = r""]
+    #[doc = r" <details><summary>JSON schema</summary>"]
+    #[doc = r""]
+    #[doc = r" ```json"]
+    #[doc = "{"]
+    #[doc = "  \"type\": \"string\","]
+    #[doc = "  \"maxLength\": 24,"]
+    #[doc = "  \"minLength\": 24"]
+    #[doc = "}"]
+    #[doc = r" ```"]
+    #[doc = r" </details>"]
+    #[derive(:: serde :: Serialize, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+    #[serde(transparent)]
+    pub struct CreateUserBodyWalletsItemPolicyIdsItem(::std::string::String);
+    impl ::std::ops::Deref for CreateUserBodyWalletsItemPolicyIdsItem {
+        type Target = ::std::string::String;
+        fn deref(&self) -> &::std::string::String {
+            &self.0
+        }
+    }
+    impl ::std::convert::From<CreateUserBodyWalletsItemPolicyIdsItem> for ::std::string::String {
+        fn from(value: CreateUserBodyWalletsItemPolicyIdsItem) -> Self {
+            value.0
+        }
+    }
+    impl ::std::convert::From<&CreateUserBodyWalletsItemPolicyIdsItem>
+        for CreateUserBodyWalletsItemPolicyIdsItem
+    {
+        fn from(value: &CreateUserBodyWalletsItemPolicyIdsItem) -> Self {
+            value.clone()
+        }
+    }
+    impl ::std::str::FromStr for CreateUserBodyWalletsItemPolicyIdsItem {
+        type Err = self::error::ConversionError;
+        fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+            if value.chars().count() > 24usize {
+                return Err("longer than 24 characters".into());
+            }
+            if value.chars().count() < 24usize {
+                return Err("shorter than 24 characters".into());
+            }
+            Ok(Self(value.to_string()))
+        }
+    }
+    impl ::std::convert::TryFrom<&str> for CreateUserBodyWalletsItemPolicyIdsItem {
+        type Error = self::error::ConversionError;
+        fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+            value.parse()
+        }
+    }
+    impl ::std::convert::TryFrom<&::std::string::String> for CreateUserBodyWalletsItemPolicyIdsItem {
+        type Error = self::error::ConversionError;
+        fn try_from(
+            value: &::std::string::String,
+        ) -> ::std::result::Result<Self, self::error::ConversionError> {
+            value.parse()
+        }
+    }
+    impl ::std::convert::TryFrom<::std::string::String> for CreateUserBodyWalletsItemPolicyIdsItem {
+        type Error = self::error::ConversionError;
+        fn try_from(
+            value: ::std::string::String,
+        ) -> ::std::result::Result<Self, self::error::ConversionError> {
+            value.parse()
+        }
+    }
+    impl<'de> ::serde::Deserialize<'de> for CreateUserBodyWalletsItemPolicyIdsItem {
+        fn deserialize<D>(deserializer: D) -> ::std::result::Result<Self, D::Error>
+        where
+            D: ::serde::Deserializer<'de>,
+        {
+            ::std::string::String::deserialize(deserializer)?
+                .parse()
+                .map_err(|e: self::error::ConversionError| {
+                    <D::Error as ::serde::de::Error>::custom(e.to_string())
+                })
+        }
+    }
     #[doc = "`CreateWalletBody`"]
     #[doc = r""]
     #[doc = r" <details><summary>JSON schema</summary>"]
@@ -8713,6 +9123,119 @@ pub mod types {
     }
     impl EthereumTypedDataMessageConditionTypedDataTypesValueItem {
         pub fn builder() -> builder::EthereumTypedDataMessageConditionTypedDataTypesValueItem {
+            Default::default()
+        }
+    }
+    #[doc = "`GetUsersCursor`"]
+    #[doc = r""]
+    #[doc = r" <details><summary>JSON schema</summary>"]
+    #[doc = r""]
+    #[doc = r" ```json"]
+    #[doc = "{"]
+    #[doc = "  \"type\": \"string\","]
+    #[doc = "  \"minLength\": 1"]
+    #[doc = "}"]
+    #[doc = r" ```"]
+    #[doc = r" </details>"]
+    #[derive(:: serde :: Serialize, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+    #[serde(transparent)]
+    pub struct GetUsersCursor(::std::string::String);
+    impl ::std::ops::Deref for GetUsersCursor {
+        type Target = ::std::string::String;
+        fn deref(&self) -> &::std::string::String {
+            &self.0
+        }
+    }
+    impl ::std::convert::From<GetUsersCursor> for ::std::string::String {
+        fn from(value: GetUsersCursor) -> Self {
+            value.0
+        }
+    }
+    impl ::std::convert::From<&GetUsersCursor> for GetUsersCursor {
+        fn from(value: &GetUsersCursor) -> Self {
+            value.clone()
+        }
+    }
+    impl ::std::str::FromStr for GetUsersCursor {
+        type Err = self::error::ConversionError;
+        fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+            if value.chars().count() < 1usize {
+                return Err("shorter than 1 characters".into());
+            }
+            Ok(Self(value.to_string()))
+        }
+    }
+    impl ::std::convert::TryFrom<&str> for GetUsersCursor {
+        type Error = self::error::ConversionError;
+        fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+            value.parse()
+        }
+    }
+    impl ::std::convert::TryFrom<&::std::string::String> for GetUsersCursor {
+        type Error = self::error::ConversionError;
+        fn try_from(
+            value: &::std::string::String,
+        ) -> ::std::result::Result<Self, self::error::ConversionError> {
+            value.parse()
+        }
+    }
+    impl ::std::convert::TryFrom<::std::string::String> for GetUsersCursor {
+        type Error = self::error::ConversionError;
+        fn try_from(
+            value: ::std::string::String,
+        ) -> ::std::result::Result<Self, self::error::ConversionError> {
+            value.parse()
+        }
+    }
+    impl<'de> ::serde::Deserialize<'de> for GetUsersCursor {
+        fn deserialize<D>(deserializer: D) -> ::std::result::Result<Self, D::Error>
+        where
+            D: ::serde::Deserializer<'de>,
+        {
+            ::std::string::String::deserialize(deserializer)?
+                .parse()
+                .map_err(|e: self::error::ConversionError| {
+                    <D::Error as ::serde::de::Error>::custom(e.to_string())
+                })
+        }
+    }
+    #[doc = "`GetUsersResponse`"]
+    #[doc = r""]
+    #[doc = r" <details><summary>JSON schema</summary>"]
+    #[doc = r""]
+    #[doc = r" ```json"]
+    #[doc = "{"]
+    #[doc = "  \"type\": \"object\","]
+    #[doc = "  \"required\": ["]
+    #[doc = "    \"data\""]
+    #[doc = "  ],"]
+    #[doc = "  \"properties\": {"]
+    #[doc = "    \"data\": {"]
+    #[doc = "      \"type\": \"array\","]
+    #[doc = "      \"items\": {"]
+    #[doc = "        \"$ref\": \"#/components/schemas/User\""]
+    #[doc = "      }"]
+    #[doc = "    },"]
+    #[doc = "    \"next_cursor\": {"]
+    #[doc = "      \"type\": \"string\""]
+    #[doc = "    }"]
+    #[doc = "  }"]
+    #[doc = "}"]
+    #[doc = r" ```"]
+    #[doc = r" </details>"]
+    #[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+    pub struct GetUsersResponse {
+        pub data: ::std::vec::Vec<User>,
+        #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
+        pub next_cursor: ::std::option::Option<::std::string::String>,
+    }
+    impl ::std::convert::From<&GetUsersResponse> for GetUsersResponse {
+        fn from(value: &GetUsersResponse) -> Self {
+            value.clone()
+        }
+    }
+    impl GetUsersResponse {
+        pub fn builder() -> builder::GetUsersResponse {
             Default::default()
         }
     }
@@ -31470,6 +31993,252 @@ pub mod types {
             }
         }
         #[derive(Clone, Debug)]
+        pub struct CreateUserBody {
+            custom_metadata: ::std::result::Result<
+                ::std::option::Option<super::CustomMetadata>,
+                ::std::string::String,
+            >,
+            linked_accounts: ::std::result::Result<
+                ::std::vec::Vec<super::LinkedAccountInput>,
+                ::std::string::String,
+            >,
+            wallets: ::std::result::Result<
+                ::std::vec::Vec<super::CreateUserBodyWalletsItem>,
+                ::std::string::String,
+            >,
+        }
+        impl ::std::default::Default for CreateUserBody {
+            fn default() -> Self {
+                Self {
+                    custom_metadata: Ok(Default::default()),
+                    linked_accounts: Err("no value supplied for linked_accounts".to_string()),
+                    wallets: Ok(Default::default()),
+                }
+            }
+        }
+        impl CreateUserBody {
+            pub fn custom_metadata<T>(mut self, value: T) -> Self
+            where
+                T: ::std::convert::TryInto<::std::option::Option<super::CustomMetadata>>,
+                T::Error: ::std::fmt::Display,
+            {
+                self.custom_metadata = value.try_into().map_err(|e| {
+                    format!("error converting supplied value for custom_metadata: {}", e)
+                });
+                self
+            }
+            pub fn linked_accounts<T>(mut self, value: T) -> Self
+            where
+                T: ::std::convert::TryInto<::std::vec::Vec<super::LinkedAccountInput>>,
+                T::Error: ::std::fmt::Display,
+            {
+                self.linked_accounts = value.try_into().map_err(|e| {
+                    format!("error converting supplied value for linked_accounts: {}", e)
+                });
+                self
+            }
+            pub fn wallets<T>(mut self, value: T) -> Self
+            where
+                T: ::std::convert::TryInto<::std::vec::Vec<super::CreateUserBodyWalletsItem>>,
+                T::Error: ::std::fmt::Display,
+            {
+                self.wallets = value
+                    .try_into()
+                    .map_err(|e| format!("error converting supplied value for wallets: {}", e));
+                self
+            }
+        }
+        impl ::std::convert::TryFrom<CreateUserBody> for super::CreateUserBody {
+            type Error = super::error::ConversionError;
+            fn try_from(
+                value: CreateUserBody,
+            ) -> ::std::result::Result<Self, super::error::ConversionError> {
+                Ok(Self {
+                    custom_metadata: value.custom_metadata?,
+                    linked_accounts: value.linked_accounts?,
+                    wallets: value.wallets?,
+                })
+            }
+        }
+        impl ::std::convert::From<super::CreateUserBody> for CreateUserBody {
+            fn from(value: super::CreateUserBody) -> Self {
+                Self {
+                    custom_metadata: Ok(value.custom_metadata),
+                    linked_accounts: Ok(value.linked_accounts),
+                    wallets: Ok(value.wallets),
+                }
+            }
+        }
+        #[derive(Clone, Debug)]
+        pub struct CreateUserBodyWalletsItem {
+            additional_signers: ::std::result::Result<
+                ::std::vec::Vec<super::CreateUserBodyWalletsItemAdditionalSignersItem>,
+                ::std::string::String,
+            >,
+            chain_type: ::std::result::Result<super::WalletChainType, ::std::string::String>,
+            create_smart_wallet:
+                ::std::result::Result<::std::option::Option<bool>, ::std::string::String>,
+            policy_ids: ::std::result::Result<
+                ::std::vec::Vec<super::CreateUserBodyWalletsItemPolicyIdsItem>,
+                ::std::string::String,
+            >,
+        }
+        impl ::std::default::Default for CreateUserBodyWalletsItem {
+            fn default() -> Self {
+                Self {
+                    additional_signers: Ok(Default::default()),
+                    chain_type: Err("no value supplied for chain_type".to_string()),
+                    create_smart_wallet: Ok(Default::default()),
+                    policy_ids: Ok(Default::default()),
+                }
+            }
+        }
+        impl CreateUserBodyWalletsItem {
+            pub fn additional_signers<T>(mut self, value: T) -> Self
+            where
+                T: ::std::convert::TryInto<
+                    ::std::vec::Vec<super::CreateUserBodyWalletsItemAdditionalSignersItem>,
+                >,
+                T::Error: ::std::fmt::Display,
+            {
+                self.additional_signers = value.try_into().map_err(|e| {
+                    format!(
+                        "error converting supplied value for additional_signers: {}",
+                        e
+                    )
+                });
+                self
+            }
+            pub fn chain_type<T>(mut self, value: T) -> Self
+            where
+                T: ::std::convert::TryInto<super::WalletChainType>,
+                T::Error: ::std::fmt::Display,
+            {
+                self.chain_type = value
+                    .try_into()
+                    .map_err(|e| format!("error converting supplied value for chain_type: {}", e));
+                self
+            }
+            pub fn create_smart_wallet<T>(mut self, value: T) -> Self
+            where
+                T: ::std::convert::TryInto<::std::option::Option<bool>>,
+                T::Error: ::std::fmt::Display,
+            {
+                self.create_smart_wallet = value.try_into().map_err(|e| {
+                    format!(
+                        "error converting supplied value for create_smart_wallet: {}",
+                        e
+                    )
+                });
+                self
+            }
+            pub fn policy_ids<T>(mut self, value: T) -> Self
+            where
+                T: ::std::convert::TryInto<
+                    ::std::vec::Vec<super::CreateUserBodyWalletsItemPolicyIdsItem>,
+                >,
+                T::Error: ::std::fmt::Display,
+            {
+                self.policy_ids = value
+                    .try_into()
+                    .map_err(|e| format!("error converting supplied value for policy_ids: {}", e));
+                self
+            }
+        }
+        impl ::std::convert::TryFrom<CreateUserBodyWalletsItem> for super::CreateUserBodyWalletsItem {
+            type Error = super::error::ConversionError;
+            fn try_from(
+                value: CreateUserBodyWalletsItem,
+            ) -> ::std::result::Result<Self, super::error::ConversionError> {
+                Ok(Self {
+                    additional_signers: value.additional_signers?,
+                    chain_type: value.chain_type?,
+                    create_smart_wallet: value.create_smart_wallet?,
+                    policy_ids: value.policy_ids?,
+                })
+            }
+        }
+        impl ::std::convert::From<super::CreateUserBodyWalletsItem> for CreateUserBodyWalletsItem {
+            fn from(value: super::CreateUserBodyWalletsItem) -> Self {
+                Self {
+                    additional_signers: Ok(value.additional_signers),
+                    chain_type: Ok(value.chain_type),
+                    create_smart_wallet: Ok(value.create_smart_wallet),
+                    policy_ids: Ok(value.policy_ids),
+                }
+            }
+        }
+        #[derive(Clone, Debug)]
+        pub struct CreateUserBodyWalletsItemAdditionalSignersItem {
+            override_policy_ids: ::std::result::Result<
+                ::std::vec::Vec<
+                    super::CreateUserBodyWalletsItemAdditionalSignersItemOverridePolicyIdsItem,
+                >,
+                ::std::string::String,
+            >,
+            signer_id: ::std::result::Result<::std::string::String, ::std::string::String>,
+        }
+        impl ::std::default::Default for CreateUserBodyWalletsItemAdditionalSignersItem {
+            fn default() -> Self {
+                Self {
+                    override_policy_ids: Ok(Default::default()),
+                    signer_id: Err("no value supplied for signer_id".to_string()),
+                }
+            }
+        }
+        impl CreateUserBodyWalletsItemAdditionalSignersItem {
+            pub fn override_policy_ids<T>(mut self, value: T) -> Self
+            where
+                T: ::std::convert::TryInto<
+                    ::std::vec::Vec<
+                        super::CreateUserBodyWalletsItemAdditionalSignersItemOverridePolicyIdsItem,
+                    >,
+                >,
+                T::Error: ::std::fmt::Display,
+            {
+                self.override_policy_ids = value.try_into().map_err(|e| {
+                    format!(
+                        "error converting supplied value for override_policy_ids: {}",
+                        e
+                    )
+                });
+                self
+            }
+            pub fn signer_id<T>(mut self, value: T) -> Self
+            where
+                T: ::std::convert::TryInto<::std::string::String>,
+                T::Error: ::std::fmt::Display,
+            {
+                self.signer_id = value
+                    .try_into()
+                    .map_err(|e| format!("error converting supplied value for signer_id: {}", e));
+                self
+            }
+        }
+        impl ::std::convert::TryFrom<CreateUserBodyWalletsItemAdditionalSignersItem>
+            for super::CreateUserBodyWalletsItemAdditionalSignersItem
+        {
+            type Error = super::error::ConversionError;
+            fn try_from(
+                value: CreateUserBodyWalletsItemAdditionalSignersItem,
+            ) -> ::std::result::Result<Self, super::error::ConversionError> {
+                Ok(Self {
+                    override_policy_ids: value.override_policy_ids?,
+                    signer_id: value.signer_id?,
+                })
+            }
+        }
+        impl ::std::convert::From<super::CreateUserBodyWalletsItemAdditionalSignersItem>
+            for CreateUserBodyWalletsItemAdditionalSignersItem
+        {
+            fn from(value: super::CreateUserBodyWalletsItemAdditionalSignersItem) -> Self {
+                Self {
+                    override_policy_ids: Ok(value.override_policy_ids),
+                    signer_id: Ok(value.signer_id),
+                }
+            }
+        }
+        #[derive(Clone, Debug)]
         pub struct CreateWalletBody {
             additional_signers: ::std::result::Result<
                 ::std::option::Option<super::WalletAdditionalSigner>,
@@ -35477,6 +36246,63 @@ pub mod types {
                 Self {
                     name: Ok(value.name),
                     type_: Ok(value.type_),
+                }
+            }
+        }
+        #[derive(Clone, Debug)]
+        pub struct GetUsersResponse {
+            data: ::std::result::Result<::std::vec::Vec<super::User>, ::std::string::String>,
+            next_cursor: ::std::result::Result<
+                ::std::option::Option<::std::string::String>,
+                ::std::string::String,
+            >,
+        }
+        impl ::std::default::Default for GetUsersResponse {
+            fn default() -> Self {
+                Self {
+                    data: Err("no value supplied for data".to_string()),
+                    next_cursor: Ok(Default::default()),
+                }
+            }
+        }
+        impl GetUsersResponse {
+            pub fn data<T>(mut self, value: T) -> Self
+            where
+                T: ::std::convert::TryInto<::std::vec::Vec<super::User>>,
+                T::Error: ::std::fmt::Display,
+            {
+                self.data = value
+                    .try_into()
+                    .map_err(|e| format!("error converting supplied value for data: {}", e));
+                self
+            }
+            pub fn next_cursor<T>(mut self, value: T) -> Self
+            where
+                T: ::std::convert::TryInto<::std::option::Option<::std::string::String>>,
+                T::Error: ::std::fmt::Display,
+            {
+                self.next_cursor = value
+                    .try_into()
+                    .map_err(|e| format!("error converting supplied value for next_cursor: {}", e));
+                self
+            }
+        }
+        impl ::std::convert::TryFrom<GetUsersResponse> for super::GetUsersResponse {
+            type Error = super::error::ConversionError;
+            fn try_from(
+                value: GetUsersResponse,
+            ) -> ::std::result::Result<Self, super::error::ConversionError> {
+                Ok(Self {
+                    data: value.data?,
+                    next_cursor: value.next_cursor?,
+                })
+            }
+        }
+        impl ::std::convert::From<super::GetUsersResponse> for GetUsersResponse {
+            fn from(value: super::GetUsersResponse) -> Self {
+                Self {
+                    data: Ok(value.data),
+                    next_cursor: Ok(value.next_cursor),
                 }
             }
         }
@@ -46455,6 +47281,18 @@ impl Client {
     pub fn wallet_export(&self) -> builder::WalletExport<'_> {
         builder::WalletExport::new(self)
     }
+    #[doc = "Gets Users\n\nGet all users in your app.\n\nSends a `GET` request to `/v1/users`\n\n```ignore\nlet response = client.get_users()\n    .cursor(cursor)\n    .limit(limit)\n    .privy_app_id(privy_app_id)\n    .send()\n    .await;\n```"]
+    pub fn get_users(&self) -> builder::GetUsers<'_> {
+        builder::GetUsers::new(self)
+    }
+    #[doc = "Create User\n\nCreate a new user with linked accounts. Optionally pre-generate embedded wallets for the user.\n\nSends a `POST` request to `/v1/users`\n\n```ignore\nlet response = client.create_user()\n    .privy_app_id(privy_app_id)\n    .body(body)\n    .send()\n    .await;\n```"]
+    pub fn create_user(&self) -> builder::CreateUser<'_> {
+        builder::CreateUser::new(self)
+    }
+    #[doc = "Get User\n\nGet a user by user ID.\n\nSends a `GET` request to `/v1/users/{user_id}`\n\n```ignore\nlet response = client.get_user()\n    .user_id(user_id)\n    .privy_app_id(privy_app_id)\n    .send()\n    .await;\n```"]
+    pub fn get_user(&self) -> builder::GetUser<'_> {
+        builder::GetUser::new(self)
+    }
 }
 #[doc = r" Types for composing operation parameters."]
 #[allow(clippy::all)]
@@ -46966,9 +47804,6 @@ pub mod builder {
             let body = body
                 .and_then(|v| types::UpdateWalletBody::try_from(v).map_err(|e| e.to_string()))
                 .map_err(Error::InvalidRequest)?;
-
-            tracing::debug!("body: {:?}", body);
-
             let url = format!(
                 "{}/v1/wallets/{}",
                 client.baseurl,
@@ -47767,6 +48602,255 @@ pub mod builder {
                 .build()?;
             let info = OperationInfo {
                 operation_id: "wallet_export",
+            };
+            client.pre(&mut request, &info).await?;
+            let result = client.exec(request, &info).await;
+            client.post(&result, &info).await?;
+            let response = result?;
+            match response.status().as_u16() {
+                200u16 => ResponseValue::from_response(response).await,
+                _ => Err(Error::UnexpectedResponse(response)),
+            }
+        }
+    }
+    #[doc = "Builder for [`Client::get_users`]\n\n[`Client::get_users`]: super::Client::get_users"]
+    #[derive(Debug, Clone)]
+    pub struct GetUsers<'a> {
+        client: &'a super::Client,
+        cursor: Result<Option<types::GetUsersCursor>, String>,
+        limit: Result<Option<f64>, String>,
+        privy_app_id: Result<::std::string::String, String>,
+    }
+    impl<'a> GetUsers<'a> {
+        pub fn new(client: &'a super::Client) -> Self {
+            Self {
+                client: client,
+                cursor: Ok(None),
+                limit: Ok(None),
+                privy_app_id: Err("privy_app_id was not initialized".to_string()),
+            }
+        }
+        pub fn cursor<V>(mut self, value: V) -> Self
+        where
+            V: std::convert::TryInto<types::GetUsersCursor>,
+        {
+            self.cursor = value
+                .try_into()
+                .map(Some)
+                .map_err(|_| "conversion to `GetUsersCursor` for cursor failed".to_string());
+            self
+        }
+        pub fn limit<V>(mut self, value: V) -> Self
+        where
+            V: std::convert::TryInto<f64>,
+        {
+            self.limit = value
+                .try_into()
+                .map(Some)
+                .map_err(|_| "conversion to `f64` for limit failed".to_string());
+            self
+        }
+        pub fn privy_app_id<V>(mut self, value: V) -> Self
+        where
+            V: std::convert::TryInto<::std::string::String>,
+        {
+            self.privy_app_id = value.try_into().map_err(|_| {
+                "conversion to `:: std :: string :: String` for privy_app_id failed".to_string()
+            });
+            self
+        }
+        #[doc = "Sends a `GET` request to `/v1/users`"]
+        pub async fn send(self) -> Result<ResponseValue<types::GetUsersResponse>, Error<()>> {
+            let Self {
+                client,
+                cursor,
+                limit,
+                privy_app_id,
+            } = self;
+            let cursor = cursor.map_err(Error::InvalidRequest)?;
+            let limit = limit.map_err(Error::InvalidRequest)?;
+            let privy_app_id = privy_app_id.map_err(Error::InvalidRequest)?;
+            let url = format!("{}/v1/users", client.baseurl,);
+            let mut header_map = ::reqwest::header::HeaderMap::with_capacity(2usize);
+            header_map.append(
+                ::reqwest::header::HeaderName::from_static("api-version"),
+                ::reqwest::header::HeaderValue::from_static(super::Client::api_version()),
+            );
+            header_map.append("privy-app-id", privy_app_id.to_string().try_into()?);
+            #[allow(unused_mut)]
+            let mut request = client
+                .client
+                .get(url)
+                .header(
+                    ::reqwest::header::ACCEPT,
+                    ::reqwest::header::HeaderValue::from_static("application/json"),
+                )
+                .query(&progenitor_client::QueryParam::new("cursor", &cursor))
+                .query(&progenitor_client::QueryParam::new("limit", &limit))
+                .headers(header_map)
+                .build()?;
+            let info = OperationInfo {
+                operation_id: "get_users",
+            };
+            client.pre(&mut request, &info).await?;
+            let result = client.exec(request, &info).await;
+            client.post(&result, &info).await?;
+            let response = result?;
+            match response.status().as_u16() {
+                200u16 => ResponseValue::from_response(response).await,
+                _ => Err(Error::UnexpectedResponse(response)),
+            }
+        }
+    }
+    #[doc = "Builder for [`Client::create_user`]\n\n[`Client::create_user`]: super::Client::create_user"]
+    #[derive(Debug, Clone)]
+    pub struct CreateUser<'a> {
+        client: &'a super::Client,
+        privy_app_id: Result<::std::string::String, String>,
+        body: Result<types::builder::CreateUserBody, String>,
+    }
+    impl<'a> CreateUser<'a> {
+        pub fn new(client: &'a super::Client) -> Self {
+            Self {
+                client: client,
+                privy_app_id: Err("privy_app_id was not initialized".to_string()),
+                body: Ok(::std::default::Default::default()),
+            }
+        }
+        pub fn privy_app_id<V>(mut self, value: V) -> Self
+        where
+            V: std::convert::TryInto<::std::string::String>,
+        {
+            self.privy_app_id = value.try_into().map_err(|_| {
+                "conversion to `:: std :: string :: String` for privy_app_id failed".to_string()
+            });
+            self
+        }
+        pub fn body<V>(mut self, value: V) -> Self
+        where
+            V: std::convert::TryInto<types::CreateUserBody>,
+            <V as std::convert::TryInto<types::CreateUserBody>>::Error: std::fmt::Display,
+        {
+            self.body = value
+                .try_into()
+                .map(From::from)
+                .map_err(|s| format!("conversion to `CreateUserBody` for body failed: {}", s));
+            self
+        }
+        pub fn body_map<F>(mut self, f: F) -> Self
+        where
+            F: std::ops::FnOnce(types::builder::CreateUserBody) -> types::builder::CreateUserBody,
+        {
+            self.body = self.body.map(f);
+            self
+        }
+        #[doc = "Sends a `POST` request to `/v1/users`"]
+        pub async fn send(self) -> Result<ResponseValue<types::User>, Error<()>> {
+            let Self {
+                client,
+                privy_app_id,
+                body,
+            } = self;
+            let privy_app_id = privy_app_id.map_err(Error::InvalidRequest)?;
+            let body = body
+                .and_then(|v| types::CreateUserBody::try_from(v).map_err(|e| e.to_string()))
+                .map_err(Error::InvalidRequest)?;
+            let url = format!("{}/v1/users", client.baseurl,);
+            let mut header_map = ::reqwest::header::HeaderMap::with_capacity(2usize);
+            header_map.append(
+                ::reqwest::header::HeaderName::from_static("api-version"),
+                ::reqwest::header::HeaderValue::from_static(super::Client::api_version()),
+            );
+            header_map.append("privy-app-id", privy_app_id.to_string().try_into()?);
+            #[allow(unused_mut)]
+            let mut request = client
+                .client
+                .post(url)
+                .header(
+                    ::reqwest::header::ACCEPT,
+                    ::reqwest::header::HeaderValue::from_static("application/json"),
+                )
+                .json(&body)
+                .headers(header_map)
+                .build()?;
+            let info = OperationInfo {
+                operation_id: "create_user",
+            };
+            client.pre(&mut request, &info).await?;
+            let result = client.exec(request, &info).await;
+            client.post(&result, &info).await?;
+            let response = result?;
+            match response.status().as_u16() {
+                200u16 => ResponseValue::from_response(response).await,
+                _ => Err(Error::UnexpectedResponse(response)),
+            }
+        }
+    }
+    #[doc = "Builder for [`Client::get_user`]\n\n[`Client::get_user`]: super::Client::get_user"]
+    #[derive(Debug, Clone)]
+    pub struct GetUser<'a> {
+        client: &'a super::Client,
+        user_id: Result<::std::string::String, String>,
+        privy_app_id: Result<::std::string::String, String>,
+    }
+    impl<'a> GetUser<'a> {
+        pub fn new(client: &'a super::Client) -> Self {
+            Self {
+                client: client,
+                user_id: Err("user_id was not initialized".to_string()),
+                privy_app_id: Err("privy_app_id was not initialized".to_string()),
+            }
+        }
+        pub fn user_id<V>(mut self, value: V) -> Self
+        where
+            V: std::convert::TryInto<::std::string::String>,
+        {
+            self.user_id = value.try_into().map_err(|_| {
+                "conversion to `:: std :: string :: String` for user_id failed".to_string()
+            });
+            self
+        }
+        pub fn privy_app_id<V>(mut self, value: V) -> Self
+        where
+            V: std::convert::TryInto<::std::string::String>,
+        {
+            self.privy_app_id = value.try_into().map_err(|_| {
+                "conversion to `:: std :: string :: String` for privy_app_id failed".to_string()
+            });
+            self
+        }
+        #[doc = "Sends a `GET` request to `/v1/users/{user_id}`"]
+        pub async fn send(self) -> Result<ResponseValue<types::User>, Error<()>> {
+            let Self {
+                client,
+                user_id,
+                privy_app_id,
+            } = self;
+            let user_id = user_id.map_err(Error::InvalidRequest)?;
+            let privy_app_id = privy_app_id.map_err(Error::InvalidRequest)?;
+            let url = format!(
+                "{}/v1/users/{}",
+                client.baseurl,
+                encode_path(&user_id.to_string()),
+            );
+            let mut header_map = ::reqwest::header::HeaderMap::with_capacity(2usize);
+            header_map.append(
+                ::reqwest::header::HeaderName::from_static("api-version"),
+                ::reqwest::header::HeaderValue::from_static(super::Client::api_version()),
+            );
+            header_map.append("privy-app-id", privy_app_id.to_string().try_into()?);
+            #[allow(unused_mut)]
+            let mut request = client
+                .client
+                .get(url)
+                .header(
+                    ::reqwest::header::ACCEPT,
+                    ::reqwest::header::HeaderValue::from_static("application/json"),
+                )
+                .headers(header_map)
+                .build()?;
+            let info = OperationInfo {
+                operation_id: "get_user",
             };
             client.pre(&mut request, &info).await?;
             let result = client.exec(request, &info).await;

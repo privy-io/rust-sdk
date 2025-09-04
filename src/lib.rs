@@ -13,7 +13,7 @@ use privy_api::{
         builder::{SolanaSignMessageRpcInput, SolanaSignMessageRpcInputParams},
     },
 };
-use reqwest::header::{ACCEPT, CONTENT_TYPE, HeaderValue};
+use reqwest::header::{CONTENT_TYPE, HeaderValue};
 
 pub(crate) mod errors;
 pub(crate) mod keys;
@@ -78,6 +78,15 @@ impl PrivySigner {
 
             #[expr($.privy_app_id(&self.app_id))]
             #[must_use] pub fn update_wallet(&self) -> privy_api::builder::UpdateWallet<'_>;
+
+            #[expr($.privy_app_id(&self.app_id))]
+            #[must_use] pub fn create_user(&self) -> privy_api::builder::CreateUser<'_>;
+
+            #[expr($.privy_app_id(&self.app_id))]
+            #[must_use] pub fn get_user(&self) -> privy_api::builder::GetUser<'_>;
+
+            #[expr($.privy_app_id(&self.app_id))]
+            #[must_use] pub fn get_users(&self) -> privy_api::builder::GetUsers<'_>;
         }
     }
 
