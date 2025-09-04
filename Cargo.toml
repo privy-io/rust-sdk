@@ -23,6 +23,7 @@ progenitor-client = "0.11.0"
 delegate = "0.13.4"
 p256 = { version = "0.13.2", features = ["pem", "ecdsa"] }
 futures = "0.3.31"
+serde_json_canonicalizer = "0.3.1"
 
 [dev-dependencies]
 anyhow = "1.0"
@@ -33,6 +34,7 @@ test-case = "3.3.1"
 tracing-test = "0.2.5"
 
 [[example]]
+doc-scrape-examples = true
 name = "basic_usage"
 path = "examples/basic_usage.rs"
 
