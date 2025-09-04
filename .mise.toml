@@ -24,6 +24,12 @@ run = [
   "curl https://api.privy.io/v1/openapi.json | jq -s '.[0] * .[1]' openapi.overlay.json - > openapi.json",
 ]
 
+[tasks.generate-openapi]
+description = "Generate the Rust code from the OpenAPI spec"
+run = [
+  "cargo progenitor --input openapi.json --output crates/privy-api --name privy-api --version 0.0.1 --interface builder --include-client=false"
+]
+
 [tasks.gen-p256-key]
 description = "Generate P-256 key pair for Privy wallet owner"
 run = [

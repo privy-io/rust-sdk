@@ -1880,14 +1880,12 @@ version = "0.0.1"
 dependencies = [
  "bytes",
  "futures-core",
- "percent-encoding",
  "progenitor-client",
  "regress",
  "reqwest",
  "serde",
  "serde_json",
  "serde_urlencoded",
- "tracing",
 ]
 
 [[package]]

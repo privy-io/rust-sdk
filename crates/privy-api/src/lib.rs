@@ -1,5 +1,3 @@
-mod progenitor_client;
-
 #[allow(unused_imports)]
 use progenitor_client::{encode_path, ClientHooks, OperationInfo, RequestBuilderExt};
 #[allow(unused_imports)]
