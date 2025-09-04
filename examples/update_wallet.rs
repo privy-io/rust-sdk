@@ -7,7 +7,6 @@ use privy_api::types::{
     builder::{OwnerInput, UpdateWalletBody},
 };
 use privy_rust::{IntoKey, IntoSignature, PrivyApiError, PrivySigner};
-use serde_json::json;
 use tracing_subscriber::EnvFilter;
 
 #[tokio::main]
@@ -37,17 +36,24 @@ async fn main() -> Result<()> {
 
     let signer = PrivySigner::new(app_id.clone(), app_secret, wallet_id.clone(), public_key)?;
 
-    // Create the request body that will be sent
-    let request_body = json!({
-        "owner": {
-            "public_key": include_str!("../public_key.pem")
-        }
-    });
+    // Create the request body that will be sent using the generated privy-api type
+    let update_wallet_body: privy_api::types::UpdateWalletBody = UpdateWalletBody::default()
+        .owner(Some(
+            OwnerInput::default()
+                .subtype_0(PublicKeyOwner {
+                    public_key: include_str!("../public_key.pem").into(),
+                })
+                .try_into()?,
+        ))
+        .try_into()?;
 
-    // Build the canonical request data for signing
+    // Serialize the typed body to a generic `serde_json::Value`
+    let request_body_json = serde_json::to_value(&update_wallet_body)?;
+
+    // Build the canonical request data for signing using the serialized body
     let canonical_data = signer.build_update_wallet_canonical_request(
         &wallet_id,
-        request_body,
+        request_body_json,
         // Some(idempotency_key.clone()),
         None,
     )?;
@@ -71,15 +77,7 @@ async fn main() -> Result<()> {
     let wallet = match signer
         .update_wallet()
         .wallet_id(wallet_id)
-        .body(
-            UpdateWalletBody::default().owner(Some(
-                OwnerInput::default()
-                    .subtype_0(PublicKeyOwner {
-                        public_key: include_str!("../public_key.pem").into(),
-                    })
-                    .try_into()?,
-            )),
-        )
+        .body(update_wallet_body)
         .privy_authorization_signature(privy_authorization_signature)
         .send()
         .await
