@@ -1,5 +1,4 @@
-pub use privy_api::Error as PrivyApiError;
-pub use privy_api::types::error::ConversionError;
+pub use privy_api::{Error as PrivyApiError, types::error::ConversionError};
 pub use solana_sdk::pubkey::ParsePubkeyError;
 use thiserror::Error;
 

@@ -64,9 +64,10 @@ impl<S: Serialize> PrivySignerBuilder<S> {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use serde_json::json;
     use test_case::test_case;
+
+    use super::*;
 
     #[test]
     fn test_canonicalization_matches_docs_example() {

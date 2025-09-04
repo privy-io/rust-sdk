@@ -1,15 +1,16 @@
-use futures::{Stream, StreamExt};
-use p256::{
-    ecdsa::{Signature, SigningKey},
-    elliptic_curve::{SecretKey, generic_array::GenericArray},
-};
-use privy_api::types::builder::AuthenticateBody;
 use std::{
     path::{Path, PathBuf},
     pin::Pin,
     sync::Arc,
     time::{Duration, SystemTime},
 };
+
+use futures::{Stream, StreamExt};
+use p256::{
+    ecdsa::{Signature, SigningKey, signature::hazmat::PrehashSigner},
+    elliptic_curve::{SecretKey, generic_array::GenericArray},
+};
+use privy_api::types::builder::AuthenticateBody;
 use tokio::sync::RwLock;
 
 use crate::{KeyError, SigningError};
@@ -75,7 +76,13 @@ impl AuthorizationContext {
     /// # use std::sync::Arc;
     /// # use futures::stream::StreamExt;
     /// # async fn foo() {
-    /// let privy = PrivySigner::new("app_id".to_string(), "app_secret".to_string(), "wallet_id".to_string(), "public_key".to_string()).unwrap();
+    /// let privy = PrivySigner::new(
+    ///     "app_id".to_string(),
+    ///     "app_secret".to_string(),
+    ///     "wallet_id".to_string(),
+    ///     "public_key".to_string(),
+    /// )
+    /// .unwrap();
     /// let jwt = JwtUser(Arc::new(privy), "test".to_string());
     /// let mut context = AuthorizationContext::new();
     /// context.push(jwt);
@@ -96,7 +103,13 @@ impl AuthorizationContext {
     /// # use std::sync::Arc;
     /// # use futures::stream::TryStreamExt;
     /// # async fn foo() {
-    /// let privy = PrivySigner::new("app_id".to_string(), "app_secret".to_string(), "wallet_id".to_string(), "public_key".to_string()).unwrap();
+    /// let privy = PrivySigner::new(
+    ///     "app_id".to_string(),
+    ///     "app_secret".to_string(),
+    ///     "wallet_id".to_string(),
+    ///     "public_key".to_string(),
+    /// )
+    /// .unwrap();
     /// let jwt = JwtUser(Arc::new(privy), "test".to_string());
     /// let mut context = AuthorizationContext::new();
     /// context.push(jwt);
@@ -126,7 +139,13 @@ impl AuthorizationContext {
     /// # use std::time::Duration;
     /// # use std::sync::Arc;
     /// # async fn foo() {
-    /// let privy = PrivySigner::new("app_id".to_string(), "app_secret".to_string(), "wallet_id".to_string(), "public_key".to_string()).unwrap();
+    /// let privy = PrivySigner::new(
+    ///     "app_id".to_string(),
+    ///     "app_secret".to_string(),
+    ///     "wallet_id".to_string(),
+    ///     "public_key".to_string(),
+    /// )
+    /// .unwrap();
     /// let jwt = JwtUser(Arc::new(privy), "test".to_string());
     /// let key = SecretKey::<p256::NistP256>::from_sec1_pem(&"test".to_string()).unwrap();
     /// let mut context = AuthorizationContext::new();
@@ -182,8 +201,9 @@ pub trait IntoSignature {
     /// ## Example Usage
     ///
     /// ```rust
-    /// use privy_rust::{IntoSignature, PrivateKeyFromFile};
     /// use std::path::PathBuf;
+    ///
+    /// use privy_rust::{IntoSignature, PrivateKeyFromFile};
     ///
     /// # async fn example() -> Result<(), Box<dyn std::error::Error>> {
     /// let key_source = PrivateKeyFromFile(PathBuf::from("private_key.pem"));
@@ -315,17 +335,18 @@ impl IntoSignature for Key {
         );
 
         // First hash the message with SHA256
-        let mut hasher = Sha256::new();
-        hasher.update(message);
-        let hashed = hasher.finalize();
+        let hashed = {
+            let mut sha256 = Sha256::new();
+            sha256.update(message);
+            sha256.finalize()
+        };
 
-        tracing::debug!("SHA256 hash computed: {}", hex::encode(&hashed));
+        tracing::debug!("SHA256 hash computed: {}", hex::encode(hashed));
 
         // Sign the hash using deterministic signing (RFC 6979)
         let signing_key = SigningKey::from(self.clone());
 
         // Use deterministic prehash signing to ensure consistent signatures
-        use p256::ecdsa::signature::hazmat::PrehashSigner;
         let signature: Signature = signing_key
             .sign_prehash(&hashed)
             .map_err(|_| SigningError::Unknown)?;
@@ -363,7 +384,7 @@ impl IntoSignature for KMSService {
 impl IntoKey for PrivateKey {
     async fn get_key(&self) -> Result<Key, KeyError> {
         SecretKey::<p256::NistP256>::from_sec1_pem(&self.0)
-            .map_err(|_| KeyError::InvalidFormat(self.0.to_owned()))
+            .map_err(|_| KeyError::InvalidFormat(self.0.clone()))
     }
 }
 
