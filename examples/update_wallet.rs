@@ -6,7 +6,7 @@ use privy_api::types::{
     PublicKeyOwner,
     builder::{OwnerInput, UpdateWalletBody},
 };
-use privy_rust::{IntoKey, IntoSignature, PrivyApiError, PrivySigner};
+use privy_rust::{IntoKey, IntoSignature, PrivyApiError, PrivyClient};
 use tracing_subscriber::EnvFilter;
 
 #[tokio::main]
@@ -34,9 +34,9 @@ async fn main() -> Result<()> {
         public_key
     );
 
-    let signer = PrivySigner::new(app_id.clone(), app_secret, wallet_id.clone(), public_key)?;
+    let client = PrivyClient::new(app_id.clone(), app_secret)?;
 
-    let wallet = signer.get_wallet().wallet_id(&wallet_id).send().await?;
+    let wallet = client.get_wallet().wallet_id(&wallet_id).send().await?;
 
     tracing::info!("got wallet: {:?}", wallet);
 
@@ -56,7 +56,7 @@ async fn main() -> Result<()> {
         .try_into()?;
 
     // Build the canonical request data for signing using the serialized body
-    let canonical_data = signer.build_update_wallet_canonical_request(
+    let canonical_data = client.build_update_wallet_canonical_request(
         &wallet_id,
         update_wallet_body.clone(),
         // Some(idempotency_key.clone()),
@@ -78,7 +78,7 @@ async fn main() -> Result<()> {
         privy_authorization_signature.len()
     );
 
-    let wallet = match signer
+    let wallet = match client
         .update_wallet()
         .wallet_id(wallet_id)
         .body(update_wallet_body)

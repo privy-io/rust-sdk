@@ -37,9 +37,5 @@ tracing-test = "0.2.5"
 
 [[example]]
 doc-scrape-examples = true
-name = "basic_usage"
-path = "examples/basic_usage.rs"
-
-[[example]]
 name = "get_wallets"
 path = "examples/get_wallets.rs"

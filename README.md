@@ -16,14 +16,11 @@ privy-rust = "0.1.0"
 First, set up your Privy credentials:
 
 ```rust
-use privy_rust::PrivySigner;
+use privy_rust::PrivyClient;
 
-let signer = PrivySigner::new(
+let client = PrivyClient::new(
     env::var("PRIVY_APP_ID").unwrap(),
     env::var("PRIVY_APP_SECRET").unwrap(),
-    env::var("PRIVY_WALLET_ID").unwrap(),
-    String::new(), // Reserved for future use
-    env::var("PRIVY_PUBLIC_KEY").unwrap(),
 )?;
 ```
 
@@ -31,29 +28,30 @@ let signer = PrivySigner::new(
 
 ```rust
 let message = b"Transaction data...";
-let signature = signer.sign(message).await?;
+let signature = client.wallet<Ethereum>("wallet_id").sign_message(message).await?;
 ```
 
 ### Solana Transaction Signing
 
 ```rust
 let transaction_bytes = b"Solana transaction data...";
-let signature = signer.sign_solana(transaction_bytes).await?;
+let wallet = client.wallet<Solana>("wallet_id");
+let signature = wallet.sign_message(transaction_bytes).await?;
 
 // Get the associated Solana public key
-let pubkey = signer.solana_pubkey();
+let pubkey = wallet.pubkey().await?;
 ```
 
 ## API Reference
 
-### `PrivySigner`
+### `PrivyClient`
 
 The main struct for interacting with the Privy API to sign transactions using embedded wallets.
 
 #### Methods
 
 - `new(app_id: String, app_secret: String, wallet_id: String, _unused: String, public_key: String) -> Result<Self, anyhow::Error>`
-  - Creates a new PrivySigner instance with the provided Privy credentials.
+  - Creates a new PrivyClient instance with the provided Privy credentials.
 
 - `async sign(&self, message: &[u8]) -> Result<Vec<u8>, anyhow::Error>`
   - Signs a message using Privy's RPC endpoint and returns the signature as a byte vector.
@@ -71,8 +69,6 @@ Create a `.env` file with your Privy credentials:
 ```env
 PRIVY_APP_ID=your_app_id
 PRIVY_APP_SECRET=your_app_secret
-PRIVY_WALLET_ID=your_wallet_id
-PRIVY_PUBLIC_KEY=your_solana_public_key
 ```
 
 ## Development

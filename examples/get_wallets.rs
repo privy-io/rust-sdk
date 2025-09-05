@@ -1,7 +1,7 @@
 //! Example usage - demonstrates how to use the Privy signer with tk-rs interface
 
 use anyhow::Result;
-use privy_rust::PrivySigner;
+use privy_rust::PrivyClient;
 use tracing_subscriber::EnvFilter;
 
 #[tokio::main]
@@ -29,9 +29,9 @@ async fn main() -> Result<()> {
         public_key
     );
 
-    let signer = PrivySigner::new(app_id, app_secret, wallet_id, public_key)?;
+    let client = PrivyClient::new(app_id, app_secret)?;
 
-    let wallets = signer.get_wallets().limit(5).send().await?;
+    let wallets = client.get_wallets().limit(5).send().await?;
 
     tracing::info!("got wallets: {:?}", wallets);
 

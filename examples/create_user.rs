@@ -3,9 +3,9 @@
 use anyhow::Result;
 use privy_api::types::{
     LinkedAccountInput,
-    builder::{CreateUserBody, LinkedAccountEmailInput},
+    builder::{CreateUserBody, LinkedAccountCustomJwtInput, LinkedAccountEmailInput},
 };
-use privy_rust::PrivySigner;
+use privy_rust::PrivyClient;
 use tracing_subscriber::EnvFilter;
 
 #[tokio::main]
@@ -17,37 +17,50 @@ async fn main() -> Result<()> {
         .init();
 
     // Get credentials from environment
-    let app_id = std::env::var("PRIVY_APP_ID").expect("PRIVY_APP_ID environment variable not set");
-    let app_secret =
-        std::env::var("PRIVY_APP_SECRET").expect("PRIVY_APP_SECRET environment variable not set");
-    let wallet_id =
-        std::env::var("PRIVY_WALLET_ID").expect("PRIVY_WALLET_ID environment variable not set");
-    let public_key =
-        std::env::var("PRIVY_PUBLIC_KEY").expect("PRIVY_PUBLIC_KEY environment variable not set");
+    let app_id =
+        std::env::var("STAGING_APP_ID").expect("STAGING_APP_ID environment variable not set");
+    let app_secret = std::env::var("STAGING_APP_SECRET")
+        .expect("STAGING_APP_SECRET environment variable not set");
 
     tracing::info!(
-        "initializing privy with app_id: {}, app_secret: {}, wallet_id: {}, public_key: {}",
+        "initializing privy with app_id: {}, app_secret: {}",
         app_id,
         app_secret,
-        wallet_id,
-        public_key
     );
 
-    let signer = PrivySigner::new(app_id, app_secret, wallet_id, public_key)?;
+    let client = PrivyClient::new_with_url(app_id, app_secret, "https://api.staging.privy.io")?;
 
-    let wallet = signer
+    let wallet = match client
         .create_user()
-        .body(
-            CreateUserBody::default().linked_accounts(vec![LinkedAccountInput::EmailInput(
-                LinkedAccountEmailInput::default()
-                    .address("alex@arlyon.dev")
-                    .type_("email")
-                    .try_into()
-                    .unwrap(),
-            )]),
-        )
+        .body(CreateUserBody::default().linked_accounts(vec![
+                LinkedAccountInput::EmailInput(
+                    LinkedAccountEmailInput::default()
+                        .address("alex@arlyon.dev")
+                        .type_("email")
+                        .try_into()
+                        .unwrap(),
+                ),
+                LinkedAccountInput::CustomJwtInput(
+                    LinkedAccountCustomJwtInput::default()
+                        .custom_user_id("alex@arlyon.dev")
+                        .type_("custom_auth")
+                        .try_into()
+                        .unwrap(),
+                ),
+            ]))
         .send()
-        .await?;
+        .await
+    {
+        Ok(r) => Ok(r.into_inner()),
+        Err(privy_api::Error::UnexpectedResponse(response)) => {
+            tracing::error!("unexpected response {:?}", response.text().await);
+            Err(privy_api::Error::Custom("whoops".to_string()))
+        }
+        Err(e) => {
+            tracing::error!("error {:?}", e);
+            Err(e)
+        }
+    }?;
 
     tracing::info!("got new user: {:?}", wallet);
 

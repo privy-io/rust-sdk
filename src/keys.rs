@@ -42,14 +42,14 @@ impl AuthorizationContext {
     /// add a `PrivateKey` source which you can set yourself.
     ///
     /// ```rust
-    /// # use privy_rust::{AuthorizationContext, JwtUser, IntoSignature, PrivateKey, PrivySigner};
+    /// # use privy_rust::{AuthorizationContext, JwtUser, IntoSignature, PrivateKey, PrivyClient};
     /// # use p256::ecdsa::signature::SignerMut;
     /// # use p256::ecdsa::Signature;
     /// # use p256::elliptic_curve::SecretKey;
     /// # use std::time::Duration;
     /// # use std::sync::Arc;
     /// # async fn foo() {
-    /// let privy = PrivySigner::new("app_id".to_string(), "app_secret".to_string(), "wallet_id".to_string(), "public_key".to_string()).unwrap();
+    /// let privy = PrivyClient::new("app_id".to_string(), "app_secret".to_string()).unwrap();
     /// let jwt = JwtUser(Arc::new(privy), "test".to_string());
     /// let key = PrivateKey("test".to_string());
     /// let mut context = AuthorizationContext::new();
@@ -68,7 +68,7 @@ impl AuthorizationContext {
     /// according to the policy set in `AuthorizationContext`.
     ///
     /// ```rust
-    /// # use privy_rust::{AuthorizationContext, JwtUser, IntoSignature, PrivySigner};
+    /// # use privy_rust::{AuthorizationContext, JwtUser, IntoSignature, PrivyClient};
     /// # use p256::ecdsa::signature::SignerMut;
     /// # use p256::ecdsa::Signature;
     /// # use p256::elliptic_curve::SecretKey;
@@ -76,13 +76,7 @@ impl AuthorizationContext {
     /// # use std::sync::Arc;
     /// # use futures::stream::StreamExt;
     /// # async fn foo() {
-    /// let privy = PrivySigner::new(
-    ///     "app_id".to_string(),
-    ///     "app_secret".to_string(),
-    ///     "wallet_id".to_string(),
-    ///     "public_key".to_string(),
-    /// )
-    /// .unwrap();
+    /// let privy = PrivyClient::new("app_id".to_string(), "app_secret".to_string()).unwrap();
     /// let jwt = JwtUser(Arc::new(privy), "test".to_string());
     /// let mut context = AuthorizationContext::new();
     /// context.push(jwt);
@@ -95,7 +89,7 @@ impl AuthorizationContext {
     /// failing on the first error.
     ///
     /// ```rust
-    /// # use privy_rust::{AuthorizationContext, JwtUser, IntoSignature, PrivySigner};
+    /// # use privy_rust::{AuthorizationContext, JwtUser, IntoSignature, PrivyClient};
     /// # use p256::ecdsa::signature::SignerMut;
     /// # use p256::ecdsa::Signature;
     /// # use p256::elliptic_curve::SecretKey;
@@ -103,13 +97,7 @@ impl AuthorizationContext {
     /// # use std::sync::Arc;
     /// # use futures::stream::TryStreamExt;
     /// # async fn foo() {
-    /// let privy = PrivySigner::new(
-    ///     "app_id".to_string(),
-    ///     "app_secret".to_string(),
-    ///     "wallet_id".to_string(),
-    ///     "public_key".to_string(),
-    /// )
-    /// .unwrap();
+    /// let privy = PrivyClient::new("app_id".to_string(), "app_secret".to_string()).unwrap();
     /// let jwt = JwtUser(Arc::new(privy), "test".to_string());
     /// let mut context = AuthorizationContext::new();
     /// context.push(jwt);
@@ -132,20 +120,14 @@ impl AuthorizationContext {
     /// valid.
     ///
     /// ```
-    /// # use privy_rust::{AuthorizationContext, JwtUser, IntoSignature, PrivySigner};
+    /// # use privy_rust::{AuthorizationContext, JwtUser, IntoSignature, PrivyClient};
     /// # use p256::ecdsa::signature::SignerMut;
     /// # use p256::ecdsa::Signature;
     /// # use p256::elliptic_curve::SecretKey;
     /// # use std::time::Duration;
     /// # use std::sync::Arc;
     /// # async fn foo() {
-    /// let privy = PrivySigner::new(
-    ///     "app_id".to_string(),
-    ///     "app_secret".to_string(),
-    ///     "wallet_id".to_string(),
-    ///     "public_key".to_string(),
-    /// )
-    /// .unwrap();
+    /// let privy = PrivyClient::new("app_id".to_string(), "app_secret".to_string()).unwrap();
     /// let jwt = JwtUser(Arc::new(privy), "test".to_string());
     /// let key = SecretKey::<p256::NistP256>::from_sec1_pem(&"test".to_string()).unwrap();
     /// let mut context = AuthorizationContext::new();
@@ -283,7 +265,7 @@ impl<T: IntoKey + Sync> IntoKey for TimeCachingKey<T> {
     }
 }
 
-pub struct JwtUser(pub Arc<crate::PrivySigner>, pub String);
+pub struct JwtUser(pub Arc<crate::PrivyClient>, pub String);
 
 impl IntoKey for JwtUser {
     async fn get_key(&self) -> Result<Key, KeyError> {
@@ -291,6 +273,7 @@ impl IntoKey for JwtUser {
 
         let auth = match self
             .0
+            .client
             .authenticate()
             .body(AuthenticateBody::default().user_jwt(self.1.clone()))
             .send()
@@ -413,7 +396,7 @@ mod tests {
     use tracing_test::traced_test;
 
     use crate::{
-        AuthorizationContext, PrivySigner,
+        AuthorizationContext, PrivyClient,
         keys::{IntoKey, IntoSignature, JwtUser, KMSService, PrivateKey, TimeCachingKey},
     };
 
@@ -450,11 +433,9 @@ mod tests {
     #[traced_test]
     async fn authorization_context() {
         let client = Arc::new(
-            PrivySigner::new(
+            PrivyClient::new(
                 env!("PRIVY_APP_ID").to_string(),
                 env!("PRIVY_APP_SECRET").to_string(),
-                env!("PRIVY_WALLET_ID").to_string(),
-                env!("PRIVY_PUBLIC_KEY").to_string(),
             )
             .unwrap(),
         );

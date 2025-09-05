@@ -2,7 +2,7 @@
 
 use anyhow::Result;
 use privy_api::types::{WalletChainType, builder::CreateWalletBody};
-use privy_rust::PrivySigner;
+use privy_rust::PrivyClient;
 use tracing_subscriber::EnvFilter;
 
 #[tokio::main]
@@ -30,9 +30,9 @@ async fn main() -> Result<()> {
         public_key
     );
 
-    let signer = PrivySigner::new(app_id, app_secret, wallet_id, public_key)?;
+    let client = PrivyClient::new(app_id, app_secret)?;
 
-    let wallet = signer
+    let wallet = client
         .create_wallet()
         .body(CreateWalletBody::default().chain_type(WalletChainType::Solana))
         .send()

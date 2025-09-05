@@ -32,6 +32,8 @@ pub enum PrivyError {
 
     #[error("Error while accessing API: {0}")]
     Api(#[from] PrivyApiError),
+    #[error("Unknown error")]
+    Unknown,
 }
 
 #[derive(Error, Debug)]
