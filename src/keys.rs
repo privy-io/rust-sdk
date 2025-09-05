@@ -299,6 +299,36 @@ impl<T: IntoKey + Sync> IntoKey for TimeCachingKey<T> {
     }
 }
 
+/// A wrapper for a closure that implements `IntoSignature`.
+/// This uses the newtype pattern to avoid conflicting blanket impls.
+pub struct FnSigner<F>(pub F);
+
+/// A wrapper for a closure that implements `IntoKey`.
+/// This uses the newtype pattern to avoid conflicting blanket impls.
+pub struct FnKey<F>(pub F);
+
+/// Blanket implementation for the FnSigner wrapper.
+impl<F, Fut> IntoSignature for FnSigner<F>
+where
+    F: Fn(&[u8]) -> Fut,
+    Fut: Future<Output = Result<Signature, SigningError>> + Send,
+{
+    fn sign(&self, message: &[u8]) -> impl Future<Output = Result<Signature, SigningError>> + Send {
+        (self.0)(message)
+    }
+}
+
+/// Blanket implementation for the FnKey wrapper.
+impl<F, Fut> IntoKey for FnKey<F>
+where
+    F: Fn() -> Fut,
+    Fut: Future<Output = Result<Key, KeyError>> + Send,
+{
+    fn get_key(&self) -> impl Future<Output = Result<Key, KeyError>> + Send {
+        (self.0)()
+    }
+}
+
 /// A key that is sourced from the user identified by the provided JWT.
 ///
 /// This is used in JWT-based authentication. When attempting to sign,
