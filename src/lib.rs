@@ -10,11 +10,13 @@ pub mod client;
 
 pub(crate) mod errors;
 pub(crate) mod keys;
+pub(crate) mod privy_hpke;
 pub(crate) mod types;
 
 pub use client::PrivyClient;
 pub use errors::*;
 pub use keys::*;
+pub use privy_hpke::PrivyHpke;
 pub use types::*;
 
 pub(crate) fn get_auth_header(app_id: &str, app_secret: &str) -> String {

@@ -44,8 +44,16 @@ pub enum KeyError {
     Unknown,
     #[error("IO error: {0}")]
     Io(#[from] std::io::Error),
-    #[error("Invalid key format")]
+    #[error("Invalid key format: {0}")]
     InvalidFormat(String),
+    #[error("Base64 decoding failed: {0}")]
+    Base64(#[from] base64::DecodeError),
+    #[error("HPKE decryption failed: {0}")]
+    HpkeDecryption(String),
+    #[error("PKCS#8 parsing failed")]
+    Pkcs8Parsing,
+    #[error("Unsupported encryption type")]
+    UnsupportedEncryption,
 }
 
 #[derive(Error, Debug)]

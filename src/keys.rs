@@ -13,6 +13,7 @@ use p256::{
 use privy_api::types::builder::AuthenticateBody;
 use tokio::sync::RwLock;
 
+use crate::privy_hpke::PrivyHpke;
 use crate::{KeyError, SigningError};
 
 const EXPIRY_BUFFER: Duration = Duration::from_secs(60);
@@ -254,7 +255,7 @@ impl<T: IntoSignature + 'static> IntoSignatureBoxed for T {
 ///
 /// # Usage
 /// ```
-/// # use privy_rust::{IntoKey, JwtUser, TimeCachingKey};
+/// # use privy_rust::{IntoKey, JwtUser, TimeCachingKey, PrivyClient};
 /// # use std::time::Duration;
 /// # use std::sync::Arc;
 /// # use p256::ecdsa::signature::SignerMut;
@@ -310,42 +311,74 @@ pub struct JwtUser(pub Arc<crate::PrivyClient>, pub String);
 
 impl IntoKey for JwtUser {
     async fn get_key(&self) -> Result<Key, KeyError> {
-        tracing::debug!("getting key from jwt {}", self.1);
+        tracing::debug!("Starting HPKE JWT exchange for user JWT: {}", self.1);
 
-        let auth = match self
-            .0
-            .client
-            .authenticate()
-            .body(AuthenticateBody::default().user_jwt(self.1.clone()))
-            .send()
-            .await
-        {
+        // Get the HPKE manager and format the public key for the API request
+        let hpke_manager = PrivyHpke::new();
+        let public_key_b64 = hpke_manager.public_key().map_err(|e| {
+            tracing::error!("Failed to format HPKE public key: {:?}", e);
+            KeyError::Unknown
+        })?;
+
+        tracing::debug!(
+            "Generated HPKE public key for authentication request {}",
+            public_key_b64
+        );
+
+        // Build the authentication request with encryption parameters
+        let body = AuthenticateBody::default()
+            .user_jwt(self.1.clone())
+            .encryption_type(privy_api::types::AuthenticateBodyEncryptionType::Hpke)
+            .recipient_public_key(public_key_b64);
+
+        // Send the authentication request
+        let auth = match self.0.authenticate().body(body).send().await {
             Ok(r) => r.into_inner(),
             Err(privy_api::Error::UnexpectedResponse(response)) => {
-                tracing::error!("unexpected response {:?}", response.text().await);
+                tracing::error!("Unexpected API response: {:?}", response.text().await);
                 return Err(KeyError::Unknown);
             }
             Err(e) => {
-                tracing::error!("error {:?}", e);
+                tracing::error!("API request failed: {:?}", e);
                 return Err(KeyError::Unknown);
             }
         };
 
+        // Process the response based on encryption type
         let key = match auth {
+            privy_api::types::AuthenticateResponse::WithEncryption {
+                encrypted_authorization_key,
+                ..
+            } => {
+                tracing::debug!("Received encrypted authorization key, starting HPKE decryption");
+
+                hpke_manager
+                    .decrypt(
+                        &encrypted_authorization_key.encapsulated_key,
+                        &encrypted_authorization_key.ciphertext,
+                    )
+                    .map_err(|e| {
+                        tracing::error!("HPKE decryption failed: {:?}", e);
+                        KeyError::HpkeDecryption(format!("{e:?}"))
+                    })?
+            }
             privy_api::types::AuthenticateResponse::WithoutEncryption {
                 authorization_key, ..
-            } => authorization_key,
-            privy_api::types::AuthenticateResponse::WithEncryption { .. } => {
-                todo!()
+            } => {
+                tracing::warn!("Received unencrypted authorization key (fallback mode)");
+
+                // Fallback to the old method for backwards compatibility
+                Key::from_bytes(GenericArray::from_slice(&authorization_key.into_bytes())).map_err(
+                    |e| {
+                        tracing::error!("Failed to parse raw authorization key: {:?}", e);
+                        KeyError::InvalidFormat("raw key bytes".to_string())
+                    },
+                )?
             }
         };
 
-        tracing::info!("got key {:?}", key);
-
-        Key::from_bytes(GenericArray::from_slice(&key.into_bytes())).map_err(|_| {
-            tracing::error!("invalid key");
-            KeyError::Unknown
-        })
+        tracing::info!("Successfully obtained and parsed authorization key");
+        Ok(key)
     }
 }
 
