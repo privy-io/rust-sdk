@@ -1,4 +1,48 @@
 {
+  "security": [
+    {
+      "AppId": ["read", "write"]
+    }
+  ],
+	"components": {
+	  "securitySchemes": {
+			"AppId": {
+				"type": "apiKey",
+				"in": "header",
+				"name": "privy-app-id"
+			}
+		},
+		"schemas": {
+			"WalletAdditionalSigner": {
+				"type": "object",
+				"properties": {
+					"signer_id": {
+						"type": "string"
+					},
+					"override_policy_ids": {
+						"type": "array",
+						"items": {
+							"type": "string",
+							"description": "The array of policy IDs that will be applied to wallet requests. If specified, this will override the base policy IDs set on the wallet."
+						}
+					}
+				},
+				"required": ["signer_id", "override_policy_ids"],
+				"items": null
+			},
+			"Wallet": {
+				"properties": {
+					"additional_signers": {
+					  "$ref": null,
+						"type": "array",
+						"items": {
+							"$ref": "#/components/schemas/WalletAdditionalSigner"
+						}
+					}
+				}
+			}
+		}
+	},
 	"paths": {
 		"/v1/users": {
 			"post": {
@@ -28,7 +72,20 @@
 		},
 		"/v1/wallets": {
 			"post": {
-				"operationId": "createWallet"
+				"operationId": "createWallet",
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": null,
+								"type": "array",
+								"items": {
+									"$ref": "#/components/schemas/WalletAdditionalSigner"
+								}
+							}
+						}
+					}
+				}
 			},
 			"get": {
 				"operationId": "getWallets"

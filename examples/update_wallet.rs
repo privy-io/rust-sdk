@@ -5,13 +5,9 @@ use std::sync::Arc;
 use anyhow::Result;
 use base64::{Engine, engine::general_purpose::STANDARD};
 use futures::TryStreamExt;
-use privy_api::types::{
-    PublicKeyOwner, UserOwner,
-    builder::{OwnerInput, UpdateWalletBody},
-};
-use privy_rust::{
-    AuthorizationContext, IntoKey, JwtUser, PrivateKeyFromFile, PrivyApiError, PrivyClient,
-};
+use httpclient::ProtocolError;
+use privy_libninja::model::{OwnerInput, PublicKeyOwner};
+use privy_rust::{AuthorizationContext, IntoKey, JwtUser, PrivateKeyFromFile, PrivyClient};
 use tracing_subscriber::EnvFilter;
 
 #[tokio::main]
@@ -46,29 +42,23 @@ async fn main() -> Result<()> {
     ctx.push(PrivateKeyFromFile("private_key.pem".into()));
     ctx.push(JwtUser(client.clone(), "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhbGV4QGFybHlvbi5kZXYiLCJpYXQiOjEwMDAwMDAwMDAwMH0.IpNgavH95CFZPjkzQW4eyxMIfJ-O_5cIaDyu_6KRXffykjYDRwxTgFJuYq0F6d8wSXf4de-vzfBRWSKMISM3rJdlhximYINGJB14mJFCD87VMLFbTpHIXcv7hc1AAYMPGhOsRkYfYXuvVopKszMvhupmQYJ1npSvKWNeBniIyOHYv4xebZD8L0RVlPvuEKTXTu-CDfs2rMwvD9g_wiBznS3uMF3v_KPaY6x0sx9zeCSxAH9zvhMMtct_Ad9kuoUncGpRzNhEk6JlVccN2Leb1JzbldxSywyS2AApD05u-GFAgFDN3P39V3qgRTGDuuUfUvKQ9S4rbu5El9Qq1CJTeA".to_string()));
 
-    let wallet = client.get_wallet().wallet_id(&wallet_id).send().await?;
+    let wallet = client.get_wallet(&wallet_id).await.unwrap();
 
     tracing::info!("got wallet: {:?}", wallet);
 
-    // Create the request body that will be sent using the generated privy-api type
-    let update_wallet_body: privy_api::types::UpdateWalletBody = UpdateWalletBody::default()
-        .owner(Some(
-            OwnerInput::default()
-                .subtype_0(PublicKeyOwner {
-                    public_key: public_key.to_string(),
-                })
-                // OwnerInput::default()
-                //     .subtype_1(UserOwner {
-                //         user_id: "did:privy:cmf5wqe2l0005k10blt7x5dq2".to_string(),
-                //     })
-                .try_into()?,
-        ))
-        .try_into()?;
+    let request = client.update_wallet(&wallet_id).owner(
+        OwnerInput::PublicKeyOwner(PublicKeyOwner {
+            public_key: public_key.to_string(),
+        }),
+        // OwnerInput::UserOwner(UserOwner {
+        //     user_id: "did:privy:cmf5wqe2l0005k10blt7x5dq2".to_string(),
+        // }),
+    );
 
     // Build the canonical request data for signing using the serialized body
     let canonical_data = client.build_update_wallet_canonical_request(
         &wallet_id,
-        update_wallet_body.clone(),
+        &request.params,
         // Some(idempotency_key.clone()),
         None,
     )?;
@@ -86,20 +76,8 @@ async fn main() -> Result<()> {
         .await?
         .join(",");
 
-    let wallet = match client
-        .update_wallet()
-        .wallet_id(wallet_id)
-        .body(update_wallet_body)
-        .privy_authorization_signature(signature)
-        .send()
-        .await
-    {
+    let wallet = match request.privy_authorization_signature(&signature).await {
         Ok(wallet) => Ok(wallet),
-        Err(PrivyApiError::UnexpectedResponse(r)) => {
-            let text = r.text().await.unwrap_or_default();
-            tracing::warn!("unexpected response: {:?}", text);
-            Err(PrivyApiError::Custom("unexpected response".into()))
-        }
         Err(e) => Err(e),
     }?;
 

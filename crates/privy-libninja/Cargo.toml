@@ -1,0 +1,14 @@
+[package]
+name = "privy-libninja"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+base64 = "0.22.1"
+futures = "0.3.31"
+httpclient = "0.26.1"
+serde = { version = "1.0.219", features = ["derive"] }
+serde_json = "1.0.143"
+
+[dev-dependencies]
+tokio = "1.47.1"

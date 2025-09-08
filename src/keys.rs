@@ -10,7 +10,7 @@ use p256::{
     ecdsa::{Signature, SigningKey, signature::hazmat::PrehashSigner},
     elliptic_curve::{SecretKey, generic_array::GenericArray},
 };
-use privy_api::types::builder::AuthenticateBody;
+use privy_libninja::model::{AuthenticateResponse, WithEncryption};
 use tokio::sync::RwLock;
 
 use crate::privy_hpke::PrivyHpke;
@@ -324,56 +324,49 @@ impl IntoKey for JwtUser {
             "Generated HPKE public key for authentication request {}",
             public_key_b64
         );
-
-        // Build the authentication request with encryption parameters
-        let body = AuthenticateBody::default()
-            .user_jwt(self.1.clone())
-            .encryption_type(privy_api::types::AuthenticateBodyEncryptionType::Hpke)
-            .recipient_public_key(public_key_b64);
-
         // Send the authentication request
-        let auth = match self.0.authenticate().body(body).send().await {
-            Ok(r) => r.into_inner(),
-            Err(privy_api::Error::UnexpectedResponse(response)) => {
-                tracing::error!("Unexpected API response: {:?}", response.text().await);
-                return Err(KeyError::Unknown);
-            }
+        let auth = match self
+            .0
+            .authenticate(&self.1)
+            .encryption_type("HPKE")
+            .recipient_public_key(&public_key_b64)
+            .await
+        {
+            Ok(r) => r,
             Err(e) => {
-                tracing::error!("API request failed: {:?}", e);
-                return Err(KeyError::Unknown);
+                tracing::error!("Failed to authenticate with Privy: {:?}", e);
+                panic!();
             }
         };
 
         // Process the response based on encryption type
         let key = match auth {
-            privy_api::types::AuthenticateResponse::WithEncryption {
+            AuthenticateResponse::WithEncryption(WithEncryption {
                 encrypted_authorization_key,
                 ..
-            } => {
+            }) => {
                 tracing::debug!("Received encrypted authorization key, starting HPKE decryption");
 
+                let encapsulated_key = encrypted_authorization_key
+                    .get("encapsulated_key")
+                    .unwrap()
+                    .as_str()
+                    .unwrap();
+                let ciphertext = encrypted_authorization_key
+                    .get("ciphertext")
+                    .unwrap()
+                    .as_str()
+                    .unwrap();
+
                 hpke_manager
-                    .decrypt(
-                        &encrypted_authorization_key.encapsulated_key,
-                        &encrypted_authorization_key.ciphertext,
-                    )
+                    .decrypt(encapsulated_key, ciphertext)
                     .map_err(|e| {
                         tracing::error!("HPKE decryption failed: {:?}", e);
                         KeyError::HpkeDecryption(format!("{e:?}"))
                     })?
             }
-            privy_api::types::AuthenticateResponse::WithoutEncryption {
-                authorization_key, ..
-            } => {
-                tracing::warn!("Received unencrypted authorization key (fallback mode)");
-
-                // Fallback to the old method for backwards compatibility
-                Key::from_bytes(GenericArray::from_slice(&authorization_key.into_bytes())).map_err(
-                    |e| {
-                        tracing::error!("Failed to parse raw authorization key: {:?}", e);
-                        KeyError::InvalidFormat("raw key bytes".to_string())
-                    },
-                )?
+            _ => {
+                panic!("Unexpected response type");
             }
         };
 
