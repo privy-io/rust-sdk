@@ -159,3 +159,53 @@ impl PrivyClient {
         self.build_canonical_request(Method::PATCH, url, Some(body), idempotency_key)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use privy_api::types::{
+        PublicKeyOwner,
+        builder::{OwnerInput, UpdateWalletBody},
+    };
+
+    use crate::{IntoKey, PrivateKeyFromFile};
+
+    use super::*;
+
+    #[tokio::test]
+    async fn test_build_canonical_request() {
+        let client =
+            PrivyClient::new("cmf418pa801bxl40b5rcgjvd9".into(), "app_secret".into()).unwrap();
+        let wallet_id = "o5zuf7fbygwze9l9gaxyc0bm";
+
+        let key = PrivateKeyFromFile("private_key.pem".into());
+        let public_key = key.get_key().await.unwrap().public_key();
+
+        // Create the request body that will be sent using the generated privy-api type
+        let update_wallet_body: privy_api::types::UpdateWalletBody = UpdateWalletBody::default()
+            .owner(Some(
+                OwnerInput::default()
+                    .subtype_0(PublicKeyOwner {
+                        public_key: public_key.to_string(),
+                    })
+                    .try_into()
+                    .unwrap(),
+            ))
+            .try_into()
+            .unwrap();
+
+        // Build the canonical request data for signing using the serialized body
+        let canonical_data = client
+            .build_update_wallet_canonical_request(
+                wallet_id,
+                update_wallet_body.clone(),
+                // Some(idempotency_key.clone()),
+                None,
+            )
+            .unwrap();
+
+        assert_eq!(
+            canonical_data,
+            "{\"body\":{\"owner\":{\"public_key\":\"-----BEGIN PUBLIC KEY-----\\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAESYrvEwooR33jt/8Up0lWdDNAcxmg\\nNZrCX23OThCPA+WxDx+dHYrjRlfPmHX0/aMTopp1PdKAtlQjRJDHSNd8XA==\\n-----END PUBLIC KEY-----\\n\"}},\"headers\":{\"privy-app-id\":\"cmf418pa801bxl40b5rcgjvd9\"},\"method\":\"PATCH\",\"url\":\"https://api.privy.io/v1/wallets/o5zuf7fbygwze9l9gaxyc0bm\",\"version\":1}"
+        );
+    }
+}
