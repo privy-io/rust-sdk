@@ -1,7 +1,7 @@
 use base64::Engine;
-use hpke::Deserializable;
 use hpke::{
-    Kem, OpModeR, Serializable, aead::ChaCha20Poly1305, kdf::HkdfSha256, kem::DhP256HkdfSha256,
+    Deserializable, Kem, OpModeR, Serializable, aead::ChaCha20Poly1305, kdf::HkdfSha256,
+    kem::DhP256HkdfSha256,
 };
 use p256::{PublicKey, elliptic_curve::SecretKey, pkcs8::DecodePrivateKey};
 use spki::EncodePublicKey;
@@ -36,8 +36,7 @@ use crate::KeyError;
 /// # Usage Pattern
 ///
 /// ```rust,no_run
-/// use privy_rust::PrivyHpke;
-/// use privy_api::types::WithEncryptionEncryptedAuthorizationKey;
+/// use privy_rust::{PrivyHpke, generated::types::WithEncryptionEncryptedAuthorizationKey};
 ///
 /// # async fn get_encrypted_authorization_key() -> WithEncryptionEncryptedAuthorizationKey {
 /// #     todo!()
@@ -56,7 +55,7 @@ use crate::KeyError;
 /// // 4. Decrypt the authorization key
 /// let auth_key = hpke.decrypt(
 ///     &encrypted_authorization_key.encapsulated_key,
-///     &encrypted_authorization_key.ciphertext
+///     &encrypted_authorization_key.ciphertext,
 /// )?;
 ///
 /// // 5. Use auth_key for wallet signing operations
@@ -187,8 +186,7 @@ impl PrivyHpke {
     /// # Example Usage
     ///
     /// ```rust,no_run
-    /// use privy_rust::PrivyHpke;
-    /// use privy_api::types::WithEncryptionEncryptedAuthorizationKey;
+    /// use privy_rust::{PrivyHpke, generated::types::WithEncryptionEncryptedAuthorizationKey};
     ///
     /// # async fn example(encrypted_authorization_key: WithEncryptionEncryptedAuthorizationKey) -> Result<(), Box<dyn std::error::Error>> {
     /// let hpke = PrivyHpke::new();
@@ -274,9 +272,10 @@ impl Default for PrivyHpke {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use spki::DecodePublicKey;
     use test_case::test_case;
+
+    use super::*;
 
     #[test_case(0, "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAECT+o7IjvJ+4MjHTU51k5HLoXT9WKzjJKbqkGA3bcvx+ESEbM/wtxRDsptOMcsP+Vn60KdYOjIyLAU/P96CB2lA==" ; "zero")]
     #[test_case(1, "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE5C1LvDxhkHINqB7lRM47O+sUIKTs/2YiPoNOQaRH2tnkhUjRC1x+g9yo0UZr/HzdJKNMAkSXRovCzovSr0jL3A==" ; "one")]

@@ -1,7 +1,7 @@
 use std::{
     path::{Path, PathBuf},
     pin::Pin,
-    sync::Arc,
+    sync::{Arc, Mutex},
     time::{Duration, SystemTime},
 };
 
@@ -10,11 +10,9 @@ use p256::{
     ecdsa::{Signature, SigningKey, signature::hazmat::PrehashSigner},
     elliptic_curve::{SecretKey, generic_array::GenericArray},
 };
-use privy_api::types::builder::AuthenticateBody;
 use tokio::sync::RwLock;
 
-use crate::privy_hpke::PrivyHpke;
-use crate::{KeyError, SigningError};
+use crate::{KeyError, SigningError, generated::types::AuthenticateBody, privy_hpke::PrivyHpke};
 
 const EXPIRY_BUFFER: Duration = Duration::from_secs(60);
 const SIGNATURE_RESOLUTION_CONCURRENCY: usize = 10;
@@ -30,7 +28,20 @@ const SIGNATURE_RESOLUTION_CONCURRENCY: usize = 10;
 ///
 /// For usage information, see the `AuthorizationContext::sign` and
 /// `AuthorizationContext::push` methods.
-pub struct AuthorizationContext(Vec<Box<dyn IntoSignatureBoxed>>, usize);
+///
+/// This struct is thread-safe, and can be cloned. It synchronizes access to the
+/// underlying store internally.
+#[derive(Clone)]
+pub struct AuthorizationContext(
+    Arc<Mutex<Vec<Arc<dyn IntoSignatureBoxed + Send + Sync>>>>,
+    usize,
+);
+
+impl std::fmt::Debug for AuthorizationContext {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("AuthorizationContext").finish()
+    }
+}
 
 impl Default for AuthorizationContext {
     fn default() -> Self {
@@ -42,7 +53,7 @@ impl AuthorizationContext {
     /// Create a new `AuthorizationContext` with the default concurrency.
     #[must_use]
     pub fn new() -> Self {
-        Self(Vec::default(), SIGNATURE_RESOLUTION_CONCURRENCY)
+        Self(Default::default(), SIGNATURE_RESOLUTION_CONCURRENCY)
     }
 
     /// Push a new credential source into the context. This supports
@@ -62,16 +73,16 @@ impl AuthorizationContext {
     /// # use std::time::Duration;
     /// # use std::sync::Arc;
     /// # async fn foo() {
-    /// let privy = PrivyClient::new("app_id".to_string(), "app_secret".to_string()).unwrap();
-    /// let jwt = JwtUser(Arc::new(privy), "test".to_string());
+    /// let context = AuthorizationContext::new();
+    /// let privy = PrivyClient::new("app_id".to_string(), "app_secret".to_string(), context.clone()).unwrap();
+    /// let jwt = JwtUser(privy, "test".to_string());
     /// let key = PrivateKey("test".to_string());
-    /// let mut context = AuthorizationContext::new();
     /// context.push(jwt);
     /// context.push(key);
     /// # }
     /// ```
-    pub fn push<T: IntoSignature + 'static>(&mut self, key: T) {
-        self.0.push(Box::new(key));
+    pub fn push<T: IntoSignature + 'static + Send + Sync>(&self, key: T) {
+        self.0.lock().expect("lock poisoned").push(Arc::new(key));
     }
 
     /// Sign a message with all the keys in the context.
@@ -89,9 +100,14 @@ impl AuthorizationContext {
     /// # use std::sync::Arc;
     /// # use futures::stream::StreamExt;
     /// # async fn foo() {
-    /// let privy = PrivyClient::new("app_id".to_string(), "app_secret".to_string()).unwrap();
-    /// let jwt = JwtUser(Arc::new(privy), "test".to_string());
-    /// let mut context = AuthorizationContext::new();
+    /// let context = AuthorizationContext::new();
+    /// let privy = PrivyClient::new(
+    ///     "app_id".to_string(),
+    ///     "app_secret".to_string(),
+    ///     context.clone(),
+    /// )
+    /// .unwrap();
+    /// let jwt = JwtUser(privy, "test".to_string());
     /// context.push(jwt);
     /// let key = context.sign(&[0, 1, 2, 3]).collect::<Vec<_>>().await;
     /// assert_eq!(key.len(), 1);
@@ -110,9 +126,14 @@ impl AuthorizationContext {
     /// # use std::sync::Arc;
     /// # use futures::stream::TryStreamExt;
     /// # async fn foo() {
-    /// let privy = PrivyClient::new("app_id".to_string(), "app_secret".to_string()).unwrap();
-    /// let jwt = JwtUser(Arc::new(privy), "test".to_string());
     /// let mut context = AuthorizationContext::new();
+    /// let privy = PrivyClient::new(
+    ///     "app_id".to_string(),
+    ///     "app_secret".to_string(),
+    ///     context.clone(),
+    /// )
+    /// .unwrap();
+    /// let jwt = JwtUser(privy, "test".to_string());
     /// context.push(jwt);
     /// let key = context.sign(&[0, 1, 2, 3]).try_collect::<Vec<_>>().await;
     /// assert!(key.map(|v| v.len() == 1).unwrap_or(false));
@@ -122,8 +143,12 @@ impl AuthorizationContext {
         &'a self,
         message: &'a [u8],
     ) -> impl Stream<Item = Result<Signature, SigningError>> + 'a {
-        futures::stream::iter(self.0.iter())
-            .map(|key| key.sign_boxed(message))
+        let keys = self.0.lock().expect("lock poisoned").clone();
+        futures::stream::iter(keys)
+            .map(move |key| {
+                let key = key.clone();
+                async move { key.sign_boxed(message).await }
+            })
             .buffer_unordered(self.1)
     }
 
@@ -140,10 +165,15 @@ impl AuthorizationContext {
     /// # use std::time::Duration;
     /// # use std::sync::Arc;
     /// # async fn foo() {
-    /// let privy = PrivyClient::new("app_id".to_string(), "app_secret".to_string()).unwrap();
-    /// let jwt = JwtUser(Arc::new(privy), "test".to_string());
-    /// let key = SecretKey::<p256::NistP256>::from_sec1_pem(&"test".to_string()).unwrap();
     /// let mut context = AuthorizationContext::new();
+    /// let privy = PrivyClient::new(
+    ///     "app_id".to_string(),
+    ///     "app_secret".to_string(),
+    ///     context.clone(),
+    /// )
+    /// .unwrap();
+    /// let jwt = JwtUser(privy, "test".to_string());
+    /// let key = SecretKey::<p256::NistP256>::from_sec1_pem(&"test".to_string()).unwrap();
     /// context.push(jwt);
     /// context.push(key);
     /// let errors = context.validate().await;
@@ -255,15 +285,16 @@ impl<T: IntoSignature + 'static> IntoSignatureBoxed for T {
 ///
 /// # Usage
 /// ```
-/// # use privy_rust::{IntoKey, JwtUser, TimeCachingKey, PrivyClient};
+/// # use privy_rust::{IntoKey, JwtUser, TimeCachingKey, PrivyClient, AuthorizationContext};
 /// # use std::time::Duration;
 /// # use std::sync::Arc;
 /// # use p256::ecdsa::signature::SignerMut;
 /// # use p256::ecdsa::Signature;
 /// # use p256::elliptic_curve::SecretKey;
 /// # async fn foo() {
-/// let privy = PrivyClient::new("app_id".to_string(), "app_secret".to_string()).unwrap();
-/// let jwt = JwtUser(Arc::new(privy), "test".to_string());
+/// let ctx = AuthorizationContext::new();
+/// let privy = PrivyClient::new("app_id".to_string(), "app_secret".to_string(), ctx).unwrap();
+/// let jwt = JwtUser(privy, "test".to_string());
 /// let key = TimeCachingKey::new(jwt);
 /// let key = key.get_key().await.unwrap();
 /// # }
@@ -307,7 +338,7 @@ impl<T: IntoKey + Sync> IntoKey for TimeCachingKey<T> {
 /// # Errors
 /// This provider can fail if the JWT is invalid, does not match a user,
 /// or if the API returns an error.
-pub struct JwtUser(pub Arc<crate::PrivyClient>, pub String);
+pub struct JwtUser(pub crate::PrivyClient, pub String);
 
 impl IntoKey for JwtUser {
     async fn get_key(&self) -> Result<Key, KeyError> {
@@ -326,15 +357,16 @@ impl IntoKey for JwtUser {
         );
 
         // Build the authentication request with encryption parameters
-        let body = AuthenticateBody::default()
-            .user_jwt(self.1.clone())
-            .encryption_type(privy_api::types::AuthenticateBodyEncryptionType::Hpke)
-            .recipient_public_key(public_key_b64);
+        let body = AuthenticateBody {
+            user_jwt: self.1.clone(),
+            encryption_type: Some(crate::generated::types::AuthenticateBodyEncryptionType::Hpke),
+            recipient_public_key: Some(public_key_b64),
+        };
 
         // Send the authentication request
-        let auth = match self.0.authenticate().body(body).send().await {
+        let auth = match self.0.authenticate(&body).await {
             Ok(r) => r.into_inner(),
-            Err(privy_api::Error::UnexpectedResponse(response)) => {
+            Err(crate::generated::Error::UnexpectedResponse(response)) => {
                 tracing::error!("Unexpected API response: {:?}", response.text().await);
                 return Err(KeyError::Unknown);
             }
@@ -346,7 +378,7 @@ impl IntoKey for JwtUser {
 
         // Process the response based on encryption type
         let key = match auth {
-            privy_api::types::AuthenticateResponse::WithEncryption {
+            crate::generated::types::AuthenticateResponse::WithEncryption {
                 encrypted_authorization_key,
                 ..
             } => {
@@ -362,8 +394,9 @@ impl IntoKey for JwtUser {
                         KeyError::HpkeDecryption(format!("{e:?}"))
                     })?
             }
-            privy_api::types::AuthenticateResponse::WithoutEncryption {
-                authorization_key, ..
+            crate::generated::types::AuthenticateResponse::WithoutEncryption {
+                authorization_key,
+                ..
             } => {
                 tracing::warn!("Received unencrypted authorization key (fallback mode)");
 
@@ -441,15 +474,6 @@ pub struct PrivateKey(pub String);
 /// is not in the expected format.
 pub struct PrivateKeyFromFile(pub PathBuf);
 
-/// An example implementation of `IntoSignature` that calls out to
-/// an arbitrary KMS service to retrieve a key.
-pub struct KMSService;
-impl IntoSignature for KMSService {
-    async fn sign(&self, _message: &[u8]) -> Result<Signature, SigningError> {
-        todo!("kms signature")
-    }
-}
-
 impl IntoKey for PrivateKey {
     async fn get_key(&self) -> Result<Key, KeyError> {
         SecretKey::<p256::NistP256>::from_sec1_pem(&self.0).map_err(|e| {
@@ -468,7 +492,7 @@ impl IntoKey for PrivateKeyFromFile {
 
 #[cfg(test)]
 mod tests {
-    use std::{path::Path, sync::Arc};
+    use std::path::Path;
 
     use base64::{Engine, engine::general_purpose::STANDARD};
     use futures::TryStreamExt;
@@ -477,23 +501,8 @@ mod tests {
 
     use crate::{
         AuthorizationContext, PrivyClient,
-        keys::{IntoKey, IntoSignature, JwtUser, KMSService, PrivateKey, TimeCachingKey},
+        keys::{IntoKey, JwtUser, PrivateKey},
     };
-
-    #[tokio::test]
-    async fn jwt() {
-        let jwt = JwtUser(todo!(), "test".to_string());
-        let key = jwt.sign(&[0, 1, 2, 3]).await.unwrap();
-        println!("{key:?}");
-    }
-
-    #[tokio::test]
-    async fn cached_jwt() {
-        let jwt = JwtUser(todo!(), "test".to_string());
-        let cached_jwt = TimeCachingKey::new(jwt);
-        let key = cached_jwt.get_key().await.unwrap();
-        println!("{key:?}");
-    }
 
     #[tokio::test]
     async fn cached_private_key() {
@@ -503,28 +512,18 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn custom_kms() {
-        let kms = KMSService;
-        let key = kms.sign(&[0, 1, 2, 3]).await.unwrap();
-        println!("{key:?}");
-    }
-
-    #[tokio::test]
     #[traced_test]
     async fn authorization_context() {
-        let client = Arc::new(
-            PrivyClient::new(
-                env!("PRIVY_APP_ID").to_string(),
-                env!("PRIVY_APP_SECRET").to_string(),
-            )
-            .unwrap(),
-        );
+        let client = PrivyClient::new(
+            env!("PRIVY_APP_ID").to_string(),
+            env!("PRIVY_APP_SECRET").to_string(),
+            AuthorizationContext::new(),
+        )
+        .unwrap();
 
-        let mut ctx = AuthorizationContext::new();
+        let ctx = AuthorizationContext::new();
 
         ctx.push(Path::new("private_key.pem"));
-        ctx.push(JwtUser(client, "my_jwt".to_string()));
-        // ctx.push(PrivateKey("my_key".to_string()));
         ctx.push(Signature::from_bytes(GenericArray::from_slice(&STANDARD.decode("J7GLk/CIqvCNCOSJ8sUZb0rCsqWF9l1H1VgYfsAd1ew2uBJHE5hoY+kV7CSzdKkgOhtdvzj22gXA7gcn5gSqvQ==").unwrap())).expect("right size"));
 
         let sigs = ctx

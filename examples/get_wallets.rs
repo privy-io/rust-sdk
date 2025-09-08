@@ -29,9 +29,9 @@ async fn main() -> Result<()> {
         public_key
     );
 
-    let client = PrivyClient::new(app_id, app_secret)?;
+    let client = PrivyClient::new(app_id, app_secret, Default::default())?;
 
-    let wallets = client.get_wallets().limit(5).send().await?;
+    let wallets = client.get_wallets(None, None, Some(5.0), None).await?;
 
     tracing::info!("got wallets: {:?}", wallets);
 

@@ -5,11 +5,23 @@
 use std::time::Duration;
 
 use delegate::delegate;
-use privy_api::Client;
+use progenitor_client::{ByteStream, ResponseValue};
 use reqwest::header::{CONTENT_TYPE, HeaderValue};
 use serde::Serialize;
 
-use crate::{Method, PrivyCreateError, WalletApiRequestSignatureInput, get_auth_header};
+use crate::{
+    AuthorizationContext, Method, PrivyCreateError, WalletApiRequestSignatureInput,
+    generated::{
+        Client,
+        types::{
+            AuthenticateBody, AuthenticateResponse, CreateUserBody, CreateWalletBody,
+            GetWalletsChainType, GetWalletsCursor, GetWalletsResponse, UpdateWalletBody, User,
+            Wallet,
+        },
+    },
+    get_auth_header,
+    middleware::MiddlewareState,
+};
 
 /// Privy client for interacting with the Privy API.
 ///
@@ -27,10 +39,26 @@ pub struct PrivyClient {
 impl PrivyClient {
     /// Create a new `PrivyClient`
     ///
+    /// # Usage
+    /// ```no_run
+    /// # use privy_rust::{PrivyClient, PrivyCreateError, PrivateKeyFromFile, AuthorizationContext};
+    /// # async fn foo() -> Result<(), PrivyCreateError> {
+    /// let ctx = AuthorizationContext::new();
+    /// let client = PrivyClient::new("app_id".into(), "app_secret".into(), ctx.clone())?;
+    /// ctx.push(PrivateKeyFromFile("private_key.pem".into()));
+    /// # Ok(())
+    /// # }
+    /// ```
+    ///
     /// # Errors
-    /// See [`PrivyClient::new_with_url`]
-    pub fn new(app_id: String, app_secret: String) -> Result<Self, PrivyCreateError> {
-        Self::new_with_url(app_id, app_secret, "https://api.privy.io")
+    /// This can fail for two reasons, either the `app_id` or `app_secret` are not
+    /// valid headers, or that the underlying http client could not be created.
+    pub fn new(
+        app_id: String,
+        app_secret: String,
+        ctx: AuthorizationContext,
+    ) -> Result<Self, PrivyCreateError> {
+        Self::new_with_url(app_id, app_secret, ctx, "https://api.privy.io")
     }
 
     /// Create a new `PrivyClient` with a custom url
@@ -41,6 +69,7 @@ impl PrivyClient {
     pub fn new_with_url(
         app_id: String,
         app_secret: String,
+        ctx: AuthorizationContext,
         url: &str,
     ) -> Result<Self, PrivyCreateError> {
         let mut headers = reqwest::header::HeaderMap::new();
@@ -59,60 +88,67 @@ impl PrivyClient {
             .build()?;
 
         Ok(Self {
-            app_id,
+            app_id: app_id.clone(),
             app_secret,
-            client: Client::new_with_client(url, client_with_custom_defaults),
+            client: Client::new_with_client(
+                url,
+                client_with_custom_defaults,
+                MiddlewareState {
+                    app_id,
+                    ctx: ctx.clone(),
+                },
+            ),
         })
+    }
+
+    /// Update a wallet
+    #[must_use]
+    pub fn update_wallet<'a>(
+        &'a self,
+        wallet_id: &'a str,
+        body: &'a UpdateWalletBody,
+    ) -> impl Future<Output = Result<ResponseValue<Wallet>, crate::generated::Error>> + 'a {
+        // NOTE: this is handled in the middleware
+        self.client.update_wallet(wallet_id, None, body)
     }
 
     // this is the crux of the impl, a handy macro that delegates all the
     // unexciting methods to the inner client automatically. we can do nice
     // things like auto-populating items on the builders
+
     delegate! {
         to self.client {
             /// Authenticate a user using a JWT
-            #[expr($.privy_app_id(&self.app_id))]
-            #[must_use] pub fn authenticate(&self) -> privy_api::builder::Authenticate<'_>;
+            #[must_use] pub fn authenticate<'a>(&'a self, body: &'a AuthenticateBody) -> impl Future<Output =  Result<ResponseValue<AuthenticateResponse>, crate::generated::Error>> + 'a;
 
             /// Get a wallet
-            #[expr($.privy_app_id(&self.app_id))]
-            #[must_use] pub fn get_wallet(&self) -> privy_api::builder::GetWallet<'_>;
+            #[must_use] pub fn get_wallet<'a>(&'a self, wallet_id: &'a str) -> impl Future<Output = Result<ResponseValue<Wallet>, crate::generated::Error>> + 'a;
+
 
             /// Get a list of wallets
-            #[expr($.privy_app_id(&self.app_id))]
-            #[must_use] pub fn get_wallets(&self) -> privy_api::builder::GetWallets<'_>;
+            #[must_use] pub fn get_wallets<'a>(&'a self, chain_type: Option<&'a GetWalletsChainType>, cursor: Option<&'a GetWalletsCursor>, limit: Option<f64>, user_id: Option<&'a str>) -> impl Future<Output = Result<ResponseValue<GetWalletsResponse>, crate::generated::Error>> + 'a;
 
             /// Create a new wallet
-            #[expr($.privy_app_id(&self.app_id))]
-            #[must_use] pub fn create_wallet(&self) -> privy_api::builder::CreateWallet<'_>;
+            #[must_use] pub fn create_wallet<'a>(&'a self, privy_idempotency_key: Option<&'a str>, body: &'a CreateWalletBody) -> impl Future<Output = Result<ResponseValue<Wallet>, crate::generated::Error>> + 'a;
 
-            /// Update a wallet
-            #[expr($.privy_app_id(&self.app_id))]
-            #[must_use] pub fn update_wallet(&self) -> privy_api::builder::UpdateWallet<'_>;
 
             /// Create a new user
-            #[expr($.privy_app_id(&self.app_id))]
-            #[must_use] pub fn create_user(&self) -> privy_api::builder::CreateUser<'_>;
+            #[must_use] pub fn create_user<'a>(&'a self, body: &'a CreateUserBody) -> impl Future<Output = Result<ResponseValue<User>, crate::generated::Error>> + 'a;
 
-            /// Get a user
-            #[expr($.privy_app_id(&self.app_id))]
-            #[must_use] pub fn get_user(&self) -> privy_api::builder::GetUser<'_>;
+            // /// Get a user
+            // #[must_use] pub fn get_user(&self) -> crate::generated::types::GetUser<'_>;
 
-            /// Get a list of users
-            #[expr($.privy_app_id(&self.app_id))]
-            #[must_use] pub fn get_users(&self) -> privy_api::builder::GetUsers<'_>;
+            // /// Get a list of users
+            // #[must_use] pub fn get_users(&self) -> crate::generated::types::GetUsers<'_>;
 
             /// Delete a user
-            #[expr($.privy_app_id(&self.app_id))]
-            #[must_use] pub fn delete_user(&self) -> privy_api::builder::DeleteUser<'_>;
+            #[must_use] pub fn delete_user<'a>(&'a self, user_id: &'a str) -> impl Future<Output = Result<ResponseValue<()>, crate::generated::Error<ByteStream>>> + 'a;
 
-            /// Search for users
-            #[expr($.privy_app_id(&self.app_id))]
-            #[must_use] pub fn search_users(&self) -> privy_api::builder::SearchUsers<'_>;
+            // /// Search for users
+            // #[must_use] pub fn search_users(&self) -> crate::generated::types::SearchUsers<'_>;
 
-            /// Create a new user wallet
-            #[expr($.privy_app_id(&self.app_id))]
-            #[must_use] pub fn create_user_wallet(&self) -> privy_api::builder::CreateUserWallet<'_>;
+            // /// Create a new user wallet
+            // #[must_use] pub fn create_user_wallet(&self) -> CreateUserWallet<'_>;
         }
     }
 
@@ -162,36 +198,35 @@ impl PrivyClient {
 
 #[cfg(test)]
 mod tests {
-    use privy_api::types::{
-        PublicKeyOwner,
-        builder::{OwnerInput, UpdateWalletBody},
-    };
-
-    use crate::{IntoKey, PrivateKeyFromFile};
-
     use super::*;
+    use crate::{
+        IntoKey, PrivateKeyFromFile,
+        generated::types::{OwnerInput, PublicKeyOwner},
+    };
 
     #[tokio::test]
     async fn test_build_canonical_request() {
-        let client =
-            PrivyClient::new("cmf418pa801bxl40b5rcgjvd9".into(), "app_secret".into()).unwrap();
+        let client = PrivyClient::new(
+            "cmf418pa801bxl40b5rcgjvd9".into(),
+            "app_secret".into(),
+            AuthorizationContext::new(),
+        )
+        .unwrap();
         let wallet_id = "o5zuf7fbygwze9l9gaxyc0bm";
 
         let key = PrivateKeyFromFile("private_key.pem".into());
         let public_key = key.get_key().await.unwrap().public_key();
 
         // Create the request body that will be sent using the generated privy-api type
-        let update_wallet_body: privy_api::types::UpdateWalletBody = UpdateWalletBody::default()
-            .owner(Some(
-                OwnerInput::default()
-                    .subtype_0(PublicKeyOwner {
-                        public_key: public_key.to_string(),
-                    })
-                    .try_into()
-                    .unwrap(),
-            ))
-            .try_into()
-            .unwrap();
+        let update_wallet_body = UpdateWalletBody {
+            owner: Some(OwnerInput {
+                subtype_0: Some(PublicKeyOwner {
+                    public_key: public_key.to_string(),
+                }),
+                ..Default::default()
+            }),
+            ..Default::default()
+        };
 
         // Build the canonical request data for signing using the serialized body
         let canonical_data = client
