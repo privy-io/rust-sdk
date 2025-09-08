@@ -1,5 +1,33 @@
 use serde::Serialize;
 
+pub const PRIVY_AUTHORIZATION_HEADER: &str = "privy-authorization-signature";
+
+/// Create canonical request data for signing
+///
+/// # Errors
+/// This can fail if JSON serialization fails
+pub fn build_canonical_request<S: Serialize>(
+    app_id: String,
+    method: Method,
+    url: String,
+    body: S,
+    idempotency_key: Option<String>,
+) -> Result<String, serde_json::Error> {
+    let mut headers = serde_json::Map::new();
+    headers.insert("privy-app-id".into(), serde_json::Value::String(app_id));
+    if let Some(key) = idempotency_key {
+        headers.insert(
+            "privy-idempotency-key".to_string(),
+            serde_json::Value::String(key),
+        );
+    }
+
+    WalletApiRequestSignatureInput::new(method, url)
+        .headers(serde_json::Value::Object(headers))
+        .body(body)
+        .canonicalize()
+}
+
 /// The HTTP method used in the request.
 ///
 /// Note that `GET` requests do not need
@@ -14,6 +42,20 @@ pub enum Method {
     PUT,
     /// `GET` requests are used to retrieve an existing resource.
     DELETE,
+}
+
+impl TryFrom<&reqwest::Method> for Method {
+    type Error = ();
+
+    fn try_from(value: &reqwest::Method) -> Result<Self, Self::Error> {
+        match *value {
+            reqwest::Method::PATCH => Ok(Method::PATCH),
+            reqwest::Method::POST => Ok(Method::POST),
+            reqwest::Method::PUT => Ok(Method::PUT),
+            reqwest::Method::DELETE => Ok(Method::DELETE),
+            _ => Err(()),
+        }
+    }
 }
 
 /// The wallet API request signature input is used

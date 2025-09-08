@@ -1,11 +1,13 @@
 //! Example usage - demonstrates how to use the Privy signer with tk-rs interface
 
 use anyhow::Result;
-use privy_api::types::{
-    LinkedAccountInput,
-    builder::{CreateUserBody, LinkedAccountCustomJwtInput, LinkedAccountEmailInput},
+use privy_rust::{
+    PrivyClient,
+    generated::types::{
+        CreateUserBody, LinkedAccountCustomJwtInput, LinkedAccountCustomJwtInputType,
+        LinkedAccountEmailInput, LinkedAccountEmailInputType, LinkedAccountInput,
+    },
 };
-use privy_rust::PrivyClient;
 use tracing_subscriber::EnvFilter;
 
 #[tokio::main]
@@ -28,41 +30,26 @@ async fn main() -> Result<()> {
         app_secret,
     );
 
-    let client = PrivyClient::new_with_url(app_id, app_secret, "https://api.staging.privy.io")?;
+    let client = PrivyClient::new(app_id, app_secret, Default::default())?;
 
-    let wallet = match client
-        .create_user()
-        .body(CreateUserBody::default().linked_accounts(vec![
-                LinkedAccountInput::EmailInput(
-                    LinkedAccountEmailInput::default()
-                        .address("alex@arlyon.dev")
-                        .type_("email")
-                        .try_into()
-                        .unwrap(),
-                ),
-                LinkedAccountInput::CustomJwtInput(
-                    LinkedAccountCustomJwtInput::default()
-                        .custom_user_id("alex@arlyon.dev")
-                        .type_("custom_auth")
-                        .try_into()
-                        .unwrap(),
-                ),
-            ]))
-        .send()
-        .await
-    {
-        Ok(r) => Ok(r.into_inner()),
-        Err(privy_api::Error::UnexpectedResponse(response)) => {
-            tracing::error!("unexpected response {:?}", response.text().await);
-            Err(privy_api::Error::Custom("whoops".to_string()))
-        }
-        Err(e) => {
-            tracing::error!("error {:?}", e);
-            Err(e)
-        }
-    }?;
+    let user = client
+        .create_user(&CreateUserBody {
+            linked_accounts: vec![
+                LinkedAccountInput::EmailInput(LinkedAccountEmailInput {
+                    address: "alex@arlyon.dev".into(),
+                    type_: LinkedAccountEmailInputType::Email,
+                }),
+                LinkedAccountInput::CustomJwtInput(LinkedAccountCustomJwtInput {
+                    custom_user_id: "alex@arlyon.dev".try_into().unwrap(),
+                    type_: LinkedAccountCustomJwtInputType::CustomAuth,
+                }),
+            ],
+            custom_metadata: None,
+            wallets: vec![],
+        })
+        .await?;
 
-    tracing::info!("got new user: {:?}", wallet);
+    tracing::info!("got new user: {:?}", user);
 
     Ok(())
 }

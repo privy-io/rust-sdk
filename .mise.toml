@@ -21,7 +21,7 @@ _.file = ['.env', '.env.local']
 [tasks.pull-openapi]
 description = "Pull the latest OpenAPI spec from the Privy API repo and apply our overlay"
 run = [
-  "curl https://api.privy.io/v1/openapi.json | jq -s '.[0] * .[1]' openapi.overlay.json - > openapi.json",
+  "curl https://api.privy.io/v1/openapi.json | jq -s -f 'scripts/openapi.jq' openapi.overlay.json - > openapi.json",
 ]
 
 [tasks.generate-openapi]

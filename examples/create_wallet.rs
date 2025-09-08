@@ -1,8 +1,10 @@
 //! Example usage - demonstrates how to use the Privy signer with tk-rs interface
 
 use anyhow::Result;
-use privy_api::types::{WalletChainType, builder::CreateWalletBody};
-use privy_rust::PrivyClient;
+use privy_rust::{
+    PrivyClient,
+    generated::types::{CreateWalletBody, WalletChainType},
+};
 use tracing_subscriber::EnvFilter;
 
 #[tokio::main]
@@ -30,12 +32,19 @@ async fn main() -> Result<()> {
         public_key
     );
 
-    let client = PrivyClient::new(app_id, app_secret)?;
+    let client = PrivyClient::new(app_id, app_secret, Default::default())?;
 
     let wallet = client
-        .create_wallet()
-        .body(CreateWalletBody::default().chain_type(WalletChainType::Solana))
-        .send()
+        .create_wallet(
+            None,
+            &CreateWalletBody {
+                chain_type: WalletChainType::Solana,
+                additional_signers: None,
+                owner: None,
+                owner_id: None,
+                policy_ids: vec![],
+            },
+        )
         .await?;
 
     tracing::info!("got new wallet: {:?}", wallet);

@@ -1,8 +1,9 @@
 #![allow(missing_docs)]
 
-pub use privy_api::{Error as PrivyApiError, types::error::ConversionError};
 pub use solana_sdk::pubkey::ParsePubkeyError;
 use thiserror::Error;
+
+pub use crate::generated::{Error as PrivyApiError, types::error::ConversionError};
 
 #[derive(Error, Debug)]
 pub enum PrivyCreateError {

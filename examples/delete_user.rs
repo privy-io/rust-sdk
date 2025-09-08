@@ -29,13 +29,9 @@ async fn main() -> Result<()> {
         public_key
     );
 
-    let client = PrivyClient::new(app_id, app_secret)?;
+    let client = PrivyClient::new(app_id, app_secret, Default::default())?;
 
-    let user = client
-        .delete_user()
-        .user_id("cmf56qacr01qpl90brxql83lx")
-        .send()
-        .await?;
+    let user = client.delete_user("cmf56qacr01qpl90brxql83lx").await?;
 
     tracing::info!("deleted user: {:?}", user);
 

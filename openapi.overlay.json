@@ -1,4 +1,18 @@
 {
+	"security": [
+		{
+			"AppId": ["read", "write"]
+		}
+	],
+	"components": {
+		"securitySchemes": {
+			"AppId": {
+				"type": "apiKey",
+				"in": "header",
+				"name": "privy-app-id"
+			}
+		}
+	},
 	"paths": {
 		"/v1/users": {
 			"post": {
