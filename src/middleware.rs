@@ -1,10 +1,8 @@
-use base64::{Engine, engine::general_purpose::STANDARD};
-use futures::TryStreamExt;
 use progenitor_client::{ClientHooks, OperationInfo};
 
 use crate::{
-    AuthorizationContext, Method, PRIVY_AUTHORIZATION_HEADER, build_canonical_request,
-    generated::Client,
+    AuthorizationContext, Method, PRIVY_AUTHORIZATION_HEADER, generated::Client,
+    sign_canonical_request,
 };
 
 #[derive(Debug, Clone)]
@@ -36,24 +34,9 @@ impl ClientHooks<MiddlewareState> for Client {
                 let app_id = self.inner.app_id.clone();
                 let ctx = self.inner.ctx.clone();
 
-                let canonical = build_canonical_request(app_id, method, url, data, None)
-                    .expect("request is valid json");
-
-                tracing::info!("canonical request data: {}", canonical);
-
-                let signature = ctx
-                    .sign(canonical.as_bytes())
-                    .map_ok(|s| {
-                        let der_bytes = s.to_der();
-                        STANDARD.encode(&der_bytes)
-                    })
-                    .try_collect::<Vec<_>>()
+                let signature = sign_canonical_request(&ctx, &app_id, method, url, data, None)
                     .await
-                    .map_err(|e| {
-                        tracing::error!("failed to sign request: {}", e);
-                        todo!()
-                    })?
-                    .join(",");
+                    .expect("request is valid json");
 
                 request.headers_mut().insert(
                     PRIVY_AUTHORIZATION_HEADER,

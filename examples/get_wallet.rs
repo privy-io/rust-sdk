@@ -1,19 +1,19 @@
-//! Delete User Example
+//! Get Wallet Example
 //!
-//! This example demonstrates how to delete a user from your Privy app.
+//! This example demonstrates how to retrieve a specific wallet by its ID.
 //! It shows how to:
 //! - Initialize a Privy client with app credentials
-//! - Delete a user by user ID
-//! - Handle the deletion response
+//! - Get detailed information about a specific wallet
+//! - Handle the response containing wallet data
 //!
 //! ## Required Environment Variables
 //! - `PRIVY_APP_ID`: Your Privy app ID
 //! - `PRIVY_APP_SECRET`: Your Privy app secret
-//! - `PRIVY_USER_ID`: The user ID to delete
+//! - `PRIVY_WALLET_ID`: The wallet ID to retrieve
 //!
 //! ## Usage
 //! ```bash
-//! cargo run --example delete_user
+//! cargo run --example get_wallet
 //! ```
 
 use anyhow::Result;
@@ -34,22 +34,19 @@ async fn main() -> Result<()> {
         std::env::var("PRIVY_APP_SECRET").expect("PRIVY_APP_SECRET environment variable not set");
     let wallet_id =
         std::env::var("PRIVY_WALLET_ID").expect("PRIVY_WALLET_ID environment variable not set");
-    let public_key =
-        std::env::var("PRIVY_PUBLIC_KEY").expect("PRIVY_PUBLIC_KEY environment variable not set");
 
     tracing::info!(
-        "initializing privy with app_id: {}, app_secret: {}, wallet_id: {}, public_key: {}",
+        "initializing privy with app_id: {}, app_secret: {}, wallet_id: {}",
         app_id,
         app_secret,
-        wallet_id,
-        public_key
+        wallet_id
     );
 
     let client = PrivyClient::new(app_id, app_secret, Default::default())?;
 
-    let user = client.users().delete("cmf56qacr01qpl90brxql83lx").await?;
+    let wallet = client.wallets().get(&wallet_id).await?;
 
-    tracing::info!("deleted user: {:?}", user);
+    tracing::info!("got wallet: {:?}", wallet);
 
     Ok(())
 }

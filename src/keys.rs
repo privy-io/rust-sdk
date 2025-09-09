@@ -426,7 +426,7 @@ impl IntoKey for JwtUser {
         };
 
         // Send the authentication request
-        let auth = match self.0.authenticate(&body).await {
+        let auth = match self.0.wallets().authenticate_with_jwt(&body).await {
             Ok(r) => r.into_inner(),
             Err(crate::generated::Error::UnexpectedResponse(response)) => {
                 tracing::error!("Unexpected API response: {:?}", response.text().await);
@@ -562,8 +562,8 @@ mod tests {
     use tracing_test::traced_test;
 
     use crate::{
-        AuthorizationContext, PrivyClient,
-        keys::{IntoKey, JwtUser, PrivateKey},
+        AuthorizationContext,
+        keys::{IntoKey, PrivateKey},
     };
 
     #[tokio::test]
@@ -576,13 +576,6 @@ mod tests {
     #[tokio::test]
     #[traced_test]
     async fn authorization_context() {
-        let client = PrivyClient::new(
-            env!("PRIVY_APP_ID").to_string(),
-            env!("PRIVY_APP_SECRET").to_string(),
-            AuthorizationContext::new(),
-        )
-        .unwrap();
-
         let ctx = AuthorizationContext::new();
 
         ctx.push(Path::new("private_key.pem"));

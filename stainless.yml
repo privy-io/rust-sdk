@@ -1,0 +1,197 @@
+resources:
+  wallets:
+    # Configure the methods defined in this resource. Each key in the object is the
+    # name of the method and the value is either an endpoint (for example, `get /foo`)
+    # or an object with more detail.
+    #
+    # [reference]: https://app.stainless.com/docs/reference/config#method
+    # Configure the models--named types--defined in the resource. Each key in the
+    # object is the name of the model and the value is either the name of a schema in
+    # `#/components/schemas` or an object with more detail.
+    #
+    # [reference]: https://app.stainless.com/docs/reference/config#model
+    models:
+      wallet: '#/components/schemas/Wallet'
+    methods:
+      list: get /v1/wallets
+      create: post /v1/wallets
+      get: get /v1/wallets/{wallet_id}
+      authenticate_with_jwt: post /v1/wallets/authenticate
+      create_wallets_with_recovery: post /v1/wallets_with_recovery
+      # The following are methods we want to replace with a custom implementation, as to include the
+      # "authorization context" argument.
+      # Prefixing  the generated implementation with an underscore ensures there is no collision on
+      # the names when we extend the generated service.
+      # This is only needed for languages that do not support method overloading
+      _rpc:
+        endpoint: post /v1/wallets/{wallet_id}/rpc
+        only: [ python, typescript, node ]
+      _raw_sign:
+        endpoint: post /v1/wallets/{wallet_id}/raw_sign
+        only: [ python, typescript, node ]
+      _update:
+        endpoint: patch /v1/wallets/{wallet_id}
+        only: [ python, typescript, node ]
+      _export:
+        endpoint: post /v1/wallets/{wallet_id}/export
+        only: [ python, typescript, node ]
+      # On the other hand, these are not prefixed, for languages that DO support method overloading.
+      rpc:
+        endpoint: post /v1/wallets/{wallet_id}/rpc
+        skip: [ python, typescript, node ]
+      raw_sign:
+        endpoint: post /v1/wallets/{wallet_id}/raw_sign
+        skip: [ python, typescript, node ]
+      update:
+        endpoint: patch /v1/wallets/{wallet_id}
+        skip: [ python, typescript, node ]
+      export:
+        endpoint: post /v1/wallets/{wallet_id}/export
+        skip: [ python, typescript, node ]
+      # Wallet 'import' methods are shadowed by an 'import' utility method.
+      # We prefix with an underscore to signal that these are not to be called directly.
+      _init_import: post /v1/wallets/import/init
+      _submit_import: post /v1/wallets/import/submit
+      # TODO(openapi spec): _export: post /v1/wallets/{wallet_id}/export
+    subresources:
+      transactions:
+        methods:
+          get: get /v1/wallets/{wallet_id}/transactions
+      balance:
+        methods:
+          get: get /v1/wallets/{wallet_id}/balance
+
+  users:
+    models:
+      user: '#/components/schemas/User'
+    methods:
+      list: get /v1/users
+      create: post /v1/users
+      get: get /v1/users/{user_id}
+      get_by_discord_username: post /v1/users/discord/username
+      get_by_email_address: post /v1/users/email/address
+      get_by_farcaster_id: post /v1/users/farcaster/fid
+      get_by_github_username: post /v1/users/github/username
+      get_by_phone_number: post /v1/users/phone/number
+      get_by_smart_wallet_address: post /v1/users/smart_wallet/address
+      get_by_telegram_user_id: post /v1/users/telegram/telegram_user_id
+      get_by_telegram_username: post /v1/users/telegram/username
+      get_by_twitter_subject: post /v1/users/twitter/subject
+      get_by_twitter_username: post /v1/users/twitter/username
+      get_by_wallet_address: post /v1/users/wallet/address
+      get_by_custom_auth_id: post /v1/users/custom_auth/id
+      delete: delete /v1/users/{user_id}
+      set_custom_metadata: post /v1/users/{user_id}/custom_metadata
+      unlink_linked_account: post /v1/users/{user_id}/accounts/unlink
+      pregenerate_wallets: post /v1/users/{user_id}/wallets
+      search: post /v1/users/search
+
+  policies:
+    models:
+      policy: '#/components/schemas/Policy'
+    methods:
+      create: post /v1/policies
+      get: get /v1/policies/{policy_id}
+      get_rule: get /v1/policies/{policy_id}/rules/{rule_id}
+      # The following are methods we want to replace with a custom implementation, as to include the
+      # "authorization context" argument.
+      # Prefixing  the generated implementation with an underscore ensures there is no collision on
+      # the names when we extend the generated service.
+      # This is only needed for languages that do not support method overloading
+      _update:
+        endpoint: patch /v1/policies/{policy_id}
+        only: [ python, typescript, node ]
+      _delete:
+        endpoint: delete /v1/policies/{policy_id}
+        only: [ python, typescript, node ]
+      _create_rule:
+        endpoint: post /v1/policies/{policy_id}/rules
+        only: [ python, typescript, node ]
+      _update_rule:
+        endpoint: patch /v1/policies/{policy_id}/rules/{rule_id}
+        only: [ python, typescript, node ]
+      _delete_rule:
+        endpoint: delete /v1/policies/{policy_id}/rules/{rule_id}
+        only: [ python, typescript, node ]
+      # On the other hand, these are not prefixed, for languages that DO support method overloading.
+      update:
+        endpoint: patch /v1/policies/{policy_id}
+        skip: [ python, typescript, node ]
+      delete:
+        endpoint: delete /v1/policies/{policy_id}
+        skip: [ python, typescript, node ]
+      create_rule:
+        endpoint: post /v1/policies/{policy_id}/rules
+        skip: [ python, typescript, node ]
+      update_rule:
+        endpoint: patch /v1/policies/{policy_id}/rules/{rule_id}
+        skip: [ python, typescript, node ]
+      delete_rule:
+        endpoint: delete /v1/policies/{policy_id}/rules/{rule_id}
+        skip: [ python, typescript, node ]
+
+  transactions:
+    methods:
+      get: get /v1/transactions/{transaction_id}
+
+  key_quorums:
+    models:
+      key_quorum: '#/components/schemas/KeyQuorum'
+    methods:
+      create: post /v1/key_quorums
+      get: get /v1/key_quorums/{key_quorum_id}
+      # The following are methods we want to replace with a custom implementation, as to include the
+      # "authorization context" argument.
+      # Prefixing  the generated implementation with an underscore ensures there is no collision on
+      # the names when we extend the generated service.
+      # This is only needed for languages that do not support method overloading
+      _update:
+        endpoint: patch /v1/key_quorums/{key_quorum_id}
+        only: [ python, typescript, node ]
+      _delete:
+        endpoint: delete /v1/key_quorums/{key_quorum_id}
+        only: [ python, typescript, node ]
+      # On the other hand, these are not prefixed, for languages that DO support method overloading.
+      update:
+        endpoint: patch /v1/key_quorums/{key_quorum_id}
+        skip: [ python, typescript, node ]
+      delete:
+        endpoint: delete /v1/key_quorums/{key_quorum_id}
+        skip: [ python, typescript, node ]
+
+  fiat:
+    methods:
+      configure_app: post /v1/apps/{app_id}/fiat
+      get_status: post /v1/users/{user_id}/fiat/status
+      get_kyc_link: post /v1/users/{user_id}/fiat/kyc_link
+    subresources:
+      accounts:
+        methods:
+          get: get /v1/users/{user_id}/fiat/accounts
+          create: post /v1/users/{user_id}/fiat/accounts
+        only:
+          - python
+      kyc:
+        methods:
+          get: get /v1/users/{user_id}/fiat/kyc
+          create: post /v1/users/{user_id}/fiat/kyc
+          update: patch /v1/users/{user_id}/fiat/kyc
+        only:
+          - python
+      onramp:
+        methods:
+          create: post /v1/users/{user_id}/fiat/onramp
+        only:
+          - python
+      offramp:
+        methods:
+          create: post /v1/users/{user_id}/fiat/offramp
+        only:
+          - python
+    only:
+      - python
+
+
+
+
+

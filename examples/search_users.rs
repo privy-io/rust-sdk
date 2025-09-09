@@ -1,23 +1,23 @@
-//! Delete User Example
+//! Search Users Example
 //!
-//! This example demonstrates how to delete a user from your Privy app.
+//! This example demonstrates how to search for users using various criteria.
 //! It shows how to:
 //! - Initialize a Privy client with app credentials
-//! - Delete a user by user ID
-//! - Handle the deletion response
+//! - Search for users by email, phone, wallet address, or other criteria
+//! - Handle search results and user data
 //!
 //! ## Required Environment Variables
 //! - `PRIVY_APP_ID`: Your Privy app ID
 //! - `PRIVY_APP_SECRET`: Your Privy app secret
-//! - `PRIVY_USER_ID`: The user ID to delete
+//! - `PRIVY_SEARCH_TERM`: Search query (optional, defaults to "alex@arlyon.dev")
 //!
 //! ## Usage
 //! ```bash
-//! cargo run --example delete_user
+//! cargo run --example search_users
 //! ```
 
 use anyhow::Result;
-use privy_rust::PrivyClient;
+use privy_rust::{PrivyClient, generated::types::SearchUsersBody};
 use tracing_subscriber::EnvFilter;
 
 #[tokio::main]
@@ -32,24 +32,26 @@ async fn main() -> Result<()> {
     let app_id = std::env::var("PRIVY_APP_ID").expect("PRIVY_APP_ID environment variable not set");
     let app_secret =
         std::env::var("PRIVY_APP_SECRET").expect("PRIVY_APP_SECRET environment variable not set");
-    let wallet_id =
-        std::env::var("PRIVY_WALLET_ID").expect("PRIVY_WALLET_ID environment variable not set");
-    let public_key =
-        std::env::var("PRIVY_PUBLIC_KEY").expect("PRIVY_PUBLIC_KEY environment variable not set");
+    let search_term =
+        std::env::var("PRIVY_SEARCH_TERM").unwrap_or_else(|_| "alex@arlyon.dev".to_string());
 
     tracing::info!(
-        "initializing privy with app_id: {}, app_secret: {}, wallet_id: {}, public_key: {}",
+        "initializing privy with app_id: {}, app_secret: {}, search_term: {}",
         app_id,
         app_secret,
-        wallet_id,
-        public_key
+        search_term
     );
 
     let client = PrivyClient::new(app_id, app_secret, Default::default())?;
 
-    let user = client.users().delete("cmf56qacr01qpl90brxql83lx").await?;
+    // Search for users by email address or other criteria
+    let search_result = client
+        .users()
+        // TODO: search term rename is not working
+        .search(&SearchUsersBody::Variant0 { search_term })
+        .await?;
 
-    tracing::info!("deleted user: {:?}", user);
+    tracing::info!("search result: {:?}", search_result);
 
     Ok(())
 }

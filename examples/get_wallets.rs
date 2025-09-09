@@ -1,4 +1,21 @@
-//! Example usage - demonstrates how to use the Privy signer with tk-rs interface
+//! Get Wallets Example
+//!
+//! This example demonstrates how to retrieve all wallets in your Privy app.
+//! It shows how to:
+//! - Initialize a Privy client with app credentials  
+//! - List all wallets with optional pagination
+//! - Handle the response containing wallet data
+//!
+//! ## Required Environment Variables
+//! - `PRIVY_APP_ID`: Your Privy app ID
+//! - `PRIVY_APP_SECRET`: Your Privy app secret
+//! - `PRIVY_WALLET_ID`: Target wallet ID (for logging purposes)
+//! - `PRIVY_PUBLIC_KEY`: Solana public key (for logging purposes)
+//!
+//! ## Usage
+//! ```bash
+//! cargo run --example get_wallets
+//! ```
 
 use anyhow::Result;
 use privy_rust::PrivyClient;
@@ -31,7 +48,7 @@ async fn main() -> Result<()> {
 
     let client = PrivyClient::new(app_id, app_secret, Default::default())?;
 
-    let wallets = client.get_wallets(None, None, Some(5.0), None).await?;
+    let wallets = client.wallets().list(None, None, Some(5.0), None).await?;
 
     tracing::info!("got wallets: {:?}", wallets);
 
