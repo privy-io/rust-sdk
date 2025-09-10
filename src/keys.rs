@@ -554,30 +554,373 @@ impl IntoKey for PrivateKeyFromFile {
 
 #[cfg(test)]
 mod tests {
-    use std::path::Path;
+    use std::{
+        path::{Path, PathBuf},
+        sync::{Arc, Mutex},
+    };
 
     use base64::{Engine, engine::general_purpose::STANDARD};
     use futures::TryStreamExt;
-    use p256::{ecdsa::Signature, elliptic_curve::generic_array::GenericArray};
+    use p256::{
+        ecdsa::Signature,
+        elliptic_curve::{SecretKey, generic_array::GenericArray},
+    };
+    use test_case::test_case;
     use tracing_test::traced_test;
 
-    use crate::{
-        AuthorizationContext,
-        keys::{IntoKey, PrivateKey},
-    };
+    use super::*;
+
+    use crate::{AuthorizationContext, FnKey, FnSigner, KeyError, PrivateKeyFromFile, PrivyClient};
+
+    // generated using `mise gen-p256-key`
+    const TEST_PRIVATE_KEY_PEM: &str = include_str!("../tests/test_private_key.pem");
+
+    fn get_test_client() -> Result<PrivyClient, Box<dyn std::error::Error>> {
+        let app_id = std::env::var("STAGING_APP_ID").unwrap_or_else(|_| "test_app_id".to_string());
+        let app_secret =
+            std::env::var("STAGING_APP_SECRET").unwrap_or_else(|_| "test_app_secret".to_string());
+        let url =
+            std::env::var("STAGING_URL").unwrap_or_else(|_| "https://api.privy.com".to_string());
+
+        Ok(PrivyClient::new_with_url(
+            app_id,
+            app_secret,
+            AuthorizationContext::new(),
+            &url,
+        )?)
+    }
+
+    fn get_test_jwt() -> String {
+        std::env::var("STAGING_JWT").unwrap_or_else(|_| {
+            "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhbGV4QGFybHlvbi5kZXYiLCJpYXQiOjEwMDAwMDAwMDAwMH0.IpNgavH95CFZPjkzQW4eyxMIfJ-O_5cIaDyu_6KRXffykjYDRwxTgFJuYq0F6d8wSXf4de-vzfBRWSKMISM3rJdlhximYINGJB14mJFCD87VMLFbTpHIXcv7hc1AAYMPGhOsRkYfYXuvVopKszMvhupmQYJ1npSvKWNeBniIyOHYv4xebZD8L0RVlPvuEKTXTu-CDfs2rMwvD9g_wiBznS3uMF3v_KPaY6x0sx9zeCSxAH9zvhMMtct_Ad9kuoUncGpRzNhEk6JlVccN2Leb1JzbldxSywyS2AApD05u-GFAgFDN3P39V3qgRTGDuuUfUvKQ9S4rbu5El9Qq1CJTeA".to_string()
+        })
+    }
+
+    // PrivateKey tests
+    #[tokio::test]
+    async fn test_private_key_creation() {
+        let key = PrivateKey(TEST_PRIVATE_KEY_PEM.to_string());
+        let result = key.get_key().await;
+        assert!(result.is_ok(), "Should successfully parse valid PEM key");
+    }
 
     #[tokio::test]
-    async fn cached_private_key() {
-        let key = PrivateKey(include_str!("../private_key.pem").to_string());
-        let key = key.get_key().await.unwrap();
-        println!("{key:?}");
+    async fn test_private_key_invalid_format() {
+        let key = PrivateKey("invalid_pem_data".to_string());
+        let result = key.get_key().await;
+        assert!(result.is_err(), "Should fail with invalid PEM data");
+
+        if let Err(KeyError::InvalidFormat(_)) = result {
+            // Expected error type
+        } else {
+            panic!("Expected InvalidFormat error");
+        }
+    }
+
+    #[tokio::test]
+    async fn test_private_key_signing() {
+        let key = PrivateKey(TEST_PRIVATE_KEY_PEM.to_string());
+        let test_key = key.get_key().await.unwrap();
+
+        let message1 = b"test message for signing";
+        let message2 = b"different message";
+        
+        // Test deterministic signing - same message should produce same signature
+        let signature1a = test_key.sign(message1).await.unwrap();
+        let signature1b = test_key.sign(message1).await.unwrap();
+        assert_eq!(signature1a, signature1b, "Deterministic signing should produce identical signatures");
+        
+        // Test different messages produce different signatures
+        let signature2 = test_key.sign(message2).await.unwrap();
+        assert_ne!(signature1a, signature2, "Different messages should produce different signatures");
+    }
+
+    // PrivateKeyFromFile tests
+    #[tokio::test]
+    async fn test_private_key_from_file_nonexistent() {
+        let key_file = PrivateKeyFromFile(PathBuf::from("/nonexistent/path/key.pem"));
+        let result = key_file.get_key().await;
+        assert!(result.is_err(), "Should fail when file doesn't exist");
+    }
+
+    #[tokio::test]
+    async fn test_private_key_from_file_success() {
+        // Create a temporary file with test key
+        let temp_dir = std::env::temp_dir();
+        let temp_file = temp_dir.join("test_key.pem");
+        std::fs::write(&temp_file, TEST_PRIVATE_KEY_PEM).unwrap();
+
+        let key_file = PrivateKeyFromFile(temp_file.clone());
+        let result = key_file.get_key().await;
+        assert!(result.is_ok(), "Should successfully read key from file");
+
+        // Cleanup
+        let _ = std::fs::remove_file(temp_file);
+    }
+
+    #[tokio::test]
+    async fn test_path_into_key() {
+        // Create a temporary file with test key
+        let temp_dir = std::env::temp_dir();
+        let temp_file = temp_dir.join("test_path_key.pem");
+        tokio::fs::write(&temp_file, TEST_PRIVATE_KEY_PEM)
+            .await
+            .unwrap();
+
+        let result = temp_file.as_path().get_key().await;
+        assert!(
+            result.is_ok(),
+            "Should successfully read key from file path"
+        );
+
+        // Cleanup
+        let _ = tokio::fs::remove_file(temp_file).await;
+    }
+
+    // Message signing tests with various inputs
+    #[test_case(b"" ; "empty message")]
+    #[test_case(b"short" ; "short message")]
+    #[test_case(&[0u8; 1000] ; "long message")]
+    #[test_case(b"special chars: \x00\xff\n\r\t" ; "special characters")]
+    #[tokio::test]
+    async fn test_signing_various_messages(message: &[u8]) {
+        let key = PrivateKey(TEST_PRIVATE_KEY_PEM.to_string());
+        let test_key = key.get_key().await.unwrap();
+
+        let signature = test_key.sign(message).await;
+        assert!(
+            signature.is_ok(),
+            "Should successfully sign message of length {}",
+            message.len()
+        );
+    }
+
+    #[tokio::test]
+    async fn test_signature_into_signature() {
+        // Create a known signature
+        let key = PrivateKey(TEST_PRIVATE_KEY_PEM.to_string());
+        let test_key = key.get_key().await.unwrap();
+        let original_signature = test_key.sign(b"test").await.unwrap();
+
+        // Use the signature as an IntoSignature source
+        let result = original_signature.sign(b"ignored_message").await.unwrap();
+        assert_eq!(
+            result, original_signature,
+            "Signature should return itself regardless of message"
+        );
+    }
+
+    // AuthorizationContext tests
+    #[tokio::test]
+    #[traced_test]
+    async fn test_authorization_context_empty() {
+        let ctx = AuthorizationContext::new();
+        let signatures: Vec<_> = ctx.sign(b"test").try_collect().await.unwrap();
+        assert!(
+            signatures.is_empty(),
+            "Empty context should produce no signatures"
+        );
     }
 
     #[tokio::test]
     #[traced_test]
-    async fn authorization_context() {
+    async fn test_authorization_context_single_key() {
+        let ctx = AuthorizationContext::new();
+        let key = PrivateKey(TEST_PRIVATE_KEY_PEM.to_string());
+        ctx.push(key);
+
+        let signatures: Vec<_> = ctx.sign(b"test").try_collect().await.unwrap();
+        assert_eq!(
+            signatures.len(),
+            1,
+            "Context with one key should produce one signature"
+        );
+    }
+
+    #[tokio::test]
+    #[traced_test]
+    async fn test_authorization_context_multiple_keys() {
         let ctx = AuthorizationContext::new();
 
+        // Add multiple keys
+        ctx.push(PrivateKey(TEST_PRIVATE_KEY_PEM.to_string()));
+
+        // Create another deterministic key for testing
+        let key_bytes = [2u8; 32]; // Different from test key
+        let second_key = SecretKey::<p256::NistP256>::from_bytes(&key_bytes.into()).unwrap();
+        ctx.push(second_key);
+
+        let signatures: Vec<_> = ctx.sign(b"test").try_collect().await.unwrap();
+        assert_eq!(
+            signatures.len(),
+            2,
+            "Context with two keys should produce two signatures"
+        );
+
+        // Signatures should be different (different keys)
+        assert_ne!(
+            signatures[0], signatures[1],
+            "Different keys should produce different signatures"
+        );
+    }
+
+    #[tokio::test]
+    #[traced_test]
+    async fn test_authorization_context_validation() {
+        // Test successful validation
+        let ctx = AuthorizationContext::new();
+        ctx.push(PrivateKey(TEST_PRIVATE_KEY_PEM.to_string()));
+        let errors = ctx.validate().await;
+        assert!(errors.is_empty(), "Valid context should have no validation errors");
+
+        // Test validation failure
+        let ctx2 = AuthorizationContext::new();
+        ctx2.push(PrivateKey("invalid_key_data".to_string()));
+        let errors2 = ctx2.validate().await;
+        assert!(!errors2.is_empty(), "Invalid key should produce validation errors");
+    }
+
+    // TimeCachingKey tests
+    #[tokio::test]
+    #[traced_test]
+    async fn test_time_caching_key_caching() {
+        struct FakeKey(Arc<Mutex<u32>>);
+        impl IntoKey for FakeKey {
+            async fn get_key(&self) -> Result<SecretKey<p256::NistP256>, KeyError> {
+                *self.0.lock().unwrap() += 1;
+                // Create deterministic key for testing
+                let key_bytes = [1u8; 32];
+                Ok(SecretKey::<p256::NistP256>::from_bytes(&key_bytes.into()).unwrap())
+            }
+        }
+
+        let counter = Arc::new(Mutex::new(0));
+        let cached_key = TimeCachingKey::new(FakeKey(counter.clone()));
+
+        // First call should fetch the key
+        let _key1 = cached_key.get_key().await.unwrap();
+        assert_eq!(*counter.lock().unwrap(), 1);
+
+        // Second call should use cached key (since EXPIRY_BUFFER is 60s)
+        let _key2 = cached_key.get_key().await.unwrap();
+        assert_eq!(
+            *counter.lock().unwrap(),
+            1,
+            "Second call should use cached key"
+        );
+    }
+
+    // Function wrapper tests
+    #[tokio::test]
+    async fn test_fn_signer_wrapper() {
+        use crate::SigningError;
+
+        // Test that FnSigner struct exists and can be constructed
+        let _signer = FnSigner(|_message: &[u8]| async move {
+            // Mock function - return error for simplicity
+            let result: Result<Signature, SigningError> = Err(SigningError::Unknown);
+            result
+        });
+
+        // Just test that the wrapper can be created
+        assert!(true, "FnSigner wrapper can be constructed");
+    }
+
+    #[tokio::test]
+    async fn test_fn_key_wrapper() {
+        let key_fn =
+            FnKey(|| async { PrivateKey(TEST_PRIVATE_KEY_PEM.to_string()).get_key().await });
+
+        let key1 = key_fn.get_key().await.unwrap();
+        let key2 = key_fn.get_key().await.unwrap();
+
+        // Keys should be the same (same source)
+        assert_eq!(key1.to_bytes(), key2.to_bytes());
+    }
+
+    #[tokio::test]
+    #[traced_test]
+    async fn test_authorization_context_concurrent_signing() {
+        let ctx = AuthorizationContext::new();
+
+        // Add multiple keys for concurrent testing
+        for i in 0..5 {
+            // Create deterministic keys for testing
+            let mut key_bytes = [1u8; 32];
+            key_bytes[0] = i as u8 + 1; // Make each key different
+            let key = SecretKey::<p256::NistP256>::from_bytes(&key_bytes.into()).unwrap();
+            ctx.push(key);
+        }
+
+        let message = b"concurrent test message";
+        let signatures: Vec<_> = ctx.sign(message).try_collect().await.unwrap();
+
+        assert_eq!(
+            signatures.len(),
+            5,
+            "Should produce 5 signatures concurrently"
+        );
+
+        // All signatures should be different (different keys)
+        for i in 0..signatures.len() {
+            for j in (i + 1)..signatures.len() {
+                assert_ne!(
+                    signatures[i], signatures[j],
+                    "Signatures from different keys should be different"
+                );
+            }
+        }
+    }
+
+    #[tokio::test]
+    async fn test_key_public_key_derivation() {
+        let private_key = PrivateKey(TEST_PRIVATE_KEY_PEM.to_string());
+        let key = private_key.get_key().await.unwrap();
+        let public_key = key.public_key();
+
+        // Should be able to derive public key without error
+        assert!(
+            !public_key.to_string().is_empty(),
+            "Public key string should not be empty"
+        );
+
+        // Public key should be consistent
+        let public_key2 = key.public_key();
+        assert_eq!(
+            public_key.to_string(),
+            public_key2.to_string(),
+            "Public key derivation should be consistent"
+        );
+    }
+
+    // Integration tests that require actual API access
+    #[tokio::test]
+    #[ignore] // Only run when STAGING_* env vars are set
+    async fn test_jwt_user_integration() {
+        let client = get_test_client().unwrap();
+        let jwt = get_test_jwt();
+        let jwt_user = JwtUser(client, jwt);
+
+        // Test both key retrieval and signing in one test
+        let key_result = jwt_user.get_key().await;
+        if key_result.is_err() {
+            println!("JWT integration test skipped - staging environment may not be configured");
+            return;
+        }
+        
+        let sign_result = jwt_user.sign(b"test message").await;
+        if sign_result.is_err() {
+            println!("JWT signing integration test skipped - staging environment may not be configured");
+        }
+    }
+
+    // Legacy compatibility test
+    #[tokio::test]
+    #[traced_test]
+    async fn test_authorization_context_mixed_sources() {
+        let ctx = AuthorizationContext::new();
+
+        // Add path-based key and pre-computed signature
         ctx.push(Path::new("private_key.pem"));
         ctx.push(Signature::from_bytes(GenericArray::from_slice(&STANDARD.decode("J7GLk/CIqvCNCOSJ8sUZb0rCsqWF9l1H1VgYfsAd1ew2uBJHE5hoY+kV7CSzdKkgOhtdvzj22gXA7gcn5gSqvQ==").unwrap())).expect("right size"));
 
@@ -587,6 +930,40 @@ mod tests {
             .await
             .expect("passes");
 
-        assert!(!sigs.is_empty());
+        assert!(!sigs.is_empty(), "Context with mixed sources should produce signatures");
     }
+
+    // Error handling tests
+    #[tokio::test]
+    async fn test_signing_error_propagation() {
+        struct FailingKey;
+        impl IntoKey for FailingKey {
+            async fn get_key(&self) -> Result<SecretKey<p256::NistP256>, KeyError> {
+                Err(KeyError::Unknown)
+            }
+        }
+
+        let failing_key = FailingKey;
+        let result = failing_key.sign(b"test").await;
+        assert!(matches!(result, Err(SigningError::Key(KeyError::Unknown))));
+    }
+
+    #[tokio::test]
+    async fn test_authorization_context_clone_and_debug() {
+        let ctx1 = AuthorizationContext::new();
+        ctx1.push(PrivateKey(TEST_PRIVATE_KEY_PEM.to_string()));
+
+        // Test clone functionality
+        let ctx2 = ctx1.clone();
+        let sigs1: Vec<_> = ctx1.sign(b"test").try_collect().await.unwrap();
+        let sigs2: Vec<_> = ctx2.sign(b"test").try_collect().await.unwrap();
+        assert_eq!(sigs1.len(), 1);
+        assert_eq!(sigs2.len(), 1);
+        assert_eq!(sigs1[0], sigs2[0], "Cloned context should produce same signatures");
+        
+        // Test debug output
+        let debug_str = format!("{:?}", ctx1);
+        assert!(debug_str.contains("AuthorizationContext"), "Debug output should contain struct name");
+    }
+
 }

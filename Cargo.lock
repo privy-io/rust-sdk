@@ -2102,6 +2102,7 @@ dependencies = [
  "solana-sdk",
  "spki",
  "syn 2.0.106",
+ "tempfile",
  "test-case",
  "thiserror",
  "tokio",

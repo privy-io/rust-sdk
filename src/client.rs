@@ -18,6 +18,7 @@ use crate::{
 /// the `wallet()` method.
 #[derive(Clone, Debug)]
 pub struct PrivyClient {
+    #[allow(dead_code)]
     pub(crate) app_id: String,
     #[allow(dead_code)]
     pub(crate) app_secret: String,
