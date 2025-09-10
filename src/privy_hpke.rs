@@ -369,4 +369,16 @@ mod tests {
         let result = PublicKey::from_sec1_bytes(&invalid_bytes);
         assert!(result.is_err(), "Should reject invalid format indicator");
     }
+
+    #[test]
+    #[ignore]
+    fn test_hpke_decrypt_success() {}
+
+    #[test]
+    #[ignore]
+    fn test_hpke_decrypt_invalid_ciphertext() {}
+
+    #[test]
+    #[ignore]
+    fn test_hpke_decrypt_invalid_encapsulated_key() {}
 }

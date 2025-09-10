@@ -71,6 +71,121 @@ PRIVY_APP_ID=your_app_id
 PRIVY_APP_SECRET=your_app_secret
 ```
 
+## Testing
+
+This project includes comprehensive test coverage across multiple levels:
+
+### Test Categories
+
+- **Unit Tests**: Located in `src/` files using `#[cfg(test)]` modules
+- **Integration Tests**: End-to-end tests in `tests/` directory
+- **Example Tests**: Runnable examples in `examples/` directory
+
+### Environment Setup for Testing
+
+#### Staging Environment Variables
+
+For end-to-end tests, configure these environment variables:
+
+```bash
+# Required for all E2E tests
+export STAGING_APP_ID="your_staging_app_id"
+export STAGING_APP_SECRET="your_staging_app_secret"
+export STAGING_URL="https://api.privy.io"  # Optional, defaults to production
+
+# Optional for specific test types
+export STAGING_JWT="your_test_jwt_token"           # JWT authentication tests
+export STAGING_WALLET_ID="your_test_wallet_id"    # Wallet operation tests
+export STAGING_PRIVATE_KEY_PATH="./private_key.pem"  # Signature auth tests
+```
+
+#### Key Generation for Signature Authorization
+
+Generate P-256 key pairs for signature authorization tests:
+
+```bash
+./scripts/generate-keys.sh
+```
+
+This creates:
+- `private_key.pem` (SEC1 format for Rust)
+- `public_key.pem` (standard PEM format)
+
+### Running Tests
+
+#### Unit Tests
+
+```bash
+# Run all unit tests
+cargo test --lib
+
+# Run specific module tests
+cargo test --lib keys::tests
+cargo test --lib client::tests
+cargo test --lib types::tests
+```
+
+#### End-to-End Tests
+
+```bash
+# Run all E2E tests (requires staging environment)
+cargo test --test "*"
+
+# Run specific E2E test suites
+cargo test --test wallet_operations
+cargo test --test jwt_authentication
+cargo test --test signature_authorization
+
+# Run with detailed logging
+RUST_LOG=info cargo test --test wallet_operations
+```
+
+#### Test Coverage
+
+The test suite covers:
+
+**Authentication Methods (`src/keys.rs`)**:
+- Private key loading (PEM format, file-based)
+- Authorization contexts with multiple keys
+- JWT user authentication and key caching
+- ECDSA P-256 signature generation
+- Concurrent signing operations
+
+**Client Operations (`src/client.rs`)**:
+- Canonical request generation (RFC 8785 compliance)
+- Multi-key signature authorization
+- HTTP client configuration and error handling
+- Idempotency key support
+
+**Wallet Operations (E2E)**:
+- Wallet creation, retrieval, and deletion
+- Balance checking and transaction history
+- Raw message signing with authorization
+- Wallet export functionality
+
+**JWT Authentication (E2E)**:
+- HPKE encryption/decryption workflows
+- Encrypted and unencrypted authentication flows
+- Authorization key caching and expiration
+- Invalid/expired JWT handling
+
+**Signature Authorization (E2E)**:
+- Canonical request generation and signing
+- Multi-key authorization scenarios
+- Deterministic signing validation
+- Wallet owner updates with signature auth
+
+### Test Structure
+
+```
+tests/
+├── common/
+│   └── mod.rs              # Shared test utilities and environment setup
+├── wallet_operations.rs    # Complete wallet lifecycle tests
+├── jwt_authentication.rs   # JWT authentication and HPKE tests
+└── signature_authorization.rs  # Signature-based authorization tests
+```
+
 ## Development
 
 ### Environment Setup
