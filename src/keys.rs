@@ -1,7 +1,8 @@
 use std::{
+    future,
     path::{Path, PathBuf},
     pin::Pin,
-    sync::Arc,
+    sync::{Arc, Mutex},
     time::{Duration, SystemTime},
 };
 
@@ -30,7 +31,26 @@ const SIGNATURE_RESOLUTION_CONCURRENCY: usize = 10;
 ///
 /// For usage information, see the `AuthorizationContext::sign` and
 /// `AuthorizationContext::push` methods.
-pub struct AuthorizationContext(Vec<Box<dyn IntoSignatureBoxed>>, usize);
+///
+/// This struct is thread-safe, and can be cloned. It synchronizes access to the
+/// underlying store internally.
+#[derive(Clone)]
+pub struct AuthorizationContext(
+    // this is a mutex so that users can keep multiple copies and push new
+    // keys at any time, potentially in different threads. we do not use
+    // an async mutex, since we do not hold the lock across await boundaries
+    //
+    // we wrap the IntoSignatureBoxed in an Arc so that we can clone the
+    // inner vector before signing so we don't need to hold the lock
+    Arc<Mutex<Vec<Arc<dyn IntoSignatureBoxed + Send + Sync>>>>,
+    usize,
+);
+
+impl std::fmt::Debug for AuthorizationContext {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("AuthorizationContext").finish()
+    }
+}
 
 impl Default for AuthorizationContext {
     fn default() -> Self {
@@ -42,7 +62,7 @@ impl AuthorizationContext {
     /// Create a new `AuthorizationContext` with the default concurrency.
     #[must_use]
     pub fn new() -> Self {
-        Self(Vec::default(), SIGNATURE_RESOLUTION_CONCURRENCY)
+        Self(Default::default(), SIGNATURE_RESOLUTION_CONCURRENCY)
     }
 
     /// Push a new credential source into the context. This supports
@@ -70,8 +90,8 @@ impl AuthorizationContext {
     /// context.push(key);
     /// # }
     /// ```
-    pub fn push<T: IntoSignature + 'static>(&mut self, key: T) {
-        self.0.push(Box::new(key));
+    pub fn push<T: IntoSignature + 'static + Send + Sync>(&self, key: T) {
+        self.0.lock().expect("lock poisoned").push(Arc::new(key));
     }
 
     /// Sign a message with all the keys in the context.
@@ -99,7 +119,7 @@ impl AuthorizationContext {
     /// ```
     ///
     /// You can also use `try_collect` to get a `Result<Vec<_>, Error>`,
-    /// failing on the first error.
+    /// or any other combinators on the `StreamExt` and `TryStreamExt` traits.
     ///
     /// ```rust
     /// # use privy_rust::{AuthorizationContext, JwtUser, IntoSignature, PrivyClient};
@@ -122,8 +142,22 @@ impl AuthorizationContext {
         &'a self,
         message: &'a [u8],
     ) -> impl Stream<Item = Result<Signature, SigningError>> + 'a {
-        futures::stream::iter(self.0.iter())
-            .map(|key| key.sign_boxed(message))
+        // we clone the inner vector before signing so we don't need to hold the lock.
+        // cloning this vector will also clone the inner items, which are reference counted
+        let keys = self.0.lock().expect("lock poisoned").clone();
+
+        futures::stream::iter(keys)
+            .map(move |key| {
+                let key = key.clone();
+                // this is some awkwardness in rust's type system.
+                // we need communicate to the type system we want to
+                // move the key, clone it, then move both the key and
+                // message into an async closure. later versions of
+                // rust may allow us to be less explicit here
+                async move { key.sign_boxed(message).await }
+            })
+            // await multiple `sign_boxed` futures concurrently,
+            // returning them in order of completion
             .buffer_unordered(self.1)
     }
 
@@ -152,7 +186,7 @@ impl AuthorizationContext {
     /// ```
     pub async fn validate(&self) -> Vec<SigningError> {
         self.sign(&[])
-            .filter_map(|r| async move { r.err() })
+            .filter_map(|r| future::ready(r.err())) // filter_map expects a future
             .collect::<Vec<_>>()
             .await
     }
@@ -217,6 +251,11 @@ pub trait IntoSignature {
     fn sign(&self, message: &[u8]) -> impl Future<Output = Result<Signature, SigningError>> + Send;
 }
 
+// this is a blanket implementation for all types that implement IntoKey.
+// we can simply call get_key on T (since it implements IntoKey) and
+// then call sign on that to get the signature. having this means
+// that AuthorizationContext can be used with any type that implements
+// IntoKey, including things like JwtUser, PrivateKey, and PrivateKeyFromFile.
 impl<T> IntoSignature for T
 where
     T: IntoKey + Sync,
@@ -227,9 +266,18 @@ where
     }
 }
 
-/// Rust has a concept of 'object safety' and `IntoSignature` is not object safe.
-/// What we can do, however, is to blanket impl `IntoSignatureBoxed` for all types
-/// that implement `IntoSignature`.
+/// Rust has a concept of 'object safety' and `IntoSignature` is not object safe,
+/// meaning it can not be used in `AuthorizationContext` directly. This is because
+/// IntoSignature's return type can differ in size depending on the type of the
+/// implementor.
+///
+/// What we can do, however, is provide a trait that _is_ object safe, and to blanket
+/// impl `IntoSignatureBoxed` for all types that implement `IntoSignature`.
+/// IntoSignatureBoxed returns a boxed future instead, which is object safe. If you
+/// are familiar with `async_trait`, this is how it works under the hood, and how all
+/// rust traits worked until GAT / RPITIT landed.
+///
+/// NOTE: this is a private implementation detail and will never leak to the public API.
 trait IntoSignatureBoxed {
     fn sign_boxed<'a>(
         &'a self,
@@ -237,6 +285,7 @@ trait IntoSignatureBoxed {
     ) -> Pin<Box<dyn Future<Output = Result<Signature, SigningError>> + Send + 'a>>;
 }
 
+// the blanket impl referenced above
 impl<T: IntoSignature + 'static> IntoSignatureBoxed for T {
     fn sign_boxed<'a>(
         &'a self,
