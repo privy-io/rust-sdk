@@ -40,6 +40,11 @@
 				"operationId": "createUserWallet"
 			}
 		},
+		"/v1/users/{user_id}/custom_metadata": {
+			"post": {
+				"operationId": "updateUserCustomMetadata"
+			}
+		},
 		"/v1/wallets": {
 			"post": {
 				"operationId": "createWallet"
@@ -99,6 +104,97 @@
 		"/v1/transactions/{transaction_id}": {
 			"get": {
 				"operationId": "getTransaction"
+			}
+		},
+		"/v1/policies": {
+			"post": {
+				"operationId": "createPolicy"
+			}
+		},
+		"/v1/policies/{policy_id}": {
+			"get": {
+				"operationId": "getPolicy"
+			},
+			"patch": {
+				"operationId": "updatePolicy"
+			},
+			"delete": {
+				"operationId": "deletePolicy"
+			}
+		},
+		"/v1/policies/{policy_id}/rules": {
+			"post": {
+				"operationId": "createPolicyRule"
+			}
+		},
+		"/v1/policies/{policy_id}/rules/{rule_id}": {
+			"get": {
+				"operationId": "getPolicyRule"
+			},
+			"patch": {
+				"operationId": "updatePolicyRule"
+			},
+			"delete": {
+				"operationId": "deletePolicyRule"
+			}
+		},
+		"/v1/key_quorums/{key_quorum_id}": {
+			"get": {
+				"operationId": "getKeyQuorum"
+			},
+			"patch": {
+				"operationId": "updateKeyQuorum"
+			},
+			"delete": {
+				"operationId": "deleteKeyQuorum"
+			}
+		},
+		"/v1/key_quorums": {
+			"post": {
+				"operationId": "createKeyQuorum"
+			}
+		},
+		"/v1/users/{user_id}/fiat/status": {
+			"post": {
+				"operationId": "userFiatStatuses"
+			}
+		},
+		"/v1/users/{user_id}/fiat/tos": {
+			"post": {
+				"operationId": "createUserFiatTos"
+			}
+		},
+		"/v1/users/{user_id}/fiat/kyc": {
+			"post": {
+				"operationId": "initiateUserFiatKyc"
+			}
+		},
+		"/v1/users/{user_id}/fiat/kyc_link": {
+			"post": {
+				"operationId": "getUserFiatKycLink"
+			}
+		},
+		"/v1/users/{user_id}/fiat/accounts": {
+			"get": {
+				"operationId": "getUserFiatAccounts"
+			},
+			"post": {
+				"operationId": "createUserFiatAccount"
+			}
+		},
+		"/v1/users/{user_id}/fiat/offramp": {
+			"post": {
+				"operationId": "initiateUserFiatOfframp"
+			}
+		},
+		"/v1/users/{user_id}/fiat/onramp": {
+			"post": {
+				"operationId": "initiateUserFiatOnramp"
+			}
+		},
+		"/v1/apps/{app_id}/fiat": {
+			"post": {
+				"operationId": "configureAppForFiatOnOffRamping"
 			}
 		}
 	}
