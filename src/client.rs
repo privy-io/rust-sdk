@@ -167,9 +167,8 @@ mod tests {
         builder::{OwnerInput, UpdateWalletBody},
     };
 
-    use crate::{IntoKey, PrivateKeyFromFile};
-
     use super::*;
+    use crate::{IntoKey, PrivateKeyFromFile};
 
     #[tokio::test]
     async fn test_build_canonical_request() {
@@ -178,7 +177,7 @@ mod tests {
         let wallet_id = "o5zuf7fbygwze9l9gaxyc0bm";
 
         let key = PrivateKeyFromFile("private_key.pem".into());
-        let public_key = key.get_key().await.unwrap().public_key();
+        let public_key = key.get_key().await.unwrap().0.public_key();
 
         // Create the request body that will be sent using the generated privy-api type
         let update_wallet_body: privy_api::types::UpdateWalletBody = UpdateWalletBody::default()

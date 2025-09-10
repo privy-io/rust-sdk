@@ -39,7 +39,7 @@ async fn main() -> Result<()> {
     let client = PrivyClient::new(app_id.clone(), app_secret)?;
 
     let key = PrivateKeyFromFile("private_key.pem".into());
-    let public_key = key.get_key().await?.public_key();
+    let public_key = key.get_key().await?.0.public_key();
 
     let client = Arc::new(client);
     let ctx = AuthorizationContext::new();

@@ -9,13 +9,12 @@ use std::{
 use futures::{Stream, StreamExt};
 use p256::{
     ecdsa::{Signature, SigningKey, signature::hazmat::PrehashSigner},
-    elliptic_curve::{SecretKey, generic_array::GenericArray},
+    elliptic_curve::SecretKey,
 };
 use privy_api::types::builder::AuthenticateBody;
 use tokio::sync::RwLock;
 
-use crate::privy_hpke::PrivyHpke;
-use crate::{KeyError, SigningError};
+use crate::{KeyError, SigningError, privy_hpke::PrivyHpke};
 
 const EXPIRY_BUFFER: Duration = Duration::from_secs(60);
 const SIGNATURE_RESOLUTION_CONCURRENCY: usize = 10;
@@ -192,12 +191,78 @@ impl AuthorizationContext {
     }
 }
 
-type Key = SecretKey<p256::NistP256>;
+/// A newtype wrapper around a `p256::SecretKey`.
+///
+/// This wrapper facilitates the use of a generic `AsRef<Key>` pattern across the crate,
+/// allowing different key representations (like `ExpirableKey`) to be used interchangeably
+/// where a basic signing key is needed.
+#[derive(Clone, Debug)]
+pub struct Key(pub SecretKey<p256::NistP256>);
 
-/// A trait for getting a key from a source. See `IntoKey::get_key` for more details.
+impl AsRef<Key> for Key {
+    fn as_ref(&self) -> &Key {
+        &self
+    }
+}
+
+/// A trait for abstracting the retrieval of a signing key from various sources.
+///
+/// This trait is central to the key handling mechanism, providing a generic interface
+/// for objects that can produce a signing key. It is designed to be flexible,
+/// supporting different types of keys and retrieval strategies.
+///
+/// ## Associated Type `Output`
+///
+/// The `Output` associated type allows implementors to return different kinds of
+/// key-containing structures. For example, one implementation might return a simple
+/// `Key`, while another might return an `ExpirableKey` that includes expiry information.
+///
+/// The `AsRef<Key>` bound on `Output` is crucial. It ensures that no matter what
+/// specific type is returned by `get_key`, it can always be treated as a reference
+/// to a `Key` for signing operations. This allows for a consistent signing interface
+/// while accommodating diverse key types and capabilities.
+///
+/// ## Example
+///
+/// ```rust,ignore
+/// // A simple key provider
+/// struct SimpleKeyProvider;
+/// impl IntoKey for SimpleKeyProvider {
+///     type Output = Key;
+///     async fn get_key(&self) -> Result<Self::Output, KeyError> {
+///         // ... logic to get a key
+///     }
+/// }
+///
+/// // A provider for keys that expire
+/// struct ExpirableKeyProvider;
+/// impl IntoKey for ExpirableKeyProvider {
+///     type Output = ExpirableKey;
+///     async fn get_key(&self) -> Result<Self::Output, KeyError> {
+///         // ... logic to get a key with an expiry time
+///     }
+/// }
+/// ```
 pub trait IntoKey {
-    /// Get a key from the `IntoKey` source.
-    fn get_key(&self) -> impl Future<Output = Result<Key, KeyError>> + Send;
+    /// The output type of the `get_key` method. Must be convertible to `&Key`.
+    /// This allows for flexible return types (e.g. `Key`, `ExpirableKey`) while
+    /// maintaining a consistent interface for consumers that need a signing key.
+    type Output: AsRef<Key> + Sync + Send;
+
+    /// Asynchronously retrieves a key from the source.
+    ///
+    /// This method is responsible for fetching, decoding, or otherwise preparing
+    /// the signing key for use.
+    fn get_key(&self) -> impl Future<Output = Result<Self::Output, KeyError>> + Send;
+}
+
+// the identity impl, all keys can of course be used as keys
+impl IntoKey for SecretKey<p256::NistP256> {
+    type Output = Key;
+
+    async fn get_key(&self) -> Result<Self::Output, KeyError> {
+        Ok(Key(self.clone()))
+    }
 }
 
 /// A trait for signing messages. See `IntoSignature::sign` for more details.
@@ -262,7 +327,7 @@ where
 {
     async fn sign(&self, message: &[u8]) -> Result<Signature, SigningError> {
         let key = self.get_key().await?;
-        key.sign(message).await
+        key.as_ref().sign(message).await
     }
 }
 
@@ -295,12 +360,27 @@ impl<T: IntoSignature + 'static> IntoSignatureBoxed for T {
     }
 }
 
-/// A wrapper type that caches the output of something that implements `IntoKey`
-/// for a period of time. For example, `JwtUser` implements `IntoKey`, and the
-/// request returns an expiry time. This wrapper will cache the key for the
-/// specified time, avoiding repeated requests to the API.
+/// A wrapper that adds caching to any `IntoKey` implementation.
 ///
-/// TODO: impl
+/// This struct acts as a decorator, intercepting calls to `get_key` and returning a
+/// cached key if one is available and not expired. This is particularly useful for
+/// key sources that involve network requests or expensive computations, such as `JwtUser`.
+///
+/// ## Caching Logic
+///
+/// The caching mechanism relies on the `Output` of the wrapped `IntoKey` implementation.
+/// If the `Output` type implements `AsRef<SystemTime>`, `TimeCachingKey` will use the
+/// provided time as the key's expiration date.
+///
+/// When `get_key` is called:
+/// 1. It checks for a cached key.
+/// 2. If a key exists, it checks if its expiration time (obtained via `AsRef<SystemTime>`)
+///    is in the future.
+/// 3. If the key is valid, it's returned immediately.
+/// 4. Otherwise, it calls the underlying `get_key` method, caches the new key with its
+///    expiration time, and then returns it.
+///
+/// The `ExpirableKey` struct is a common `Output` type used with `TimeCachingKey`.
 ///
 /// # Usage
 /// ```
@@ -312,12 +392,17 @@ impl<T: IntoSignature + 'static> IntoSignatureBoxed for T {
 /// # use p256::elliptic_curve::SecretKey;
 /// # async fn foo() {
 /// let privy = PrivyClient::new("app_id".to_string(), "app_secret".to_string()).unwrap();
-/// let jwt = JwtUser(Arc::new(privy), "test".to_string());
-/// let key = TimeCachingKey::new(jwt);
-/// let key = key.get_key().await.unwrap();
+/// let jwt_key_source = JwtUser(Arc::new(privy), "test".to_string());
+/// // Wrap the source with the caching decorator.
+/// let cached_key_source = TimeCachingKey::new(jwt_key_source);
+///
+/// // The first call will fetch the key from the API.
+/// let key1 = cached_key_source.get_key().await.unwrap();
+/// // Subsequent calls (within the expiry window) will return the cached key.
+/// let key2 = cached_key_source.get_key().await.unwrap();
 /// # }
 /// ```
-pub struct TimeCachingKey<T: IntoKey>(T, Arc<RwLock<Option<(SystemTime, Key)>>>);
+pub struct TimeCachingKey<T: IntoKey>(T, Arc<RwLock<Option<(SystemTime, T::Output)>>>);
 
 impl<T: IntoKey + Sync> TimeCachingKey<T> {
     /// Create a new `TimeCachingKey` from anything that implements `IntoKey`.
@@ -326,22 +411,30 @@ impl<T: IntoKey + Sync> TimeCachingKey<T> {
     }
 }
 
-impl<T: IntoKey + Sync> IntoKey for TimeCachingKey<T> {
-    async fn get_key(&self) -> Result<Key, KeyError> {
+impl<T: IntoKey + Sync> IntoKey for TimeCachingKey<T>
+where
+    T::Output: Clone + Send + Sync + AsRef<SystemTime>,
+{
+    type Output = T::Output;
+
+    async fn get_key(&self) -> Result<Self::Output, KeyError> {
         {
             let valid = self.1.read().await;
-            if let Some((_, key)) = valid.as_ref().filter(|(time, _)| time > &SystemTime::now()) {
+            let now = SystemTime::now();
+            if let Some((time, key)) = valid.as_ref().filter(|(time, _)| time > &now) {
+                tracing::debug!("returning cached key expiring at {:?} vs {:?}", time, now);
                 return Ok(key.clone());
+            } else {
+                tracing::debug!("key missing or expired at {:?}", now);
             }
         }
 
         let key = self.0.get_key().await?;
+        let expiry: &SystemTime = key.as_ref();
 
         {
             let mut state = self.1.write().await;
-            // TODO: set this time from the key
-            let now = SystemTime::now();
-            *state = Some((now + EXPIRY_BUFFER, key.clone()));
+            *state = Some((expiry.to_owned(), key.clone()));
         }
 
         Ok(key)
@@ -373,15 +466,64 @@ where
     F: Fn() -> Fut,
     Fut: Future<Output = Result<Key, KeyError>> + Send,
 {
+    type Output = Key;
+
     fn get_key(&self) -> impl Future<Output = Result<Key, KeyError>> + Send {
         (self.0)()
     }
 }
 
+/// A key that includes an expiration time.
+///
+/// This struct bundles a `Key` with its `SystemTime` of expiration. It is designed
+/// to be used as the `Output` for `IntoKey` implementations where keys have a
+/// limited lifetime (e.g., keys derived from JWTs).
+///
+/// It implements `AsRef<Key>` to allow it to be used for signing, and `AsRef<SystemTime>`
+/// to expose its expiration time to caching mechanisms like `TimeCachingKey`.
+#[derive(Clone, Debug)]
+pub struct ExpirableKey(Key, SystemTime);
+
+impl AsRef<Key> for ExpirableKey {
+    fn as_ref(&self) -> &Key {
+        &self.0
+    }
+}
+
+impl AsRef<SystemTime> for ExpirableKey {
+    fn as_ref(&self) -> &SystemTime {
+        &self.1
+    }
+}
+
 /// A key that is sourced from the user identified by the provided JWT.
+/// If you wish to automatically cache the key for its expiry period,
+/// you can use
 ///
 /// This is used in JWT-based authentication. When attempting to sign,
 /// the JWT is used to retrieve the user's key from the Privy API.
+///
+/// # Example
+///
+/// It is recommended to use this with `TimeCachingKey` to automatically
+/// cache the key for its expiry period. If you would prefer to refresh
+/// every time, then you can use `JwtUser` directly.
+///
+/// ```rust
+/// # use privy_rust::{AuthorizationContext, JwtUser, IntoSignature, PrivyClient, TimeCachingKey};
+/// # use p256::ecdsa::signature::SignerMut;
+/// # use p256::ecdsa::Signature;
+/// # use p256::elliptic_curve::SecretKey;
+/// # use std::time::Duration;
+/// # use std::sync::Arc;
+/// # async fn foo() {
+/// let privy = PrivyClient::new("app_id".to_string(), "app_secret".to_string()).unwrap();
+/// let jwt = JwtUser(Arc::new(privy), "test".to_string());
+/// let key = TimeCachingKey::new(jwt);
+/// let mut context = AuthorizationContext::new();
+/// context.push(key);
+/// # }
+/// ```
 ///
 /// # Errors
 /// This provider can fail if the JWT is invalid, does not match a user,
@@ -389,7 +531,9 @@ where
 pub struct JwtUser(pub Arc<crate::PrivyClient>, pub String);
 
 impl IntoKey for JwtUser {
-    async fn get_key(&self) -> Result<Key, KeyError> {
+    type Output = ExpirableKey;
+
+    async fn get_key(&self) -> Result<Self::Output, KeyError> {
         tracing::debug!("Starting HPKE JWT exchange for user JWT: {}", self.1);
 
         // Get the HPKE manager and format the public key for the API request
@@ -424,14 +568,18 @@ impl IntoKey for JwtUser {
         };
 
         // Process the response based on encryption type
-        let key = match auth {
+        let (key, expiry) = match auth {
             privy_api::types::AuthenticateResponse::WithEncryption {
                 encrypted_authorization_key,
+                expires_at,
                 ..
             } => {
                 tracing::debug!("Received encrypted authorization key, starting HPKE decryption");
 
-                hpke_manager
+                // convert the f64 expiry to a SystemTime
+                let expiry = SystemTime::UNIX_EPOCH + Duration::from_secs_f64(expires_at);
+
+                let key = hpke_manager
                     .decrypt(
                         &encrypted_authorization_key.encapsulated_key,
                         &encrypted_authorization_key.ciphertext,
@@ -439,25 +587,27 @@ impl IntoKey for JwtUser {
                     .map_err(|e| {
                         tracing::error!("HPKE decryption failed: {:?}", e);
                         KeyError::HpkeDecryption(format!("{e:?}"))
-                    })?
+                    })
+                    .map(Key)?;
+
+                (key, expiry)
             }
-            privy_api::types::AuthenticateResponse::WithoutEncryption {
-                authorization_key, ..
-            } => {
+            privy_api::types::AuthenticateResponse::WithoutEncryption { .. } => {
                 tracing::warn!("Received unencrypted authorization key (fallback mode)");
 
                 // Fallback to the old method for backwards compatibility
-                Key::from_bytes(GenericArray::from_slice(&authorization_key.into_bytes())).map_err(
-                    |e| {
-                        tracing::error!("Failed to parse raw authorization key: {:?}", e);
-                        KeyError::InvalidFormat("raw key bytes".to_string())
-                    },
-                )?
+                todo!()
             }
         };
 
-        tracing::info!("Successfully obtained and parsed authorization key");
-        Ok(key)
+        tracing::debug!("successfully obtained and parsed authorization key");
+
+        Ok(ExpirableKey(
+            key,
+            // subtract a reasonable buffer to ensure the key is valid by the time it is used
+            // otherwise we may end up giving a soon-to-expire key to the signer which is ends up invalid
+            expiry - EXPIRY_BUFFER,
+        ))
     }
 }
 
@@ -480,7 +630,7 @@ impl IntoSignature for Key {
         tracing::debug!("SHA256 hash computed: {}", hex::encode(hashed));
 
         // Sign the hash using deterministic signing (RFC 6979)
-        let signing_key = SigningKey::from(self.clone());
+        let signing_key = SigningKey::from(self.0.clone());
 
         // Use deterministic prehash signing to ensure consistent signatures
         let signature: Signature = signing_key
@@ -494,9 +644,13 @@ impl IntoSignature for Key {
 }
 
 impl IntoKey for &Path {
+    type Output = Key;
+
     async fn get_key(&self) -> Result<Key, KeyError> {
         let key = tokio::fs::read_to_string(self).await?;
-        SecretKey::<p256::NistP256>::from_sec1_pem(&key).map_err(|_| KeyError::InvalidFormat(key))
+        SecretKey::<p256::NistP256>::from_sec1_pem(&key)
+            .map_err(|_| KeyError::InvalidFormat(key))
+            .map(Key)
     }
 }
 
@@ -530,15 +684,21 @@ impl IntoSignature for KMSService {
 }
 
 impl IntoKey for PrivateKey {
+    type Output = Key;
+
     async fn get_key(&self) -> Result<Key, KeyError> {
-        SecretKey::<p256::NistP256>::from_sec1_pem(&self.0).map_err(|e| {
-            tracing::error!("Failed to parse SEC1 PEM: {:?}", e);
-            KeyError::InvalidFormat(self.0.clone())
-        })
+        SecretKey::<p256::NistP256>::from_sec1_pem(&self.0)
+            .map_err(|e| {
+                tracing::error!("Failed to parse SEC1 PEM: {:?}", e);
+                KeyError::InvalidFormat(self.0.clone())
+            })
+            .map(Key)
     }
 }
 
 impl IntoKey for PrivateKeyFromFile {
+    type Output = Key;
+
     async fn get_key(&self) -> Result<Key, KeyError> {
         let pem_content = std::fs::read_to_string(&self.0)?;
         PrivateKey(pem_content).get_key().await
@@ -547,17 +707,21 @@ impl IntoKey for PrivateKeyFromFile {
 
 #[cfg(test)]
 mod tests {
-    use std::{path::Path, sync::Arc};
+    use std::{
+        path::Path,
+        sync::{Arc, Mutex},
+        time::{Duration, SystemTime},
+    };
 
     use base64::{Engine, engine::general_purpose::STANDARD};
     use futures::TryStreamExt;
-    use p256::{ecdsa::Signature, elliptic_curve::generic_array::GenericArray};
+    use p256::{SecretKey, ecdsa::Signature};
     use tracing_test::traced_test;
 
-    use crate::{
-        AuthorizationContext, PrivyClient,
-        keys::{IntoKey, IntoSignature, JwtUser, KMSService, PrivateKey, TimeCachingKey},
+    use super::{
+        ExpirableKey, IntoKey, IntoSignature, JwtUser, KMSService, Key, PrivateKey, TimeCachingKey,
     };
+    use crate::{AuthorizationContext, KeyError, PrivyClient};
 
     #[tokio::test]
     async fn jwt() {
@@ -602,9 +766,6 @@ mod tests {
         let mut ctx = AuthorizationContext::new();
 
         ctx.push(Path::new("private_key.pem"));
-        ctx.push(JwtUser(client, "my_jwt".to_string()));
-        // ctx.push(PrivateKey("my_key".to_string()));
-        ctx.push(Signature::from_bytes(GenericArray::from_slice(&STANDARD.decode("J7GLk/CIqvCNCOSJ8sUZb0rCsqWF9l1H1VgYfsAd1ew2uBJHE5hoY+kV7CSzdKkgOhtdvzj22gXA7gcn5gSqvQ==").unwrap())).expect("right size"));
 
         let sigs = ctx
             .sign(&[0, 1, 2, 3])
@@ -613,5 +774,62 @@ mod tests {
             .expect("passes");
 
         assert!(!sigs.is_empty());
+    }
+
+    #[tokio::test]
+    #[traced_test]
+    async fn expiring_key() {
+        struct FakeExpiring(Arc<Mutex<u32>>);
+        impl IntoKey for FakeExpiring {
+            type Output = ExpirableKey;
+
+            async fn get_key(&self) -> Result<Self::Output, KeyError> {
+                *self.0.lock().unwrap() += 1;
+
+                let mut rng = rand::rng();
+
+                Ok(ExpirableKey(
+                    Key(SecretKey::random(&mut rng)),
+                    SystemTime::now()
+                        .checked_add(Duration::from_secs(1))
+                        .unwrap(),
+                ))
+            }
+        }
+
+        let mut ctx = AuthorizationContext::new();
+        let counter = Arc::new(Mutex::new(0));
+        ctx.push(TimeCachingKey::new(FakeExpiring(counter.clone())));
+
+        let sig_a = ctx
+            .sign(&[0, 1, 2, 3])
+            .try_collect::<Vec<_>>()
+            .await
+            .expect("passes");
+
+        let sig_b = ctx
+            .sign(&[0, 1, 2, 3])
+            .try_collect::<Vec<_>>()
+            .await
+            .expect("passes");
+
+        // we expect only one hit, since the key is cached
+        assert_eq!(*counter.lock().unwrap(), 1);
+        // they should be identical
+        assert_eq!(sig_a, sig_b);
+
+        // expires in 1s, lets sleep 2 to be safe
+        tokio::time::sleep(Duration::from_secs(2)).await;
+
+        let sig_c = ctx
+            .sign(&[0, 1, 2, 3])
+            .try_collect::<Vec<_>>()
+            .await
+            .expect("passes");
+
+        // we expect a second hit, since we missed the window
+        assert_eq!(*counter.lock().unwrap(), 2);
+        // the impl above generates a new key, so a new signature
+        assert_ne!(sig_a, sig_c);
     }
 }

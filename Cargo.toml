@@ -9,7 +9,6 @@ license = "MIT OR Apache-2.0"
 members = ["crates/*", "."]
 
 [dependencies]
-solana-sdk = "2.1.9"
 privy-api = { path = "crates/privy-api" }
 reqwest = { version = "0.12", features = ["json"] }
 base64 = "0.21"
@@ -21,7 +20,7 @@ async-trait = "0.1"
 tracing = "0.1.41"
 progenitor-client = "0.11.0"
 delegate = "0.13.4"
-p256 = { version = "0.13.2", features = ["pem", "ecdsa", "pkcs8"] }
+p256 = { version = "0.14.0-pre.10", features = ["pem", "ecdsa", "pkcs8"] }
 futures = "0.3.31"
 serde_json_canonicalizer = "0.3.1"
 sha2 = "0.10.9"
