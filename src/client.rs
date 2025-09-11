@@ -78,4 +78,8 @@ impl PrivyClient {
             client: Client::new_with_client(url, client_with_custom_defaults),
         })
     }
+
+    pub fn app_id(&self) -> &str {
+        &self.app_id
+    }
 }
