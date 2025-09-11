@@ -78,4 +78,8 @@ impl PrivyClient {
             client: Client::new_with_client(url, client_with_custom_defaults),
         })
     }
+
+    pub fn utils(&self) -> crate::utils::Utils {
+        crate::utils::Utils(self.app_id.clone())
+    }
 }

@@ -17,13 +17,16 @@ pub mod subclients;
 
 pub(crate) mod errors;
 pub(crate) mod keys;
-pub(crate) mod types;
+pub(crate) mod utils;
 
 pub use client::PrivyClient;
 pub use errors::*;
 pub use keys::*;
 pub use privy_hpke::PrivyHpke;
-pub use types::*;
+pub use utils::{
+    Method, Utils, WalletApiRequestSignatureInput, format_request_for_authorization_signature,
+    generate_authorization_signatures,
+};
 
 pub(crate) fn get_auth_header(app_id: &str, app_secret: &str) -> String {
     let credentials = format!("{app_id}:{app_secret}");
