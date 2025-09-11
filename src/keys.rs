@@ -81,7 +81,7 @@ impl AuthorizationContext {
     /// # use std::sync::Arc;
     /// # async fn foo() {
     /// let context = AuthorizationContext::new();
-    /// let privy = PrivyClient::new("app_id".to_string(), "app_secret".to_string(), context.clone()).unwrap();
+    /// let privy = PrivyClient::new("app_id".to_string(), "app_secret".to_string()).unwrap();
     /// let jwt = JwtUser(privy, "test".to_string());
     /// let key = PrivateKey("test".to_string());
     /// context.push(jwt);
@@ -111,7 +111,6 @@ impl AuthorizationContext {
     /// let privy = PrivyClient::new(
     ///     "app_id".to_string(),
     ///     "app_secret".to_string(),
-    ///     context.clone(),
     /// )
     /// .unwrap();
     /// let jwt = JwtUser(privy, "test".to_string());
@@ -137,7 +136,6 @@ impl AuthorizationContext {
     /// let privy = PrivyClient::new(
     ///     "app_id".to_string(),
     ///     "app_secret".to_string(),
-    ///     context.clone(),
     /// )
     /// .unwrap();
     /// let jwt = JwtUser(privy, "test".to_string());
@@ -186,7 +184,6 @@ impl AuthorizationContext {
     /// let privy = PrivyClient::new(
     ///     "app_id".to_string(),
     ///     "app_secret".to_string(),
-    ///     context.clone(),
     /// )
     /// .unwrap();
     /// let jwt = JwtUser(privy, "test".to_string());
@@ -324,8 +321,7 @@ impl<T: IntoSignature + 'static> IntoSignatureBoxed for T {
 /// # use p256::ecdsa::Signature;
 /// # use p256::elliptic_curve::SecretKey;
 /// # async fn foo() {
-/// let ctx = AuthorizationContext::new();
-/// let privy = PrivyClient::new("app_id".to_string(), "app_secret".to_string(), ctx).unwrap();
+/// let privy = PrivyClient::new("app_id".to_string(), "app_secret".to_string()).unwrap();
 /// let jwt = JwtUser(privy, "test".to_string());
 /// let key = TimeCachingKey::new(jwt);
 /// let key = key.get_key().await.unwrap();
@@ -582,12 +578,7 @@ mod tests {
         let url =
             std::env::var("STAGING_URL").unwrap_or_else(|_| "https://api.privy.com".to_string());
 
-        Ok(PrivyClient::new_with_url(
-            app_id,
-            app_secret,
-            AuthorizationContext::new(),
-            &url,
-        )?)
+        Ok(PrivyClient::new_with_url(app_id, app_secret, &url)?)
     }
 
     fn get_test_jwt() -> String {
@@ -624,15 +615,21 @@ mod tests {
 
         let message1 = b"test message for signing";
         let message2 = b"different message";
-        
+
         // Test deterministic signing - same message should produce same signature
         let signature1a = test_key.sign(message1).await.unwrap();
         let signature1b = test_key.sign(message1).await.unwrap();
-        assert_eq!(signature1a, signature1b, "Deterministic signing should produce identical signatures");
-        
+        assert_eq!(
+            signature1a, signature1b,
+            "Deterministic signing should produce identical signatures"
+        );
+
         // Test different messages produce different signatures
         let signature2 = test_key.sign(message2).await.unwrap();
-        assert_ne!(signature1a, signature2, "Different messages should produce different signatures");
+        assert_ne!(
+            signature1a, signature2,
+            "Different messages should produce different signatures"
+        );
     }
 
     // PrivateKeyFromFile tests
@@ -771,13 +768,19 @@ mod tests {
         let ctx = AuthorizationContext::new();
         ctx.push(PrivateKey(TEST_PRIVATE_KEY_PEM.to_string()));
         let errors = ctx.validate().await;
-        assert!(errors.is_empty(), "Valid context should have no validation errors");
+        assert!(
+            errors.is_empty(),
+            "Valid context should have no validation errors"
+        );
 
         // Test validation failure
         let ctx2 = AuthorizationContext::new();
         ctx2.push(PrivateKey("invalid_key_data".to_string()));
         let errors2 = ctx2.validate().await;
-        assert!(!errors2.is_empty(), "Invalid key should produce validation errors");
+        assert!(
+            !errors2.is_empty(),
+            "Invalid key should produce validation errors"
+        );
     }
 
     // TimeCachingKey tests
@@ -907,10 +910,12 @@ mod tests {
             println!("JWT integration test skipped - staging environment may not be configured");
             return;
         }
-        
+
         let sign_result = jwt_user.sign(b"test message").await;
         if sign_result.is_err() {
-            println!("JWT signing integration test skipped - staging environment may not be configured");
+            println!(
+                "JWT signing integration test skipped - staging environment may not be configured"
+            );
         }
     }
 
@@ -930,7 +935,10 @@ mod tests {
             .await
             .expect("passes");
 
-        assert!(!sigs.is_empty(), "Context with mixed sources should produce signatures");
+        assert!(
+            !sigs.is_empty(),
+            "Context with mixed sources should produce signatures"
+        );
     }
 
     // Error handling tests
@@ -959,11 +967,16 @@ mod tests {
         let sigs2: Vec<_> = ctx2.sign(b"test").try_collect().await.unwrap();
         assert_eq!(sigs1.len(), 1);
         assert_eq!(sigs2.len(), 1);
-        assert_eq!(sigs1[0], sigs2[0], "Cloned context should produce same signatures");
-        
+        assert_eq!(
+            sigs1[0], sigs2[0],
+            "Cloned context should produce same signatures"
+        );
+
         // Test debug output
         let debug_str = format!("{:?}", ctx1);
-        assert!(debug_str.contains("AuthorizationContext"), "Debug output should contain struct name");
+        assert!(
+            debug_str.contains("AuthorizationContext"),
+            "Debug output should contain struct name"
+        );
     }
-
 }

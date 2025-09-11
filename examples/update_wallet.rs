@@ -50,9 +50,9 @@ async fn main() -> Result<()> {
     let key = PrivateKeyFromFile("private_key.pem".into());
     let public_key = key.get_key().await?.public_key();
 
-    let ctx = AuthorizationContext::new();
-    let client = PrivyClient::new(app_id.clone(), app_secret, ctx.clone())?;
+    let client = PrivyClient::new(app_id.clone(), app_secret)?;
 
+    let ctx = AuthorizationContext::new();
     ctx.push(PrivateKeyFromFile("private_key.pem".into()));
     ctx.push(JwtUser(client.clone(), "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhbGV4QGFybHlvbi5kZXYiLCJpYXQiOjEwMDAwMDAwMDAwMH0.IpNgavH95CFZPjkzQW4eyxMIfJ-O_5cIaDyu_6KRXffykjYDRwxTgFJuYq0F6d8wSXf4de-vzfBRWSKMISM3rJdlhximYINGJB14mJFCD87VMLFbTpHIXcv7hc1AAYMPGhOsRkYfYXuvVopKszMvhupmQYJ1npSvKWNeBniIyOHYv4xebZD8L0RVlPvuEKTXTu-CDfs2rMwvD9g_wiBznS3uMF3v_KPaY6x0sx9zeCSxAH9zvhMMtct_Ad9kuoUncGpRzNhEk6JlVccN2Leb1JzbldxSywyS2AApD05u-GFAgFDN3P39V3qgRTGDuuUfUvKQ9S4rbu5El9Qq1CJTeA".to_string()));
 
@@ -61,20 +61,21 @@ async fn main() -> Result<()> {
 
     tracing::info!("got wallet: {:?}", wallet);
 
-    // Create the request body that will be sent using the generated privy-api type
-    let update_wallet_body = UpdateWalletBody {
-        owner: Some(OwnerInput {
-            subtype_0: Some(PublicKeyOwner {
-                public_key: public_key.to_string(),
-            }),
-            ..Default::default()
-        }),
-
-        ..Default::default()
-    };
-
     let wallet = match wallets_client
-        .update(&wallet_id, None, &update_wallet_body)
+        .update(
+            &wallet_id,
+            &ctx,
+            &UpdateWalletBody {
+                owner: Some(OwnerInput {
+                    subtype_0: Some(PublicKeyOwner {
+                        public_key: public_key.to_string(),
+                    }),
+                    ..Default::default()
+                }),
+
+                ..Default::default()
+            },
+        )
         .await
     {
         Ok(wallet) => Ok(wallet),

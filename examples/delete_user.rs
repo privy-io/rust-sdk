@@ -45,7 +45,7 @@ async fn main() -> Result<()> {
         public_key
     );
 
-    let client = PrivyClient::new(app_id, app_secret, Default::default())?;
+    let client = PrivyClient::new(app_id, app_secret)?;
 
     let user = client.users().delete("cmf56qacr01qpl90brxql83lx").await?;
 

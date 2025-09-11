@@ -51,7 +51,8 @@ struct ResourceConfig {
 struct MethodConfig {
     name: String,
     endpoint: String,
-    should_generate: bool, // false for methods starting with '_'
+    should_generate: bool, // affected by skip and only rules
+    private: bool,         // true for methods starting with '_'
 }
 
 /// Information extracted from the generated progenitor code
@@ -69,9 +70,7 @@ fn main() {
 
     // Step 1: Generate the base progenitor code
     let openapi_spec = load_openapi_spec();
-    let mut generator = progenitor::Generator::new(
-        GenerationSettings::default().with_inner_type(quote! {crate::middleware::MiddlewareState}),
-    );
+    let mut generator = progenitor::Generator::new(&GenerationSettings::default());
     let tokens = generator.generate_tokens(&openapi_spec).unwrap();
     let ast = syn::parse2(tokens).unwrap();
     let content = prettyplease::unparse(&ast);
@@ -131,23 +130,43 @@ fn parse_resource_config(name: &str, config: &Value) -> ResourceConfig {
     if let Some(methods_map) = config.get("methods").and_then(|m| m.as_mapping()) {
         for (method_name, method_config) in methods_map {
             if let Some(method_name_str) = method_name.as_str() {
-                let endpoint = match method_config {
-                    Value::String(s) => s.clone(),
-                    Value::Mapping(map) => map
-                        .get("endpoint")
-                        .and_then(|e| e.as_str())
-                        .unwrap_or("")
-                        .to_string(),
+                let (endpoint, should_generate) = match method_config {
+                    Value::String(s) => (s.clone(), true),
+                    Value::Mapping(map) => {
+                        let endpoint = map
+                            .get("endpoint")
+                            .and_then(|e| e.as_str())
+                            .unwrap_or("")
+                            .to_string();
+
+                        // if there is an 'only' rule, make sure we are in it
+                        // otherwise we are included
+                        let is_included = map
+                            .get("only")
+                            .and_then(|o| o.as_sequence())
+                            .map(|o| o.iter().any(|rule| rule.as_str().unwrap_or("") == "rust"))
+                            .unwrap_or(true);
+
+                        // // if there is a skip rule, make sure we are NOT in it
+                        // // otherwise not skipped
+                        let is_skipped = map
+                            .get("skip")
+                            .and_then(|o| o.as_sequence())
+                            .map(|o| o.iter().any(|rule| rule.as_str().unwrap_or("") == "rust"))
+                            .unwrap_or(false);
+
+                        (endpoint, is_included && !is_skipped)
+                    }
                     _ => continue,
                 };
 
-                // Skip methods that start with underscore unless they're the Rust version
-                let should_generate = !method_name_str.starts_with('_');
+                let private = method_name_str.starts_with('_');
 
                 methods.push(MethodConfig {
                     name: method_name_str.to_string(),
                     endpoint,
                     should_generate,
+                    private,
                 });
             }
         }
@@ -301,6 +320,10 @@ fn generate_resource_code(
         #[derive(Clone, Debug)]
         pub struct #client_ident {
             client: Client,
+            #[allow(dead_code)]
+            app_id: String,
+            #[allow(dead_code)]
+            base_url: String,
         }
     };
 
@@ -327,8 +350,8 @@ fn generate_resource_code(
     let impl_block = quote! {
         impl #client_ident {
             /// Create a new client instance
-            pub fn new(client: Client) -> Self {
-                Self { client }
+            pub fn new(client: Client, app_id: String, base_url: String) -> Self {
+                Self { client, app_id, base_url }
             }
 
             #(#impl_methods)*
@@ -409,9 +432,15 @@ fn generate_method_impl(
             quote! { self.client.#generated_method_ident(#(#param_names),*) }
         };
 
+        let public = if method.private {
+            quote! {}
+        } else {
+            quote! { pub }
+        };
+
         Some(quote! {
             #doc_comment
-            pub #sig {
+            #public #sig {
                 #call_expr
             }
         })
@@ -437,7 +466,7 @@ fn generate_subresource_accessor(
     quote! {
         #[doc = #msg]
         pub fn #method_name(&self) -> #client_ident {
-            #client_ident::new(self.client.clone())
+            #client_ident::new(self.client.clone(), self.app_id.clone(), self.base_url.clone())
         }
     }
 }
@@ -455,7 +484,7 @@ fn generate_main_client_extension(resources: &[ResourceConfig]) -> proc_macro2::
         accessor_methods.push(quote! {
             #[doc = #msg]
             pub fn #method_name(&self) -> #client_ident {
-                #client_ident::new(self.client.clone())
+                #client_ident::new(self.client.clone(), self.app_id.clone(), self.base_url.clone())
             }
         });
     }

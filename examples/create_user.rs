@@ -45,7 +45,7 @@ async fn main() -> Result<()> {
         app_secret,
     );
 
-    let client = PrivyClient::new(app_id, app_secret, Default::default())?;
+    let client = PrivyClient::new(app_id, app_secret)?;
 
     let user = client
         .users()

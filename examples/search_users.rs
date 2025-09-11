@@ -42,7 +42,7 @@ async fn main() -> Result<()> {
         search_term
     );
 
-    let client = PrivyClient::new(app_id, app_secret, Default::default())?;
+    let client = PrivyClient::new(app_id, app_secret)?;
 
     // Search for users by email address or other criteria
     let search_result = client

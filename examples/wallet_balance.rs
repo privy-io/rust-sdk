@@ -47,7 +47,7 @@ async fn main() -> Result<()> {
         wallet_id
     );
 
-    let client = PrivyClient::new(app_id, app_secret, Default::default())?;
+    let client = PrivyClient::new(app_id, app_secret)?;
 
     // Get SOL balance on Solana
     let balance = client
