@@ -3,19 +3,16 @@ use std::{
     path::{Path, PathBuf},
     pin::Pin,
     sync::{Arc, Mutex},
-    time::{Duration, SystemTime},
 };
 
 use futures::{Stream, StreamExt};
 use p256::{
     ecdsa::{Signature, SigningKey, signature::hazmat::PrehashSigner},
-    elliptic_curve::{SecretKey, generic_array::GenericArray},
+    elliptic_curve::SecretKey,
 };
-use tokio::sync::RwLock;
 
-use crate::{KeyError, SigningError, generated::types::AuthenticateBody, privy_hpke::PrivyHpke};
+use crate::{KeyError, SigningError};
 
-const EXPIRY_BUFFER: Duration = Duration::from_secs(60);
 const SIGNATURE_RESOLUTION_CONCURRENCY: usize = 10;
 
 /// A context for signing messages. Any keys added to the context will be
@@ -108,11 +105,7 @@ impl AuthorizationContext {
     /// # use futures::stream::StreamExt;
     /// # async fn foo() {
     /// let context = AuthorizationContext::new();
-    /// let privy = PrivyClient::new(
-    ///     "app_id".to_string(),
-    ///     "app_secret".to_string(),
-    /// )
-    /// .unwrap();
+    /// let privy = PrivyClient::new("app_id".to_string(), "app_secret".to_string()).unwrap();
     /// let jwt = JwtUser(privy, "test".to_string());
     /// context.push(jwt);
     /// let key = context.sign(&[0, 1, 2, 3]).collect::<Vec<_>>().await;
@@ -133,11 +126,7 @@ impl AuthorizationContext {
     /// # use futures::stream::TryStreamExt;
     /// # async fn foo() {
     /// let mut context = AuthorizationContext::new();
-    /// let privy = PrivyClient::new(
-    ///     "app_id".to_string(),
-    ///     "app_secret".to_string(),
-    /// )
-    /// .unwrap();
+    /// let privy = PrivyClient::new("app_id".to_string(), "app_secret".to_string()).unwrap();
     /// let jwt = JwtUser(privy, "test".to_string());
     /// context.push(jwt);
     /// let key = context.sign(&[0, 1, 2, 3]).try_collect::<Vec<_>>().await;
@@ -181,11 +170,7 @@ impl AuthorizationContext {
     /// # use std::sync::Arc;
     /// # async fn foo() {
     /// let mut context = AuthorizationContext::new();
-    /// let privy = PrivyClient::new(
-    ///     "app_id".to_string(),
-    ///     "app_secret".to_string(),
-    /// )
-    /// .unwrap();
+    /// let privy = PrivyClient::new("app_id".to_string(), "app_secret".to_string()).unwrap();
     /// let jwt = JwtUser(privy, "test".to_string());
     /// let key = SecretKey::<p256::NistP256>::from_sec1_pem(&"test".to_string()).unwrap();
     /// context.push(jwt);
@@ -305,59 +290,6 @@ impl<T: IntoSignature + 'static> IntoSignatureBoxed for T {
     }
 }
 
-/// A wrapper type that caches the output of something that implements `IntoKey`
-/// for a period of time. For example, `JwtUser` implements `IntoKey`, and the
-/// request returns an expiry time. This wrapper will cache the key for the
-/// specified time, avoiding repeated requests to the API.
-///
-/// TODO: impl
-///
-/// # Usage
-/// ```
-/// # use privy_rust::{IntoKey, JwtUser, TimeCachingKey, PrivyClient, AuthorizationContext};
-/// # use std::time::Duration;
-/// # use std::sync::Arc;
-/// # use p256::ecdsa::signature::SignerMut;
-/// # use p256::ecdsa::Signature;
-/// # use p256::elliptic_curve::SecretKey;
-/// # async fn foo() {
-/// let privy = PrivyClient::new("app_id".to_string(), "app_secret".to_string()).unwrap();
-/// let jwt = JwtUser(privy, "test".to_string());
-/// let key = TimeCachingKey::new(jwt);
-/// let key = key.get_key().await.unwrap();
-/// # }
-/// ```
-pub struct TimeCachingKey<T: IntoKey>(T, Arc<RwLock<Option<(SystemTime, Key)>>>);
-
-impl<T: IntoKey + Sync> TimeCachingKey<T> {
-    /// Create a new `TimeCachingKey` from anything that implements `IntoKey`.
-    pub fn new(key: T) -> Self {
-        Self(key, Arc::new(RwLock::new(None)))
-    }
-}
-
-impl<T: IntoKey + Sync> IntoKey for TimeCachingKey<T> {
-    async fn get_key(&self) -> Result<Key, KeyError> {
-        {
-            let valid = self.1.read().await;
-            if let Some((_, key)) = valid.as_ref().filter(|(time, _)| time > &SystemTime::now()) {
-                return Ok(key.clone());
-            }
-        }
-
-        let key = self.0.get_key().await?;
-
-        {
-            let mut state = self.1.write().await;
-            // TODO: set this time from the key
-            let now = SystemTime::now();
-            *state = Some((now + EXPIRY_BUFFER, key.clone()));
-        }
-
-        Ok(key)
-    }
-}
-
 /// A wrapper for a closure that implements `IntoSignature`.
 /// This uses the newtype pattern to avoid conflicting blanket impls.
 pub struct FnSigner<F>(pub F);
@@ -400,76 +332,10 @@ pub struct JwtUser(pub crate::PrivyClient, pub String);
 
 impl IntoKey for JwtUser {
     async fn get_key(&self) -> Result<Key, KeyError> {
-        tracing::debug!("Starting HPKE JWT exchange for user JWT: {}", self.1);
-
-        // Get the HPKE manager and format the public key for the API request
-        let hpke_manager = PrivyHpke::new();
-        let public_key_b64 = hpke_manager.public_key().map_err(|e| {
-            tracing::error!("Failed to format HPKE public key: {:?}", e);
-            KeyError::Unknown
-        })?;
-
-        tracing::debug!(
-            "Generated HPKE public key for authentication request {}",
-            public_key_b64
-        );
-
-        // Build the authentication request with encryption parameters
-        let body = AuthenticateBody {
-            user_jwt: self.1.clone(),
-            encryption_type: Some(crate::generated::types::AuthenticateBodyEncryptionType::Hpke),
-            recipient_public_key: Some(public_key_b64),
-        };
-
-        // Send the authentication request
-        let auth = match self.0.wallets().authenticate_with_jwt(&body).await {
-            Ok(r) => r.into_inner(),
-            Err(crate::generated::Error::UnexpectedResponse(response)) => {
-                tracing::error!("Unexpected API response: {:?}", response.text().await);
-                return Err(KeyError::Unknown);
-            }
-            Err(e) => {
-                tracing::error!("API request failed: {:?}", e);
-                return Err(KeyError::Unknown);
-            }
-        };
-
-        // Process the response based on encryption type
-        let key = match auth {
-            crate::generated::types::AuthenticateResponse::WithEncryption {
-                encrypted_authorization_key,
-                ..
-            } => {
-                tracing::debug!("Received encrypted authorization key, starting HPKE decryption");
-
-                hpke_manager
-                    .decrypt(
-                        &encrypted_authorization_key.encapsulated_key,
-                        &encrypted_authorization_key.ciphertext,
-                    )
-                    .map_err(|e| {
-                        tracing::error!("HPKE decryption failed: {:?}", e);
-                        KeyError::HpkeDecryption(format!("{e:?}"))
-                    })?
-            }
-            crate::generated::types::AuthenticateResponse::WithoutEncryption {
-                authorization_key,
-                ..
-            } => {
-                tracing::warn!("Received unencrypted authorization key (fallback mode)");
-
-                // Fallback to the old method for backwards compatibility
-                Key::from_bytes(GenericArray::from_slice(&authorization_key.into_bytes())).map_err(
-                    |e| {
-                        tracing::error!("Failed to parse raw authorization key: {:?}", e);
-                        KeyError::InvalidFormat("raw key bytes".to_string())
-                    },
-                )?
-            }
-        };
-
-        tracing::info!("Successfully obtained and parsed authorization key");
-        Ok(key)
+        self.0
+            .jwt_exchange
+            .exchange_jwt_for_authorization_key(self)
+            .await
     }
 }
 
@@ -550,10 +416,7 @@ impl IntoKey for PrivateKeyFromFile {
 
 #[cfg(test)]
 mod tests {
-    use std::{
-        path::{Path, PathBuf},
-        sync::{Arc, Mutex},
-    };
+    use std::path::{Path, PathBuf};
 
     use base64::{Engine, engine::general_purpose::STANDARD};
     use futures::TryStreamExt;
@@ -565,8 +428,10 @@ mod tests {
     use tracing_test::traced_test;
 
     use super::*;
-
-    use crate::{AuthorizationContext, FnKey, FnSigner, KeyError, PrivateKeyFromFile, PrivyClient};
+    use crate::{
+        AuthorizationContext, FnKey, FnSigner, KeyError, PrivateKeyFromFile, PrivyClient,
+        client::PrivyClientOptions,
+    };
 
     // generated using `mise gen-p256-key`
     const TEST_PRIVATE_KEY_PEM: &str = include_str!("../tests/test_private_key.pem");
@@ -578,7 +443,14 @@ mod tests {
         let url =
             std::env::var("STAGING_URL").unwrap_or_else(|_| "https://api.privy.com".to_string());
 
-        Ok(PrivyClient::new_with_url(app_id, app_secret, &url)?)
+        Ok(PrivyClient::new_with_options(
+            app_id,
+            app_secret,
+            PrivyClientOptions {
+                base_url: url,
+                ..Default::default()
+            },
+        )?)
     }
 
     fn get_test_jwt() -> String {
@@ -780,36 +652,6 @@ mod tests {
         assert!(
             !errors2.is_empty(),
             "Invalid key should produce validation errors"
-        );
-    }
-
-    // TimeCachingKey tests
-    #[tokio::test]
-    #[traced_test]
-    async fn test_time_caching_key_caching() {
-        struct FakeKey(Arc<Mutex<u32>>);
-        impl IntoKey for FakeKey {
-            async fn get_key(&self) -> Result<SecretKey<p256::NistP256>, KeyError> {
-                *self.0.lock().unwrap() += 1;
-                // Create deterministic key for testing
-                let key_bytes = [1u8; 32];
-                Ok(SecretKey::<p256::NistP256>::from_bytes(&key_bytes.into()).unwrap())
-            }
-        }
-
-        let counter = Arc::new(Mutex::new(0));
-        let cached_key = TimeCachingKey::new(FakeKey(counter.clone()));
-
-        // First call should fetch the key
-        let _key1 = cached_key.get_key().await.unwrap();
-        assert_eq!(*counter.lock().unwrap(), 1);
-
-        // Second call should use cached key (since EXPIRY_BUFFER is 60s)
-        let _key2 = cached_key.get_key().await.unwrap();
-        assert_eq!(
-            *counter.lock().unwrap(),
-            1,
-            "Second call should use cached key"
         );
     }
 

@@ -4,8 +4,10 @@
 //! as well as some manual overrides for things that need the authctx,
 //! following the stainless spec.
 
-use crate::generated::types::{Policy, UpdatePolicyBody, UpdatePolicyPolicyId};
-use crate::{AuthorizationContext, generate_authorization_signatures};
+use crate::{
+    AuthorizationContext, generate_authorization_signatures,
+    generated::types::{Policy, UpdatePolicyBody, UpdatePolicyPolicyId},
+};
 
 include!(concat!(env!("OUT_DIR"), "/subclients.rs"));
 
