@@ -6,10 +6,7 @@ use std::time::Duration;
 
 use reqwest::header::{CONTENT_TYPE, HeaderValue};
 
-use crate::{
-    AuthorizationContext, PrivyCreateError, generated::Client, get_auth_header,
-    middleware::MiddlewareState,
-};
+use crate::{PrivyCreateError, generated::Client, get_auth_header};
 
 /// Privy client for interacting with the Privy API.
 ///
@@ -18,10 +15,10 @@ use crate::{
 /// the `wallet()` method.
 #[derive(Clone, Debug)]
 pub struct PrivyClient {
-    #[allow(dead_code)]
     pub(crate) app_id: String,
     #[allow(dead_code)]
     pub(crate) app_secret: String,
+    pub(crate) base_url: String,
     pub(crate) client: Client,
 }
 
@@ -30,10 +27,9 @@ impl PrivyClient {
     ///
     /// # Usage
     /// ```no_run
-    /// # use privy_rust::{PrivyClient, PrivyCreateError, PrivateKeyFromFile, AuthorizationContext};
+    /// # use privy_rust::{PrivyCreateError, PrivateKeyFromFile, AuthorizationContext};
     /// # async fn foo() -> Result<(), PrivyCreateError> {
     /// let ctx = AuthorizationContext::new();
-    /// let client = PrivyClient::new("app_id".into(), "app_secret".into(), ctx.clone())?;
     /// ctx.push(PrivateKeyFromFile("private_key.pem".into()));
     /// # Ok(())
     /// # }
@@ -42,12 +38,8 @@ impl PrivyClient {
     /// # Errors
     /// This can fail for two reasons, either the `app_id` or `app_secret` are not
     /// valid headers, or that the underlying http client could not be created.
-    pub fn new(
-        app_id: String,
-        app_secret: String,
-        ctx: AuthorizationContext,
-    ) -> Result<Self, PrivyCreateError> {
-        Self::new_with_url(app_id, app_secret, ctx, "https://api.privy.io")
+    pub fn new(app_id: String, app_secret: String) -> Result<Self, PrivyCreateError> {
+        Self::new_with_url(app_id, app_secret, "https://api.privy.io")
     }
 
     /// Create a new `PrivyClient` with a custom url
@@ -58,7 +50,6 @@ impl PrivyClient {
     pub fn new_with_url(
         app_id: String,
         app_secret: String,
-        ctx: AuthorizationContext,
         url: &str,
     ) -> Result<Self, PrivyCreateError> {
         let mut headers = reqwest::header::HeaderMap::new();
@@ -79,14 +70,8 @@ impl PrivyClient {
         Ok(Self {
             app_id: app_id.clone(),
             app_secret,
-            client: Client::new_with_client(
-                url,
-                client_with_custom_defaults,
-                MiddlewareState {
-                    app_id,
-                    ctx: ctx.clone(),
-                },
-            ),
+            base_url: url.to_string(),
+            client: Client::new_with_client(url, client_with_custom_defaults),
         })
     }
 }

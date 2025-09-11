@@ -42,7 +42,7 @@ async fn main() -> Result<()> {
         transaction_id
     );
 
-    let client = PrivyClient::new(app_id, app_secret, Default::default())?;
+    let client = PrivyClient::new(app_id, app_secret)?;
 
     let transaction = client.transactions().get(&transaction_id).await?;
 

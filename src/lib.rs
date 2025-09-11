@@ -13,13 +13,10 @@ pub mod generated {
     include!(concat!(env!("OUT_DIR"), "/codegen.rs"));
 }
 
-mod subclients {
-    include!(concat!(env!("OUT_DIR"), "/subclients.rs"));
-}
+pub mod subclients;
 
 pub(crate) mod errors;
 pub(crate) mod keys;
-pub(crate) mod middleware;
 pub(crate) mod types;
 
 pub use client::PrivyClient;

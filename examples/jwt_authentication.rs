@@ -9,7 +9,7 @@
 //!
 //! ## Required Environment Variables
 //! - `PRIVY_APP_ID`: Your Privy app ID
-//! - `PRIVY_APP_SECRET`: Your Privy app secret  
+//! - `PRIVY_APP_SECRET`: Your Privy app secret
 //! - `PRIVY_USER_JWT`: Valid JWT token for the user
 //!
 //! ## Usage
@@ -42,7 +42,7 @@ async fn main() -> Result<()> {
         app_secret,
     );
 
-    let client = PrivyClient::new(app_id, app_secret, Default::default())?;
+    let client = PrivyClient::new(app_id, app_secret)?;
 
     let jwt_auth = client
         .wallets()

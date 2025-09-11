@@ -2,7 +2,7 @@
 //!
 //! This example demonstrates how to retrieve all wallets in your Privy app.
 //! It shows how to:
-//! - Initialize a Privy client with app credentials  
+//! - Initialize a Privy client with app credentials
 //! - List all wallets with optional pagination
 //! - Handle the response containing wallet data
 //!
@@ -46,7 +46,7 @@ async fn main() -> Result<()> {
         public_key
     );
 
-    let client = PrivyClient::new(app_id, app_secret, Default::default())?;
+    let client = PrivyClient::new(app_id, app_secret)?;
 
     let wallets = client.wallets().list(None, None, Some(5.0), None).await?;
 

@@ -598,8 +598,7 @@ mod tests {
 
     #[test]
     fn test_privy_client_new() {
-        let ctx = AuthorizationContext::new();
-        let result = PrivyClient::new("test_app".to_string(), "test_secret".to_string(), ctx);
+        let result = PrivyClient::new("test_app".to_string(), "test_secret".to_string());
         assert!(result.is_ok(), "Should successfully create client");
 
         let client = result.unwrap();
@@ -608,11 +607,9 @@ mod tests {
 
     #[test]
     fn test_privy_client_new_with_url() {
-        let ctx = AuthorizationContext::new();
         let result = PrivyClient::new_with_url(
             "test_app".to_string(),
             "test_secret".to_string(),
-            ctx,
             "https://staging.privy.io",
         );
         assert!(
@@ -626,9 +623,8 @@ mod tests {
 
     #[test]
     fn test_privy_client_invalid_credentials() {
-        let ctx = AuthorizationContext::new();
         // Test with invalid characters that would fail header validation
-        let result = PrivyClient::new("test\napp".to_string(), "test_secret".to_string(), ctx);
+        let result = PrivyClient::new("test\napp".to_string(), "test_secret".to_string());
         assert!(
             result.is_err(),
             "Should fail with invalid app_id characters"
@@ -637,9 +633,7 @@ mod tests {
 
     #[test]
     fn test_privy_client_clone() {
-        let ctx = AuthorizationContext::new();
-        let client =
-            PrivyClient::new("test_app".to_string(), "test_secret".to_string(), ctx).unwrap();
+        let client = PrivyClient::new("test_app".to_string(), "test_secret".to_string()).unwrap();
         let client2 = client.clone();
 
         assert_eq!(client.app_id, client2.app_id);
@@ -648,9 +642,7 @@ mod tests {
 
     #[test]
     fn test_privy_client_debug() {
-        let ctx = AuthorizationContext::new();
-        let client =
-            PrivyClient::new("test_app".to_string(), "test_secret".to_string(), ctx).unwrap();
+        let client = PrivyClient::new("test_app".to_string(), "test_secret".to_string()).unwrap();
         let debug_str = format!("{:?}", client);
         assert!(
             debug_str.contains("PrivyClient"),
@@ -885,9 +877,8 @@ mod tests {
     #[ignore] // Only run when STAGING_* env vars are set
     async fn test_client_creation_staging() {
         let (app_id, app_secret, url) = get_staging_env();
-        let ctx = AuthorizationContext::new();
 
-        let result = PrivyClient::new_with_url(app_id, app_secret, ctx, &url);
+        let result = PrivyClient::new_with_url(app_id, app_secret, &url);
         assert!(
             result.is_ok(),
             "Should successfully create client with staging credentials"

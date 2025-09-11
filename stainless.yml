@@ -25,29 +25,29 @@ resources:
       # This is only needed for languages that do not support method overloading
       _rpc:
         endpoint: post /v1/wallets/{wallet_id}/rpc
-        only: [ python, typescript, node ]
+        only: [ python, typescript, node, rust ]
       _raw_sign:
         endpoint: post /v1/wallets/{wallet_id}/raw_sign
-        only: [ python, typescript, node ]
+        only: [ python, typescript, node, rust ]
       _update:
         endpoint: patch /v1/wallets/{wallet_id}
-        only: [ python, typescript, node ]
+        only: [ python, typescript, node, rust ]
       _export:
         endpoint: post /v1/wallets/{wallet_id}/export
-        only: [ python, typescript, node ]
+        only: [ python, typescript, node, rust ]
       # On the other hand, these are not prefixed, for languages that DO support method overloading.
       rpc:
         endpoint: post /v1/wallets/{wallet_id}/rpc
-        skip: [ python, typescript, node ]
+        skip: [ python, typescript, node, rust ]
       raw_sign:
         endpoint: post /v1/wallets/{wallet_id}/raw_sign
-        skip: [ python, typescript, node ]
+        skip: [ python, typescript, node, rust ]
       update:
         endpoint: patch /v1/wallets/{wallet_id}
-        skip: [ python, typescript, node ]
+        skip: [ python, typescript, node, rust ]
       export:
         endpoint: post /v1/wallets/{wallet_id}/export
-        skip: [ python, typescript, node ]
+        skip: [ python, typescript, node, rust ]
       # Wallet 'import' methods are shadowed by an 'import' utility method.
       # We prefix with an underscore to signal that these are not to be called directly.
       _init_import: post /v1/wallets/import/init
@@ -100,35 +100,35 @@ resources:
       # This is only needed for languages that do not support method overloading
       _update:
         endpoint: patch /v1/policies/{policy_id}
-        only: [ python, typescript, node ]
+        only: [ python, typescript, node, rust ]
       _delete:
         endpoint: delete /v1/policies/{policy_id}
-        only: [ python, typescript, node ]
+        only: [ python, typescript, node, rust ]
       _create_rule:
         endpoint: post /v1/policies/{policy_id}/rules
-        only: [ python, typescript, node ]
+        only: [ python, typescript, node, rust ]
       _update_rule:
         endpoint: patch /v1/policies/{policy_id}/rules/{rule_id}
-        only: [ python, typescript, node ]
+        only: [ python, typescript, node, rust ]
       _delete_rule:
         endpoint: delete /v1/policies/{policy_id}/rules/{rule_id}
-        only: [ python, typescript, node ]
+        only: [ python, typescript, node, rust ]
       # On the other hand, these are not prefixed, for languages that DO support method overloading.
       update:
         endpoint: patch /v1/policies/{policy_id}
-        skip: [ python, typescript, node ]
+        skip: [ python, typescript, node, rust ]
       delete:
         endpoint: delete /v1/policies/{policy_id}
-        skip: [ python, typescript, node ]
+        skip: [ python, typescript, node, rust ]
       create_rule:
         endpoint: post /v1/policies/{policy_id}/rules
-        skip: [ python, typescript, node ]
+        skip: [ python, typescript, node, rust ]
       update_rule:
         endpoint: patch /v1/policies/{policy_id}/rules/{rule_id}
-        skip: [ python, typescript, node ]
+        skip: [ python, typescript, node, rust ]
       delete_rule:
         endpoint: delete /v1/policies/{policy_id}/rules/{rule_id}
-        skip: [ python, typescript, node ]
+        skip: [ python, typescript, node, rust ]
 
   transactions:
     methods:
@@ -147,17 +147,17 @@ resources:
       # This is only needed for languages that do not support method overloading
       _update:
         endpoint: patch /v1/key_quorums/{key_quorum_id}
-        only: [ python, typescript, node ]
+        only: [ python, typescript, node, rust ]
       _delete:
         endpoint: delete /v1/key_quorums/{key_quorum_id}
-        only: [ python, typescript, node ]
+        only: [ python, typescript, node, rust ]
       # On the other hand, these are not prefixed, for languages that DO support method overloading.
       update:
         endpoint: patch /v1/key_quorums/{key_quorum_id}
-        skip: [ python, typescript, node ]
+        skip: [ python, typescript, node, rust ]
       delete:
         endpoint: delete /v1/key_quorums/{key_quorum_id}
-        skip: [ python, typescript, node ]
+        skip: [ python, typescript, node, rust ]
 
   fiat:
     methods:
