@@ -5,7 +5,7 @@
 //! following the stainless spec.
 
 use crate::generated::types::{Policy, UpdatePolicyBody, UpdatePolicyPolicyId};
-use crate::{AuthorizationContext, sign_canonical_request};
+use crate::{AuthorizationContext, generate_authorization_signatures};
 
 include!(concat!(env!("OUT_DIR"), "/subclients.rs"));
 
@@ -16,7 +16,7 @@ impl PoliciesClient {
         ctx: &'a AuthorizationContext,
         body: &'a UpdatePolicyBody,
     ) -> Result<ResponseValue<Policy>, Error<()>> {
-        let sig = sign_canonical_request(
+        let sig = generate_authorization_signatures(
             ctx,
             &self.app_id,
             crate::Method::PATCH,
@@ -35,7 +35,7 @@ impl PoliciesClient {
         policy_id: &'a crate::generated::types::DeletePolicyPolicyId,
         ctx: &'a AuthorizationContext,
     ) -> Result<ResponseValue<crate::generated::types::DeletePolicyResponse>, Error<()>> {
-        let sig = sign_canonical_request(
+        let sig = generate_authorization_signatures(
             ctx,
             &self.app_id,
             crate::Method::DELETE,
@@ -55,7 +55,7 @@ impl PoliciesClient {
         ctx: &'a AuthorizationContext,
         body: &'a crate::generated::types::PolicyRule,
     ) -> Result<ResponseValue<crate::generated::types::RuleResponse>, Error<()>> {
-        let sig = sign_canonical_request(
+        let sig = generate_authorization_signatures(
             ctx,
             &self.app_id,
             crate::Method::POST,
@@ -76,7 +76,7 @@ impl PoliciesClient {
         ctx: &'a AuthorizationContext,
         body: &'a crate::generated::types::PolicyRule,
     ) -> Result<ResponseValue<crate::generated::types::UpdatePolicyRuleResponse>, Error<()>> {
-        let sig = sign_canonical_request(
+        let sig = generate_authorization_signatures(
             ctx,
             &self.app_id,
             crate::Method::PATCH,
@@ -102,7 +102,7 @@ impl PoliciesClient {
         rule_id: &'a crate::generated::types::DeletePolicyRuleRuleId,
         ctx: &'a AuthorizationContext,
     ) -> Result<ResponseValue<crate::generated::types::DeletePolicyRuleResponse>, Error<()>> {
-        let sig = sign_canonical_request(
+        let sig = generate_authorization_signatures(
             ctx,
             &self.app_id,
             crate::Method::DELETE,
@@ -129,7 +129,7 @@ impl KeyQuorumsClient {
         ctx: &'a AuthorizationContext,
         body: &'a crate::generated::types::UpdateKeyQuorumBody,
     ) -> Result<ResponseValue<crate::generated::types::KeyQuorum>, Error<()>> {
-        let sig = sign_canonical_request(
+        let sig = generate_authorization_signatures(
             ctx,
             &self.app_id,
             crate::Method::PATCH,
@@ -148,7 +148,7 @@ impl KeyQuorumsClient {
         key_quorum_id: &'a str,
         ctx: &'a AuthorizationContext,
     ) -> Result<ResponseValue<crate::generated::types::DeleteKeyQuorumResponse>, Error<()>> {
-        let sig = sign_canonical_request(
+        let sig = generate_authorization_signatures(
             ctx,
             &self.app_id,
             crate::Method::DELETE,
@@ -171,7 +171,7 @@ impl WalletsClient {
         privy_idempotency_key: Option<&'a str>,
         body: &'a crate::generated::types::WalletRpcBody,
     ) -> Result<ResponseValue<crate::generated::types::WalletRpcResponse>, Error<()>> {
-        let sig = sign_canonical_request(
+        let sig = generate_authorization_signatures(
             ctx,
             &self.app_id,
             crate::Method::POST,
@@ -193,7 +193,7 @@ impl WalletsClient {
         privy_idempotency_key: Option<&'a str>,
         body: &'a crate::generated::types::RawSign,
     ) -> Result<ResponseValue<crate::generated::types::RawSignResponse>, Error<()>> {
-        let sig = sign_canonical_request(
+        let sig = generate_authorization_signatures(
             ctx,
             &self.app_id,
             crate::Method::POST,
@@ -214,7 +214,7 @@ impl WalletsClient {
         ctx: &'a AuthorizationContext,
         body: &'a crate::generated::types::UpdateWalletBody,
     ) -> Result<ResponseValue<crate::generated::types::Wallet>, Error<()>> {
-        let sig = sign_canonical_request(
+        let sig = generate_authorization_signatures(
             ctx,
             &self.app_id,
             crate::Method::PATCH,
@@ -234,7 +234,7 @@ impl WalletsClient {
         ctx: &'a AuthorizationContext,
         body: &'a crate::generated::types::WalletExportRequest,
     ) -> Result<ResponseValue<crate::generated::types::WalletExportResponse>, Error<()>> {
-        let sig = sign_canonical_request(
+        let sig = generate_authorization_signatures(
             ctx,
             &self.app_id,
             crate::Method::POST,
