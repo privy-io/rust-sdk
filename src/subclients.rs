@@ -5,8 +5,11 @@
 //! following the stainless spec.
 
 use crate::{
-    AuthorizationContext, generate_authorization_signatures,
+    AuthorizationContext,
+    ethereum::EthereumService,
+    generate_authorization_signatures,
     generated::types::{Policy, UpdatePolicyBody, UpdatePolicyPolicyId},
+    solana::SolanaService,
 };
 
 include!(concat!(env!("OUT_DIR"), "/subclients.rs"));
@@ -248,5 +251,13 @@ impl WalletsClient {
         .unwrap();
 
         self._export(wallet_id, Some(&sig), body).await
+    }
+
+    pub fn ethereum(&self) -> EthereumService {
+        EthereumService::new(self.clone())
+    }
+
+    pub fn solana(&self) -> SolanaService {
+        SolanaService::new(self.clone())
     }
 }
