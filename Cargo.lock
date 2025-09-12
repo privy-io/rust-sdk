@@ -4639,7 +4639,7 @@ checksum = "1dccffe3ce07af9386bfd29e80c0ab1a8205a2fc34e4bcd40364df902cfa8f3f"
 [[package]]
 name = "typify"
 version = "0.4.3"
-source = "git+https://github.com/oxidecomputer/typify#62f3020ceb0dc0e5b6dcb16deb3629f16ca5be01"
+source = "git+https://github.com/arlyon/typify?branch=arlyon%2Finstance-type-inference#a76393e1a0e18c18a25d62ad9ed9fe113690e730"
 dependencies = [
  "typify-impl",
  "typify-macro",
@@ -4648,7 +4648,7 @@ dependencies = [
 [[package]]
 name = "typify-impl"
 version = "0.4.3"
-source = "git+https://github.com/oxidecomputer/typify#62f3020ceb0dc0e5b6dcb16deb3629f16ca5be01"
+source = "git+https://github.com/arlyon/typify?branch=arlyon%2Finstance-type-inference#a76393e1a0e18c18a25d62ad9ed9fe113690e730"
 dependencies = [
  "heck",
  "log",
@@ -4667,7 +4667,7 @@ dependencies = [
 [[package]]
 name = "typify-macro"
 version = "0.4.3"
-source = "git+https://github.com/oxidecomputer/typify#62f3020ceb0dc0e5b6dcb16deb3629f16ca5be01"
+source = "git+https://github.com/arlyon/typify?branch=arlyon%2Finstance-type-inference#a76393e1a0e18c18a25d62ad9ed9fe113690e730"
 dependencies = [
  "proc-macro2",
  "quote",

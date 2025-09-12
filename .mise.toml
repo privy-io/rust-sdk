@@ -21,7 +21,21 @@ _.file = ['.env', '.env.local']
 [tasks.pull-openapi]
 description = "Pull the latest OpenAPI spec from the Privy API repo and apply our overlay"
 run = [
-  "curl https://api.privy.io/v1/openapi.json | jq -s -f 'scripts/openapi.jq' openapi.overlay.json - > openapi.json",
+  # we need to do some post-processing on this spec to make it work more nicely with
+  # progenitor / our downstream code generation
+  #
+  # - openapi.overlay.json:
+  #   - sets operation ids for all operations we need to generate code for (requirement from progenitor)
+  #   - this will be fixed upstream and removed
+  # - scripts/openapi.jq:
+  #   - merges the official published spec with our openapi.overlay.json file
+  #   - removes all instances of privy-app-id from the input args for each operation
+  #   - this can be fixed upstream by moving privy-app-id into the security scheme
+  # - sed:
+  #   - replace all instances of anyOf with oneOf
+  #   - we are being unintentionally loose with our definitions
+  #   - this will be fixed upstream and removed
+  "curl https://api.privy.io/v1/openapi.json | jq -s -f 'scripts/openapi.jq' openapi.overlay.json - | sed \"s/anyOf/oneOf/g\" > openapi.json",
 ]
 
 [tasks.generate-openapi]
