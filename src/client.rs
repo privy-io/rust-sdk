@@ -43,6 +43,10 @@ impl PrivyClient {
         app_secret: String,
         url: &str,
     ) -> Result<Self, PrivyCreateError> {
+        let client_version = concat!("rust:", env!("CARGO_PKG_VERSION"));
+
+        tracing::debug!("Privy client version: {}", client_version);
+
         let mut headers = reqwest::header::HeaderMap::new();
         headers.insert(
             reqwest::header::AUTHORIZATION,
@@ -50,7 +54,7 @@ impl PrivyClient {
         );
         headers.insert("privy-app-id", HeaderValue::from_str(&app_id)?);
         headers.insert(CONTENT_TYPE, HeaderValue::from_static("application/json"));
-        headers.insert("privy-client", HeaderValue::from_static("rust-sdk"));
+        headers.insert("privy-client", HeaderValue::from_static(client_version));
 
         let client_with_custom_defaults = reqwest::ClientBuilder::new()
             .connect_timeout(Duration::from_secs(15))
