@@ -4,8 +4,6 @@ use serde::Serialize;
 
 use crate::AuthorizationContext;
 
-pub const PRIVY_AUTHORIZATION_HEADER: &str = "privy-authorization-signature";
-
 /// A convenience wrapper used as a namespace for utility functions
 pub struct Utils(pub(crate) String);
 /// A convenience wrapper used as a namespace for utility functions
@@ -181,10 +179,12 @@ mod tests {
 
     use super::*;
     use crate::{
-        AuthorizationContext, IntoKey, PrivateKey, PrivateKeyFromFile, PrivyClient,
+        AuthorizationContext, IntoKey, PrivateKey, PrivateKeyFromFile,
         generated::types::{OwnerInput, PublicKeyOwner, UpdateWalletBody},
         get_auth_header,
     };
+
+    const TEST_PRIVATE_KEY_PEM: &str = include_str!("../tests/test_private_key.pem");
 
     #[tokio::test]
     async fn test_build_canonical_request() {
@@ -608,19 +608,6 @@ mod tests {
 
         // NaN should serialize to null in serde_json, so this should actually succeed
         assert!(result.is_ok(), "serde_json handles NaN gracefully");
-    }
-
-    // Integration tests with staging environment
-    #[tokio::test]
-    #[ignore] // Only run when STAGING_* env vars are set
-    async fn test_client_creation_staging() {
-        let (app_id, app_secret, url) = get_staging_env();
-
-        let result = PrivyClient::new_with_url(app_id, app_secret, &url);
-        assert!(
-            result.is_ok(),
-            "Should successfully create client with staging credentials"
-        );
     }
 
     // Test auth header generation
