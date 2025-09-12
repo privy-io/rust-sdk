@@ -2,11 +2,11 @@
 //!
 //! This module contains the `PrivyClient` with typed wallet support.
 
-use std::time::Duration;
+use std::{num::NonZeroUsize, time::Duration};
 
 use reqwest::header::{CONTENT_TYPE, HeaderValue};
 
-use crate::{PrivyCreateError, generated::Client, get_auth_header};
+use crate::{PrivyCreateError, generated::Client, get_auth_header, jwt_exchange::JwtExchange};
 
 /// Privy client for interacting with the Privy API.
 ///
@@ -20,6 +20,23 @@ pub struct PrivyClient {
     pub(crate) app_secret: String,
     pub(crate) base_url: String,
     pub(crate) client: Client,
+
+    /// A store of all jwt operations for this client
+    pub jwt_exchange: JwtExchange,
+}
+
+pub struct PrivyClientOptions {
+    pub cache_size: NonZeroUsize,
+    pub base_url: String,
+}
+
+impl Default for PrivyClientOptions {
+    fn default() -> Self {
+        Self {
+            cache_size: NonZeroUsize::new(1000).unwrap(),
+            base_url: String::from("https://api.privy.com"),
+        }
+    }
 }
 
 impl PrivyClient {
@@ -39,7 +56,7 @@ impl PrivyClient {
     /// This can fail for two reasons, either the `app_id` or `app_secret` are not
     /// valid headers, or that the underlying http client could not be created.
     pub fn new(app_id: String, app_secret: String) -> Result<Self, PrivyCreateError> {
-        Self::new_with_url(app_id, app_secret, "https://api.privy.io")
+        Self::new_with_options(app_id, app_secret, Default::default())
     }
 
     /// Create a new `PrivyClient` with a custom url
@@ -47,10 +64,10 @@ impl PrivyClient {
     /// # Errors
     /// This can fail for two reasons, either the `app_id` or `app_secret` are not
     /// valid headers, or that the underlying http client could not be created.
-    pub fn new_with_url(
+    pub fn new_with_options(
         app_id: String,
         app_secret: String,
-        url: &str,
+        options: PrivyClientOptions,
     ) -> Result<Self, PrivyCreateError> {
         let client_version = concat!("rust:", env!("CARGO_PKG_VERSION"));
 
@@ -74,8 +91,9 @@ impl PrivyClient {
         Ok(Self {
             app_id: app_id.clone(),
             app_secret,
-            base_url: url.to_string(),
-            client: Client::new_with_client(url, client_with_custom_defaults),
+            base_url: options.base_url.clone(),
+            client: Client::new_with_client(&options.base_url, client_with_custom_defaults),
+            jwt_exchange: JwtExchange::new(options.cache_size),
         })
     }
 
