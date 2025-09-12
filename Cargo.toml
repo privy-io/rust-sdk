@@ -5,12 +5,8 @@ rust-version = "1.87"
 edition = "2024"
 license = "MIT OR Apache-2.0"
 
-[workspace]
-members = ["crates/*", "."]
-
 [dependencies]
 solana-sdk = "2.1.9"
-privy-api = { path = "crates/privy-api" }
 reqwest = { version = "0.12", features = ["json"] }
 base64 = "0.21"
 serde = { version = "1.0", features = ["derive"] }
@@ -32,6 +28,8 @@ rand = "0.9.2"
 spki = { version = "0.7", features = ["std", "alloc"] }
 der = { version = "0.7", features = ["std", "alloc"] }
 const-oid = { version = "0.10.1", features = ["db"] }
+regress = "0.10.4"
+uuid = { version = "1.0", features = ["serde"] }
 
 [dev-dependencies]
 anyhow = "1.0"
@@ -43,8 +41,20 @@ tracing-test = "0.2.5"
 
 # used for deterministic key generation under testing
 rand_chacha = "0.9.0"
+hex = "0.4"
 
 [[example]]
 doc-scrape-examples = true
 name = "get_wallets"
 path = "examples/get_wallets.rs"
+
+[build-dependencies]
+prettyplease = "0.2.37"
+progenitor = {path = "../progenitor/progenitor"}
+quote = "1.0.40"
+serde_json = "1.0"
+syn = { version = "2.0.106", features = ["full", "extra-traits"] }
+serde_yaml = "0.9"
+proc-macro2 = "1.0"
+openapiv3 = "2.2.0"
+heck = "0.5.0"

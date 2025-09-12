@@ -1,16 +1,25 @@
 //! Privy SDK for Rust
 
 #![deny(clippy::unwrap_used)]
-#![warn(clippy::pedantic)]
-#![warn(missing_docs)]
+// #![warn(clippy::pedantic)]
+// #![warn(missing_docs)]
 
 use base64::{Engine, engine::general_purpose::STANDARD};
 
 pub mod client;
+pub mod privy_hpke;
+
+pub mod generated {
+    include!(concat!(env!("OUT_DIR"), "/codegen.rs"));
+}
+
+mod subclients {
+    include!(concat!(env!("OUT_DIR"), "/subclients.rs"));
+}
 
 pub(crate) mod errors;
 pub(crate) mod keys;
-pub(crate) mod privy_hpke;
+pub(crate) mod middleware;
 pub(crate) mod types;
 
 pub use client::PrivyClient;

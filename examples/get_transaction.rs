@@ -1,19 +1,19 @@
-//! Delete User Example
+//! Get Transaction Example
 //!
-//! This example demonstrates how to delete a user from your Privy app.
+//! This example demonstrates how to retrieve transaction details by transaction ID.
 //! It shows how to:
 //! - Initialize a Privy client with app credentials
-//! - Delete a user by user ID
-//! - Handle the deletion response
+//! - Query transaction details using transaction ID
+//! - Handle transaction response data
 //!
 //! ## Required Environment Variables
 //! - `PRIVY_APP_ID`: Your Privy app ID
 //! - `PRIVY_APP_SECRET`: Your Privy app secret
-//! - `PRIVY_USER_ID`: The user ID to delete
+//! - `PRIVY_TRANSACTION_ID`: The transaction ID to retrieve
 //!
 //! ## Usage
 //! ```bash
-//! cargo run --example delete_user
+//! cargo run --example get_transaction
 //! ```
 
 use anyhow::Result;
@@ -32,24 +32,21 @@ async fn main() -> Result<()> {
     let app_id = std::env::var("PRIVY_APP_ID").expect("PRIVY_APP_ID environment variable not set");
     let app_secret =
         std::env::var("PRIVY_APP_SECRET").expect("PRIVY_APP_SECRET environment variable not set");
-    let wallet_id =
-        std::env::var("PRIVY_WALLET_ID").expect("PRIVY_WALLET_ID environment variable not set");
-    let public_key =
-        std::env::var("PRIVY_PUBLIC_KEY").expect("PRIVY_PUBLIC_KEY environment variable not set");
+    let transaction_id = std::env::var("PRIVY_TRANSACTION_ID")
+        .expect("PRIVY_TRANSACTION_ID environment variable not set");
 
     tracing::info!(
-        "initializing privy with app_id: {}, app_secret: {}, wallet_id: {}, public_key: {}",
+        "initializing privy with app_id: {}, app_secret: {}, transaction_id: {}",
         app_id,
         app_secret,
-        wallet_id,
-        public_key
+        transaction_id
     );
 
     let client = PrivyClient::new(app_id, app_secret, Default::default())?;
 
-    let user = client.users().delete("cmf56qacr01qpl90brxql83lx").await?;
+    let transaction = client.transactions().get(&transaction_id).await?;
 
-    tracing::info!("deleted user: {:?}", user);
+    tracing::info!("got transaction: {:?}", transaction);
 
     Ok(())
 }

@@ -1,28 +1,28 @@
-//! Update Wallet Example
+//! Wallet Raw Sign Example
 //!
-//! This example demonstrates how to update a wallet's owner using signature authorization.
+//! This example demonstrates how to sign raw data using Privy's wallet raw signing.
 //! It shows how to:
 //! - Initialize a Privy client with app credentials
-//! - Load private keys for signature authorization
-//! - Update a wallet's owner with proper authorization
-//! - Handle signature authorization errors and responses
+//! - Sign arbitrary data with a wallet
+//! - Handle raw signature responses
 //!
 //! ## Required Environment Variables
 //! - `PRIVY_APP_ID`: Your Privy app ID
 //! - `PRIVY_APP_SECRET`: Your Privy app secret
-//! - `PRIVY_WALLET_ID`: The wallet ID to update
-//! - `PRIVY_PRIVATE_KEY_PATH`: Path to the private key file for authorization
+//! - `PRIVY_WALLET_ID`: The wallet ID to use for signing
 //!
 //! ## Usage
 //! ```bash
-//! cargo run --example update_wallet
+//! cargo run --example wallet_raw_sign
 //! ```
 
 use anyhow::Result;
 use privy_rust::{
-    AuthorizationContext, IntoKey, JwtUser, PrivateKeyFromFile, PrivyApiError, PrivyClient,
-    generated::types::{OwnerInput, PublicKeyOwner, UpdateWalletBody},
+    AuthorizationContext, JwtUser, Method, PrivateKeyFromFile, PrivyClient,
+    generated::types::{RawSign, RawSignParams},
+    sign_canonical_request,
 };
+use progenitor_client::Error;
 use tracing_subscriber::EnvFilter;
 
 #[tokio::main]
@@ -44,49 +44,50 @@ async fn main() -> Result<()> {
         "initializing privy with app_id: {}, app_secret: {}, wallet_id: {}",
         app_id,
         app_secret,
-        wallet_id,
+        wallet_id
     );
-
-    let key = PrivateKeyFromFile("private_key.pem".into());
-    let public_key = key.get_key().await?.public_key();
-
     let ctx = AuthorizationContext::new();
     let client = PrivyClient::new(app_id.clone(), app_secret, ctx.clone())?;
 
     ctx.push(PrivateKeyFromFile("private_key.pem".into()));
     ctx.push(JwtUser(client.clone(), "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhbGV4QGFybHlvbi5kZXYiLCJpYXQiOjEwMDAwMDAwMDAwMH0.IpNgavH95CFZPjkzQW4eyxMIfJ-O_5cIaDyu_6KRXffykjYDRwxTgFJuYq0F6d8wSXf4de-vzfBRWSKMISM3rJdlhximYINGJB14mJFCD87VMLFbTpHIXcv7hc1AAYMPGhOsRkYfYXuvVopKszMvhupmQYJ1npSvKWNeBniIyOHYv4xebZD8L0RVlPvuEKTXTu-CDfs2rMwvD9g_wiBznS3uMF3v_KPaY6x0sx9zeCSxAH9zvhMMtct_Ad9kuoUncGpRzNhEk6JlVccN2Leb1JzbldxSywyS2AApD05u-GFAgFDN3P39V3qgRTGDuuUfUvKQ9S4rbu5El9Qq1CJTeA".to_string()));
 
-    let wallets_client = client.wallets();
-    let wallet = wallets_client.get(&wallet_id).await?;
-
-    tracing::info!("got wallet: {:?}", wallet);
-
-    // Create the request body that will be sent using the generated privy-api type
-    let update_wallet_body = UpdateWalletBody {
-        owner: Some(OwnerInput {
-            subtype_0: Some(PublicKeyOwner {
-                public_key: public_key.to_string(),
-            }),
-            ..Default::default()
-        }),
-
-        ..Default::default()
+    let body = RawSign {
+        params: RawSignParams {
+            hash: Some("0xdeadbeef".to_string()),
+        },
     };
 
-    let wallet = match wallets_client
-        .update(&wallet_id, None, &update_wallet_body)
+    let signature = sign_canonical_request(
+        &ctx,
+        &app_id,
+        Method::POST,
+        format!("https://api.privy.com/v1/wallets/{}/raw_sign", wallet_id),
+        &body,
+        None,
+    )
+    .await?;
+
+    // Example: Sign raw message data
+    let raw_sign_response = match client
+        .wallets()
+        .raw_sign(
+            &wallet_id,
+            Some(&signature),
+            None, // No idempotency key
+            &body,
+        )
         .await
     {
-        Ok(wallet) => Ok(wallet),
-        Err(PrivyApiError::UnexpectedResponse(r)) => {
-            let text = r.text().await.unwrap_or_default();
-            tracing::warn!("unexpected response: {:?}", text);
-            Err(PrivyApiError::Custom("unexpected response".into()))
+        Ok(r) => r,
+        Err(Error::UnexpectedResponse(resp)) => {
+            tracing::error!("Unexpected response: {:?}", resp.text().await);
+            return Err(anyhow::anyhow!("Unexpected response"));
         }
-        Err(e) => Err(e),
-    }?;
+        Err(e) => return Err(e.into()),
+    };
 
-    tracing::info!("got updated wallet: {:?}", wallet);
+    tracing::info!("Raw sign response: {:?}", raw_sign_response);
 
     Ok(())
 }

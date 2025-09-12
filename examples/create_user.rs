@@ -1,11 +1,28 @@
-//! Example usage - demonstrates how to use the Privy signer with tk-rs interface
+//! Create User Example
+//!
+//! This example demonstrates how to create a new user in Privy with linked accounts.
+//! It shows how to:
+//! - Initialize a Privy client with app credentials
+//! - Create a user with email and custom JWT linked accounts
+//! - Handle the response containing the new user data
+//!
+//! ## Required Environment Variables
+//! - `PRIVY_APP_ID`: Your Privy staging app ID
+//! - `PRIVY_APP_SECRET`: Your Privy staging app secret
+//!
+//! ## Usage
+//! ```bash
+//! cargo run --example create_user
+//! ```
 
 use anyhow::Result;
-use privy_api::types::{
-    LinkedAccountInput,
-    builder::{CreateUserBody, LinkedAccountCustomJwtInput, LinkedAccountEmailInput},
+use privy_rust::{
+    PrivyClient,
+    generated::types::{
+        CreateUserBody, LinkedAccountCustomJwtInput, LinkedAccountCustomJwtInputType,
+        LinkedAccountEmailInput, LinkedAccountEmailInputType, LinkedAccountInput,
+    },
 };
-use privy_rust::PrivyClient;
 use tracing_subscriber::EnvFilter;
 
 #[tokio::main]
@@ -18,9 +35,9 @@ async fn main() -> Result<()> {
 
     // Get credentials from environment
     let app_id =
-        std::env::var("STAGING_APP_ID").expect("STAGING_APP_ID environment variable not set");
-    let app_secret = std::env::var("STAGING_APP_SECRET")
-        .expect("STAGING_APP_SECRET environment variable not set");
+        std::env::var("PRIVY_APP_ID").expect("STAGING_APP_ID environment variable not set");
+    let app_secret =
+        std::env::var("STAGING_APP_SECRET").expect("PRIVY_APP_SECRET environment variable not set");
 
     tracing::info!(
         "initializing privy with app_id: {}, app_secret: {}",
@@ -28,41 +45,27 @@ async fn main() -> Result<()> {
         app_secret,
     );
 
-    let client = PrivyClient::new_with_url(app_id, app_secret, "https://api.staging.privy.io")?;
+    let client = PrivyClient::new(app_id, app_secret, Default::default())?;
 
-    let wallet = match client
-        .create_user()
-        .body(CreateUserBody::default().linked_accounts(vec![
-                LinkedAccountInput::EmailInput(
-                    LinkedAccountEmailInput::default()
-                        .address("alex@arlyon.dev")
-                        .type_("email")
-                        .try_into()
-                        .unwrap(),
-                ),
-                LinkedAccountInput::CustomJwtInput(
-                    LinkedAccountCustomJwtInput::default()
-                        .custom_user_id("alex@arlyon.dev")
-                        .type_("custom_auth")
-                        .try_into()
-                        .unwrap(),
-                ),
-            ]))
-        .send()
-        .await
-    {
-        Ok(r) => Ok(r.into_inner()),
-        Err(privy_api::Error::UnexpectedResponse(response)) => {
-            tracing::error!("unexpected response {:?}", response.text().await);
-            Err(privy_api::Error::Custom("whoops".to_string()))
-        }
-        Err(e) => {
-            tracing::error!("error {:?}", e);
-            Err(e)
-        }
-    }?;
+    let user = client
+        .users()
+        .create(&CreateUserBody {
+            linked_accounts: vec![
+                LinkedAccountInput::EmailInput(LinkedAccountEmailInput {
+                    address: "alex@arlyon.dev".into(),
+                    type_: LinkedAccountEmailInputType::Email,
+                }),
+                LinkedAccountInput::CustomJwtInput(LinkedAccountCustomJwtInput {
+                    custom_user_id: "alex@arlyon.dev".try_into().unwrap(),
+                    type_: LinkedAccountCustomJwtInputType::CustomAuth,
+                }),
+            ],
+            custom_metadata: None,
+            wallets: vec![],
+        })
+        .await?;
 
-    tracing::info!("got new user: {:?}", wallet);
+    tracing::info!("got new user: {:?}", user);
 
     Ok(())
 }

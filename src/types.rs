@@ -1,4 +1,66 @@
+use base64::{Engine, engine::general_purpose::STANDARD};
+use futures::TryStreamExt;
 use serde::Serialize;
+
+use crate::AuthorizationContext;
+
+pub const PRIVY_AUTHORIZATION_HEADER: &str = "privy-authorization-signature";
+
+/// Create canonical request data for signing
+///
+/// # Errors
+/// This can fail if JSON serialization fails
+pub fn build_canonical_request<S: Serialize>(
+    app_id: &str,
+    method: Method,
+    url: String,
+    body: S,
+    idempotency_key: Option<String>,
+) -> Result<String, serde_json::Error> {
+    let mut headers = serde_json::Map::new();
+    headers.insert(
+        "privy-app-id".into(),
+        serde_json::Value::String(app_id.to_owned()),
+    );
+    if let Some(key) = idempotency_key {
+        headers.insert(
+            "privy-idempotency-key".to_string(),
+            serde_json::Value::String(key),
+        );
+    }
+
+    WalletApiRequestSignatureInput::new(method, url)
+        .headers(serde_json::Value::Object(headers))
+        .body(body)
+        .canonicalize()
+}
+
+pub async fn sign_canonical_request<S: Serialize>(
+    ctx: &AuthorizationContext,
+    app_id: &str,
+    method: Method,
+    url: String,
+    body: S,
+    idempotency_key: Option<String>,
+) -> Result<String, serde_json::Error> {
+    let canonical = build_canonical_request(app_id, method, url, body, idempotency_key)?;
+
+    tracing::info!("canonical request data: {}", canonical);
+
+    Ok(ctx
+        .sign(canonical.as_bytes())
+        .map_ok(|s| {
+            let der_bytes = s.to_der();
+            STANDARD.encode(&der_bytes)
+        })
+        .try_collect::<Vec<_>>()
+        .await
+        .map_err(|e| {
+            tracing::error!("failed to sign request: {}", e);
+            todo!()
+        })?
+        .join(","))
+}
 
 /// The HTTP method used in the request.
 ///
@@ -14,6 +76,20 @@ pub enum Method {
     PUT,
     /// `GET` requests are used to retrieve an existing resource.
     DELETE,
+}
+
+impl TryFrom<&reqwest::Method> for Method {
+    type Error = ();
+
+    fn try_from(value: &reqwest::Method) -> Result<Self, Self::Error> {
+        match *value {
+            reqwest::Method::PATCH => Ok(Method::PATCH),
+            reqwest::Method::POST => Ok(Method::POST),
+            reqwest::Method::PUT => Ok(Method::PUT),
+            reqwest::Method::DELETE => Ok(Method::DELETE),
+            _ => Err(()),
+        }
+    }
 }
 
 /// The wallet API request signature input is used
@@ -75,6 +151,42 @@ mod tests {
     use test_case::test_case;
 
     use super::*;
+    use crate::{
+        IntoKey, PrivateKeyFromFile,
+        generated::types::{OwnerInput, PublicKeyOwner, UpdateWalletBody},
+    };
+
+    #[tokio::test]
+    async fn test_build_canonical_request() {
+        let key = PrivateKeyFromFile("private_key.pem".into());
+        let public_key = key.get_key().await.unwrap().public_key();
+
+        // Create the request body that will be sent using the generated privy-api type
+        let update_wallet_body = UpdateWalletBody {
+            owner: Some(OwnerInput {
+                subtype_0: Some(PublicKeyOwner {
+                    public_key: public_key.to_string(),
+                }),
+                ..Default::default()
+            }),
+            ..Default::default()
+        };
+
+        // Build the canonical request data for signing using the serialized body
+        let canonical_data = build_canonical_request(
+            "cmf418pa801bxl40b5rcgjvd9".into(),
+            Method::PATCH,
+            "https://api.privy.io/v1/wallets/o5zuf7fbygwze9l9gaxyc0bm".into(),
+            update_wallet_body.clone(),
+            None,
+        )
+        .unwrap();
+
+        assert_eq!(
+            canonical_data,
+            "{\"body\":{\"owner\":{\"public_key\":\"-----BEGIN PUBLIC KEY-----\\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAESYrvEwooR33jt/8Up0lWdDNAcxmg\\nNZrCX23OThCPA+WxDx+dHYrjRlfPmHX0/aMTopp1PdKAtlQjRJDHSNd8XA==\\n-----END PUBLIC KEY-----\\n\"}},\"headers\":{\"privy-app-id\":\"cmf418pa801bxl40b5rcgjvd9\"},\"method\":\"PATCH\",\"url\":\"https://api.privy.io/v1/wallets/o5zuf7fbygwze9l9gaxyc0bm\",\"version\":1}"
+        );
+    }
 
     #[test]
     fn test_canonicalization_matches_docs_example() {
