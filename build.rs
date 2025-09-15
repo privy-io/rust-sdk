@@ -71,7 +71,7 @@ fn main() {
     // Step 1: Generate the base progenitor code
     let openapi_spec = load_openapi_spec();
     let mut generator = progenitor::Generator::new(
-        &GenerationSettings::default().with_operation_id_strategy(OperationIdStrategy::OmitMissing),
+        GenerationSettings::default().with_operation_id_strategy(OperationIdStrategy::OmitMissing),
     );
     let tokens = generator.generate_tokens(&openapi_spec).unwrap();
     let ast = syn::parse2(tokens).unwrap();
