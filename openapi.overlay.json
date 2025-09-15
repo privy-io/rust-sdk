@@ -23,7 +23,40 @@
 		},
 		"/v1/users/{user_id}/wallets": {
 			"post": {
-				"operationId": "createUserWallet"
+				"operationId": "createUserWallet",
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"wallets": {
+										"items": {
+											"properties": {
+												"chain_type": {
+													"anyOf": null,
+													"type": "string",
+													"enum": [
+														"cosmos",
+														"stellar",
+														"sui",
+														"tron",
+														"bitcoin-segwit",
+														"near",
+														"ton",
+														"starknet",
+														"spark",
+														"solana",
+														"ethereum"
+													]
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
 			}
 		},
 		"/v1/users/{user_id}/custom_metadata": {
@@ -36,7 +69,57 @@
 				"operationId": "createWallet"
 			},
 			"get": {
-				"operationId": "getWallets"
+				"operationId": "getWallets",
+				"parameters": [
+					{
+						"schema": {
+							"type": "string",
+							"minLength": 1
+						},
+						"required": false,
+						"name": "cursor",
+						"in": "query"
+					},
+					{
+						"schema": {
+							"type": "number",
+							"nullable": true,
+							"maximum": 100
+						},
+						"required": false,
+						"name": "limit",
+						"in": "query"
+					},
+					{
+						"schema": {
+							"type": "string",
+							"enum": [
+								"cosmos",
+								"stellar",
+								"sui",
+								"tron",
+								"bitcoin-segwit",
+								"near",
+								"ton",
+								"starknet",
+								"spark",
+								"solana",
+								"ethereum"
+							]
+						},
+						"required": false,
+						"name": "chain_type",
+						"in": "query"
+					},
+					{
+						"schema": {
+							"type": "string"
+						},
+						"required": false,
+						"name": "user_id",
+						"in": "query"
+					}
+				]
 			}
 		},
 		"/v1/wallets/{wallet_id}/rpc": {
