@@ -7,7 +7,9 @@
 use base64::{Engine, engine::general_purpose::STANDARD};
 
 pub mod client;
+pub mod ethereum;
 pub mod privy_hpke;
+pub mod solana;
 
 pub mod generated {
     include!(concat!(env!("OUT_DIR"), "/codegen.rs"));
