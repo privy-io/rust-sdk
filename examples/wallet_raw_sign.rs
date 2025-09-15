@@ -19,8 +19,10 @@
 use anyhow::Result;
 use privy_rust::{
     AuthorizationContext, JwtUser, PrivateKeyFromFile, PrivyClient,
-    generated::Error,
-    generated::types::{RawSign, RawSignParams},
+    generated::{
+        Error,
+        types::{RawSign, RawSignParams},
+    },
 };
 use tracing_subscriber::EnvFilter;
 
