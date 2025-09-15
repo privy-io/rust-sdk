@@ -8,6 +8,10 @@ on:
 
 env:
   CARGO_TERM_COLOR: always
+  PRIVY_TEST_APP_ID: ${{ secrets.PRIVY_TEST_APP_ID }}
+  PRIVY_TEST_APP_SECRET: ${{ secrets.PRIVY_TEST_APP_SECRET }}
+  PRIVY_TEST_JWT_PRIVATE_KEY: ${{ secrets.PRIVY_TEST_JWT_PRIVATE_KEY }}
+  PRIVY_TEST_URL: ${{ secrets.PRIVY_TEST_URL }}
 
 jobs:
   test:
