@@ -56,7 +56,7 @@ impl PoliciesClient {
         policy_id: &'a crate::generated::types::CreatePolicyRulePolicyId,
         ctx: &'a AuthorizationContext,
         body: &'a crate::generated::types::PolicyRule,
-    ) -> Result<ResponseValue<crate::generated::types::RuleResponse>, Error<()>> {
+    ) -> Result<ResponseValue<crate::generated::types::PolicyRuleResponse>, Error<()>> {
         let sig = generate_authorization_signatures(
             ctx,
             &self.app_id,
@@ -234,8 +234,8 @@ impl WalletsClient {
         &'a self,
         wallet_id: &'a str,
         ctx: &'a AuthorizationContext,
-        body: &'a crate::generated::types::WalletExportRequest,
-    ) -> Result<ResponseValue<crate::generated::types::WalletExportResponse>, Error<()>> {
+        body: &'a crate::generated::types::WalletExportRequestBody,
+    ) -> Result<ResponseValue<crate::generated::types::WalletExportResponseBody>, Error<()>> {
         let sig = generate_authorization_signatures(
             ctx,
             &self.app_id,

@@ -1,6 +1,5 @@
 use std::{
     future,
-    path::{Path, PathBuf},
     pin::Pin,
     sync::{Arc, Mutex},
 };
@@ -229,10 +228,11 @@ pub trait IntoSignature {
     /// ```rust
     /// use std::path::PathBuf;
     ///
-    /// use privy_rust::{IntoSignature, PrivateKeyFromFile};
+    /// use privy_rust::{IntoSignature, PrivateKey};
     ///
     /// # async fn example() -> Result<(), Box<dyn std::error::Error>> {
-    /// let key_source = PrivateKeyFromFile(PathBuf::from("private_key.pem"));
+    /// # let my_key = include_str!("../tests/test_private_key.pem").to_string();
+    /// let key_source = PrivateKey(my_key);
     /// let message = b"canonical request data";
     /// let signature = key_source.sign(message).await?;
     ///
@@ -371,13 +371,6 @@ impl IntoSignature for Key {
     }
 }
 
-impl IntoKey for &Path {
-    async fn get_key(&self) -> Result<Key, KeyError> {
-        let key = tokio::fs::read_to_string(self).await?;
-        SecretKey::<p256::NistP256>::from_sec1_pem(&key).map_err(|_| KeyError::InvalidFormat(key))
-    }
-}
-
 impl IntoSignature for Signature {
     async fn sign(&self, _message: &[u8]) -> Result<Signature, SigningError> {
         Ok(*self)
@@ -390,14 +383,6 @@ impl IntoSignature for Signature {
 /// This provider can fail if the key is not in the expected format.
 pub struct PrivateKey(pub String);
 
-/// An `IntoKey` implementation that reads a private key from a file on disk.
-/// This key is assumed to be in the SEC1 PEM format.
-///
-/// # Errors
-/// This provider can fail if the file is not found or if the file
-/// is not in the expected format.
-pub struct PrivateKeyFromFile(pub PathBuf);
-
 impl IntoKey for PrivateKey {
     async fn get_key(&self) -> Result<Key, KeyError> {
         SecretKey::<p256::NistP256>::from_sec1_pem(&self.0).map_err(|e| {
@@ -407,17 +392,8 @@ impl IntoKey for PrivateKey {
     }
 }
 
-impl IntoKey for PrivateKeyFromFile {
-    async fn get_key(&self) -> Result<Key, KeyError> {
-        let pem_content = std::fs::read_to_string(&self.0)?;
-        PrivateKey(pem_content).get_key().await
-    }
-}
-
 #[cfg(test)]
 mod tests {
-    use std::path::{Path, PathBuf};
-
     use base64::{Engine, engine::general_purpose::STANDARD};
     use futures::TryStreamExt;
     use p256::{
@@ -429,8 +405,7 @@ mod tests {
 
     use super::*;
     use crate::{
-        AuthorizationContext, FnKey, FnSigner, KeyError, PrivateKeyFromFile, PrivyClient,
-        client::PrivyClientOptions,
+        AuthorizationContext, FnKey, FnSigner, KeyError, PrivyClient, client::PrivyClientOptions,
     };
 
     // generated using `mise gen-p256-key`
@@ -502,48 +477,6 @@ mod tests {
             signature1a, signature2,
             "Different messages should produce different signatures"
         );
-    }
-
-    // PrivateKeyFromFile tests
-    #[tokio::test]
-    async fn test_private_key_from_file_nonexistent() {
-        let key_file = PrivateKeyFromFile(PathBuf::from("/nonexistent/path/key.pem"));
-        let result = key_file.get_key().await;
-        assert!(result.is_err(), "Should fail when file doesn't exist");
-    }
-
-    #[tokio::test]
-    async fn test_private_key_from_file_success() {
-        // Create a temporary file with test key
-        let temp_dir = std::env::temp_dir();
-        let temp_file = temp_dir.join("test_key.pem");
-        std::fs::write(&temp_file, TEST_PRIVATE_KEY_PEM).unwrap();
-
-        let key_file = PrivateKeyFromFile(temp_file.clone());
-        let result = key_file.get_key().await;
-        assert!(result.is_ok(), "Should successfully read key from file");
-
-        // Cleanup
-        let _ = std::fs::remove_file(temp_file);
-    }
-
-    #[tokio::test]
-    async fn test_path_into_key() {
-        // Create a temporary file with test key
-        let temp_dir = std::env::temp_dir();
-        let temp_file = temp_dir.join("test_path_key.pem");
-        tokio::fs::write(&temp_file, TEST_PRIVATE_KEY_PEM)
-            .await
-            .unwrap();
-
-        let result = temp_file.as_path().get_key().await;
-        assert!(
-            result.is_ok(),
-            "Should successfully read key from file path"
-        );
-
-        // Cleanup
-        let _ = tokio::fs::remove_file(temp_file).await;
     }
 
     // Message signing tests with various inputs
@@ -768,7 +701,9 @@ mod tests {
         let ctx = AuthorizationContext::new();
 
         // Add path-based key and pre-computed signature
-        ctx.push(Path::new("private_key.pem"));
+        ctx.push(PrivateKey(
+            include_str!("../tests/test_private_key.pem").to_string(),
+        ));
         ctx.push(Signature::from_bytes(GenericArray::from_slice(&STANDARD.decode("J7GLk/CIqvCNCOSJ8sUZb0rCsqWF9l1H1VgYfsAd1ew2uBJHE5hoY+kV7CSzdKkgOhtdvzj22gXA7gcn5gSqvQ==").unwrap())).expect("right size"));
 
         let sigs = ctx

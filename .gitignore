@@ -2,3 +2,5 @@
 target
 openapi.json
 *.pem
+!tests/test_private_key.pem
+!tests/test_public_key.pem

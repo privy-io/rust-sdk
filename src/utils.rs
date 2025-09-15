@@ -179,7 +179,7 @@ mod tests {
 
     use super::*;
     use crate::{
-        AuthorizationContext, IntoKey, PrivateKey, PrivateKeyFromFile,
+        AuthorizationContext, IntoKey, PrivateKey,
         generated::types::{OwnerInput, UpdateWalletBody},
         get_auth_header,
     };
@@ -188,12 +188,13 @@ mod tests {
 
     #[tokio::test]
     async fn test_build_canonical_request() {
-        let key = PrivateKeyFromFile("private_key.pem".into());
+        let private_key = include_str!("../tests/test_private_key.pem");
+        let key = PrivateKey(private_key.to_string());
         let public_key = key.get_key().await.unwrap().public_key();
 
         // Create the request body that will be sent using the generated privy-api type
         let update_wallet_body = UpdateWalletBody {
-            owner: Some(OwnerInput::Variant0 {
+            owner: Some(OwnerInput::PublicKeyOwner {
                 public_key: public_key.to_string(),
             }),
             ..Default::default()

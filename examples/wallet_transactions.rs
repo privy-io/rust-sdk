@@ -19,7 +19,9 @@
 use anyhow::Result;
 use privy_rust::{
     PrivyClient,
-    generated::types::{WalletTransactionsAsset, WalletTransactionsChain},
+    generated::types::{
+        WalletTransactionsAsset, WalletTransactionsAssetString, WalletTransactionsChain,
+    },
 };
 use tracing_subscriber::EnvFilter;
 
@@ -53,9 +55,7 @@ async fn main() -> Result<()> {
         .transactions()
         .get(
             &wallet_id,
-            &WalletTransactionsAsset::Variant0(
-                privy_rust::generated::types::WalletTransactionsAssetVariant0::Sol,
-            ),
+            &WalletTransactionsAsset::String(WalletTransactionsAssetString::Sol),
             WalletTransactionsChain::Base,
             None,       // No cursor for first page
             Some(10.0), // Limit to 10 transactions
