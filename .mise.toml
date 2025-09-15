@@ -2,7 +2,7 @@
 jq = "latest"
 # note: rust-toolchain.toml is an 'idiomatic version file' for rust and mise does
 #       pick it up automatically, but it is currently behind a experimental flag
-rust = "{{ exec(command='./scripts/rust-version.sh') }}"
+rust = { version = "{{ exec(command='./scripts/rust-version.sh') }}", components = "clippy" }
 cargo-binstall = "latest"
 "cargo:bacon" = "latest"
 
