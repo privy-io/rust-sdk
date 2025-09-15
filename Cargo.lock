@@ -2152,23 +2152,11 @@ dependencies = [
 [[package]]
 name = "progenitor"
 version = "0.11.0"
+source = "git+https://github.com/arlyon/progenitor?branch=privy#ec5e30115266d7c5c8a0977ca6073355d76dee7c"
 dependencies = [
- "progenitor-client 0.11.0",
+ "progenitor-client 0.11.0 (git+https://github.com/arlyon/progenitor?branch=privy)",
  "progenitor-impl",
  "progenitor-macro",
-]
-
-[[package]]
-name = "progenitor-client"
-version = "0.11.0"
-dependencies = [
- "bytes",
- "futures-core",
- "percent-encoding",
- "reqwest",
- "serde",
- "serde_json",
- "serde_urlencoded",
 ]
 
 [[package]]
@@ -2187,8 +2175,23 @@ dependencies = [
 ]
 
 [[package]]
+name = "progenitor-client"
+version = "0.11.0"
+source = "git+https://github.com/arlyon/progenitor?branch=privy#ec5e30115266d7c5c8a0977ca6073355d76dee7c"
+dependencies = [
+ "bytes",
+ "futures-core",
+ "percent-encoding",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "serde_urlencoded",
+]
+
+[[package]]
 name = "progenitor-impl"
 version = "0.11.0"
+source = "git+https://github.com/arlyon/progenitor?branch=privy#ec5e30115266d7c5c8a0977ca6073355d76dee7c"
 dependencies = [
  "heck",
  "http",
@@ -2209,6 +2212,7 @@ dependencies = [
 [[package]]
 name = "progenitor-macro"
 version = "0.11.0"
+source = "git+https://github.com/arlyon/progenitor?branch=privy#ec5e30115266d7c5c8a0977ca6073355d76dee7c"
 dependencies = [
  "openapiv3",
  "proc-macro2",

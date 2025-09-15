@@ -20,7 +20,8 @@ use anyhow::Result;
 use privy_rust::{
     PrivyClient,
     generated::types::{
-        GetWalletBalanceAsset, GetWalletBalanceChain, GetWalletBalanceIncludeCurrency,
+        GetWalletBalanceAsset, GetWalletBalanceAssetString, GetWalletBalanceChain,
+        GetWalletBalanceChainString, GetWalletBalanceIncludeCurrency,
     },
 };
 use tracing_subscriber::EnvFilter;
@@ -55,12 +56,8 @@ async fn main() -> Result<()> {
         .balance()
         .get(
             &wallet_id,
-            &GetWalletBalanceAsset::Variant0(
-                privy_rust::generated::types::GetWalletBalanceAssetVariant0::Sol,
-            ),
-            &GetWalletBalanceChain::Variant0(
-                privy_rust::generated::types::GetWalletBalanceChainVariant0::Solana,
-            ),
+            &GetWalletBalanceAsset::String(GetWalletBalanceAssetString::Sol),
+            &GetWalletBalanceChain::String(GetWalletBalanceChainString::Solana),
             Some(GetWalletBalanceIncludeCurrency::Usd),
         )
         .await?;

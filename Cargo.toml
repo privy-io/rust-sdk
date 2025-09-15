@@ -52,7 +52,10 @@ path = "examples/get_wallets.rs"
 
 [build-dependencies]
 prettyplease = "0.2.37"
-progenitor = {path = "../progenitor/progenitor"}
+# the privy branch includes these PRs:
+# https://github.com/oxidecomputer/progenitor/pull/1194
+# https://github.com/oxidecomputer/typify/pull/894
+progenitor = { git = "https://github.com/arlyon/progenitor", branch = "privy" }
 quote = "1.0.40"
 serde_json = "1.0"
 syn = { version = "2.0.106", features = ["full", "extra-traits"] }

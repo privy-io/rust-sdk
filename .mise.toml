@@ -6,7 +6,6 @@ jq = "latest"
 rust = "{{ exec(command='yq .toolchain.channel rust-toolchain.toml') }}"
 cargo-binstall = "latest"
 "cargo:bacon" = "latest"
-"cargo:cargo-progenitor" = "latest"
 
 [env]
 _.file = ['.env', '.env.local']
@@ -36,12 +35,6 @@ run = [
   #   - we are being unintentionally loose with our definitions
   #   - this will be fixed upstream and removed
   "curl https://api.privy.io/v1/openapi.json | jq -s -f 'scripts/openapi.jq' openapi.overlay.json - | sed \"s/anyOf/oneOf/g\" > openapi.json",
-]
-
-[tasks.generate-openapi]
-description = "Generate the Rust code from the OpenAPI spec"
-run = [
-  "cargo progenitor --input openapi.json --output crates/privy-api --name privy-api --version 0.0.1 --interface builder --include-client=false"
 ]
 
 [tasks.gen-p256-key]

@@ -23,7 +23,7 @@ use anyhow::Result;
 use hex::ToHex;
 use privy_rust::{
     AuthorizationContext, JwtUser, PrivateKeyFromFile, PrivyClient,
-    generated::types::{HpkeEncryption, WalletExportRequest},
+    generated::types::{HpkeEncryption, WalletExportRequestBody},
 };
 use tracing_subscriber::EnvFilter;
 
@@ -67,7 +67,7 @@ async fn main() -> Result<()> {
         .export(
             &wallet_id,
             &ctx,
-            &WalletExportRequest {
+            &WalletExportRequestBody {
                 encryption_type: HpkeEncryption::Hpke,
                 recipient_public_key,
             },

@@ -193,7 +193,7 @@ mod tests {
 
         // Create the request body that will be sent using the generated privy-api type
         let update_wallet_body = UpdateWalletBody {
-            owner: Some(OwnerInput::Variant0 {
+            owner: Some(OwnerInput::PublicKeyOwner {
                 public_key: public_key.to_string(),
             }),
             ..Default::default()
