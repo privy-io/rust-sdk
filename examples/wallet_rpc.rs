@@ -19,13 +19,12 @@
 use anyhow::Result;
 use base64::{Engine, engine::general_purpose::STANDARD};
 use privy_rs::{
-    AuthorizationContext, JwtUser, PrivateKey, PrivyClient, PrivySignedApiError,
+    AuthorizationContext, JwtUser, PrivateKey, PrivyApiError, PrivyClient, PrivySignedApiError,
     generated::types::{
         SolanaSignMessageRpcInput, SolanaSignMessageRpcInputMethod,
         SolanaSignMessageRpcInputParams, SolanaSignMessageRpcInputParamsEncoding, WalletRpcBody,
     },
 };
-use progenitor_client::Error;
 use tracing_subscriber::EnvFilter;
 
 #[tokio::main]
@@ -78,7 +77,7 @@ async fn main() -> Result<()> {
         .await
     {
         Ok(r) => r,
-        Err(PrivySignedApiError::Api(Error::UnexpectedResponse(resp))) => {
+        Err(PrivySignedApiError::Api(PrivyApiError::UnexpectedResponse(resp))) => {
             tracing::error!("Unexpected response: {:?}", resp.text().await);
             return Err(anyhow::anyhow!("Unexpected response"));
         }

@@ -3,37 +3,12 @@ use std::str::FromStr;
 use anyhow::Result;
 use base64::{Engine, engine::general_purpose::STANDARD};
 use common::{ensure_test_user, get_test_client, get_test_wallet_id_by_type, mint_staging_jwt};
+use hex::ToHex;
 use p256::elliptic_curve::SecretKey;
-use privy_openapi::types::{WalletAdditionalSigner, WalletAdditionalSignerItem};
 use privy_rs::{
-    AuthorizationContext, IntoKey, JwtUser, PrivateKey, PrivyHpke,
-    generated::types::{
-        AuthenticateBody, AuthenticateBodyEncryptionType, AuthenticateResponse, CreateWalletBody,
-        EthereumPersonalSignRpcInput, EthereumPersonalSignRpcInputChainType,
-        EthereumPersonalSignRpcInputMethod, EthereumPersonalSignRpcInputParams,
-        EthereumPersonalSignRpcInputParamsEncoding, EthereumSecp256k1SignRpcInput,
-        EthereumSendTransactionRpcInputChainType, EthereumSendTransactionRpcInputMethod,
-        EthereumSendTransactionRpcInputParams, EthereumSendTransactionRpcInputParamsTransaction,
-        EthereumSendTransactionRpcInputParamsTransactionValue,
-        EthereumSign7702AuthorizationRpcInput, EthereumSign7702AuthorizationRpcInputMethod,
-        EthereumSign7702AuthorizationRpcInputParams,
-        EthereumSign7702AuthorizationRpcInputParamsChainId, EthereumSignTypedDataRpcInput,
-        EthereumSignTypedDataRpcInputMethod, EthereumSignTypedDataRpcInputParams,
-        EthereumSignTypedDataRpcInputParamsTypedData,
-        EthereumSignTypedDataRpcInputParamsTypedDataTypesValueItem, GetWalletBalanceAsset,
-        GetWalletBalanceAssetString, GetWalletBalanceChain, GetWalletBalanceChainString,
-        GetWalletBalanceResponseBalancesItem, HpkeEncryption, OwnerInput, RawSignParams,
-        SolanaSignAndSendTransactionRpcInput, SolanaSignAndSendTransactionRpcInputCaip2,
-        SolanaSignAndSendTransactionRpcInputMethod, SolanaSignAndSendTransactionRpcInputParams,
-        SolanaSignAndSendTransactionRpcInputParamsEncoding, SolanaSignMessageRpcInput,
-        SolanaSignMessageRpcInputMethod, SolanaSignMessageRpcInputParams,
-        SolanaSignMessageRpcInputParamsEncoding, SolanaSignTransactionRpcInput,
-        SolanaSignTransactionRpcInputMethod, SolanaSignTransactionRpcInputParams,
-        SolanaSignTransactionRpcInputParamsEncoding, UpdateWalletBody, UserLinkedAccountsItem,
-        WalletChainType, WalletExportRequestBody, WalletRpcBody, WalletTransactionsAsset,
-        WalletTransactionsAssetString, WalletTransactionsChain,
-    },
+    AuthorizationContext, IntoKey, JwtUser, PrivateKey, PrivyHpke, generated::types::*,
 };
+use sha2::Digest;
 use solana_sdk::{pubkey::Pubkey, transaction::Transaction};
 use tracing_test::traced_test;
 
@@ -177,10 +152,10 @@ async fn test_wallets_update_with_auth_context() -> Result<()> {
     let _wallet = debug_response!(client.wallets().update(&wallet_id, &ctx, &update_body)).await?;
 
     let mut rng = rand::thread_rng();
-    let other = SecretKey::random(&mut rng);
+    let other = SecretKey::<p256::NistP256>::random(&mut rng);
 
     let update_body = UpdateWalletBody {
-        owner: Some(OwnerInput::PublicKey(public_key.to_string())),
+        owner: Some(OwnerInput::PublicKey(other.public_key().to_string())),
         ..Default::default()
     };
 
@@ -219,21 +194,13 @@ async fn test_wallets_export() -> Result<()> {
         })
         .unwrap();
 
-    let privy_hpke = PrivyHpke::new();
-    let export_body = WalletExportRequestBody {
-        encryption_type: HpkeEncryption::Hpke,
-        recipient_public_key: privy_hpke.public_key().unwrap(),
-    };
-
     let ctx = AuthorizationContext::new();
     let jwt = mint_staging_jwt(&sub)?;
     ctx.push(JwtUser(client.clone(), jwt));
 
-    let exported = debug_response!(client.wallets().export(&wallet_id, &ctx, &export_body)).await?;
+    let exported = debug_response!(client.wallets().export(&wallet_id, &ctx)).await?;
 
     println!("Wallet exported successfully {:?}", exported);
-
-    assert_eq!(exported.encryption_type, HpkeEncryption::Hpke);
 
     Ok(())
 }
@@ -724,6 +691,58 @@ async fn test_wallets_ethereum_send_transaction() -> Result<()> {
 
     // Just verify we got a valid response
     println!("Ethereum transaction sent via RPC: {:?}", result);
+
+    Ok(())
+}
+
+#[tokio::test]
+#[traced_test]
+async fn test_ethereum_wallet_import() -> Result<()> {
+    let client = get_test_client()?;
+
+    let mut rng = rand::thread_rng();
+    let (secret, public) = secp256k1::generate_keypair(&mut rng);
+
+    let secret: String = (&secret[..]).encode_hex();
+
+    // strip 04 from the start
+    let public = &public.serialize_uncompressed()[1..];
+
+    // address is the last 20 bytes of the keccak256 hash of the public key
+    let address: String = format!(
+        "0x{}",
+        sha3::Keccak256::digest(&public)[12..]
+            .iter()
+            .encode_hex::<String>()
+    );
+
+    tracing::info!("Generated secret key: {:?}", secret);
+    tracing::info!("Generated public key: {:?}", public);
+    tracing::info!("Generated address: {:?}", address);
+
+    // Initialize wallet import for Ethereum
+    let imported_wallet = client
+        .wallets()
+        .import(
+            address.clone(),
+            &secret,
+            WalletImportSupportedChains::Ethereum,
+            None,   // owner
+            vec![], // policy_ids
+            vec![], // additional_signers
+        )
+        .await?
+        .into_inner();
+
+    // Verify the imported wallet has the correct address and chain type
+    assert_eq!(imported_wallet.address.to_lowercase(), address);
+    assert_eq!(imported_wallet.chain_type, WalletChainType::Ethereum);
+
+    println!(
+        "Successfully imported Ethereum wallet with ID: {}",
+        imported_wallet.id
+    );
+    println!("Wallet address: {}", imported_wallet.address);
 
     Ok(())
 }

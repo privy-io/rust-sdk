@@ -4,11 +4,18 @@
 //! as well as some manual overrides for things that need the authctx,
 //! following the stainless spec.
 
+use p256::elliptic_curve::SecretKey;
+
 use crate::{
-    AuthorizationContext, PrivySignedApiError,
+    AuthorizationContext, PrivyExportError, PrivyHpke, PrivySignedApiError,
     ethereum::EthereumService,
     generate_authorization_signatures,
-    generated::types::{Policy, UpdatePolicyBody, UpdatePolicyPolicyId},
+    generated::types::{
+        HpkeEncryption, Policy, PrivateKeyInitInput, UpdatePolicyBody, UpdatePolicyPolicyId,
+        Wallet, WalletExportRequestBody, WalletImportSubmissionRequestAdditionalSignersItem,
+        WalletImportSubmissionRequestOwner, WalletImportSupportedChains,
+    },
+    import::WalletImport,
     solana::SolanaService,
 };
 
@@ -52,7 +59,8 @@ impl PoliciesClient {
         &'a self,
         policy_id: &'a crate::generated::types::DeletePolicyPolicyId,
         ctx: &'a AuthorizationContext,
-    ) -> Result<ResponseValue<crate::generated::types::DeletePolicyResponse>, PrivySignedApiError> {
+    ) -> Result<ResponseValue<crate::generated::types::DeletePolicyResponse>, PrivySignedApiError>
+    {
         let sig = generate_authorization_signatures(
             ctx,
             &self.app_id,
@@ -78,7 +86,8 @@ impl PoliciesClient {
         policy_id: &'a crate::generated::types::CreatePolicyRulePolicyId,
         ctx: &'a AuthorizationContext,
         body: &'a crate::generated::types::PolicyRuleRequestBody,
-    ) -> Result<ResponseValue<crate::generated::types::PolicyRuleResponse>, PrivySignedApiError> {
+    ) -> Result<ResponseValue<crate::generated::types::PolicyRuleResponse>, PrivySignedApiError>
+    {
         let sig = generate_authorization_signatures(
             ctx,
             &self.app_id,
@@ -105,7 +114,8 @@ impl PoliciesClient {
         rule_id: &'a crate::generated::types::UpdatePolicyRuleRuleId,
         ctx: &'a AuthorizationContext,
         body: &'a crate::generated::types::PolicyRuleRequestBody,
-    ) -> Result<ResponseValue<crate::generated::types::UpdatePolicyRuleResponse>, PrivySignedApiError> {
+    ) -> Result<ResponseValue<crate::generated::types::UpdatePolicyRuleResponse>, PrivySignedApiError>
+    {
         let sig = generate_authorization_signatures(
             ctx,
             &self.app_id,
@@ -138,7 +148,8 @@ impl PoliciesClient {
         policy_id: &'a crate::generated::types::DeletePolicyRulePolicyId,
         rule_id: &'a crate::generated::types::DeletePolicyRuleRuleId,
         ctx: &'a AuthorizationContext,
-    ) -> Result<ResponseValue<crate::generated::types::DeletePolicyRuleResponse>, PrivySignedApiError> {
+    ) -> Result<ResponseValue<crate::generated::types::DeletePolicyRuleResponse>, PrivySignedApiError>
+    {
         let sig = generate_authorization_signatures(
             ctx,
             &self.app_id,
@@ -196,7 +207,8 @@ impl KeyQuorumsClient {
         &'a self,
         key_quorum_id: &'a str,
         ctx: &'a AuthorizationContext,
-    ) -> Result<ResponseValue<crate::generated::types::DeleteKeyQuorumResponse>, PrivySignedApiError> {
+    ) -> Result<ResponseValue<crate::generated::types::DeleteKeyQuorumResponse>, PrivySignedApiError>
+    {
         let sig = generate_authorization_signatures(
             ctx,
             &self.app_id,
@@ -225,7 +237,8 @@ impl WalletsClient {
         ctx: &'a AuthorizationContext,
         privy_idempotency_key: Option<&'a str>,
         body: &'a crate::generated::types::WalletRpcBody,
-    ) -> Result<ResponseValue<crate::generated::types::WalletRpcResponse>, PrivySignedApiError> {
+    ) -> Result<ResponseValue<crate::generated::types::WalletRpcResponse>, PrivySignedApiError>
+    {
         let sig = generate_authorization_signatures(
             ctx,
             &self.app_id,
@@ -301,24 +314,73 @@ impl WalletsClient {
     ///
     /// Can fail either if the authorization signature could not be generated,
     /// or if the api call fails whether than be due to network issues, auth problems,
-    /// or the Privy API returning an error.
+    /// or the Privy API returning an error. Additionally, if the privy platform
+    /// were to produce a response from which we cannot decrypt the secret key,
+    /// a `PrivyExportError::Key` will be returned.
     pub async fn export<'a>(
         &'a self,
         wallet_id: &'a str,
         ctx: &'a AuthorizationContext,
-        body: &'a crate::generated::types::WalletExportRequestBody,
-    ) -> Result<ResponseValue<crate::generated::types::WalletExportResponseBody>, PrivySignedApiError> {
+    ) -> Result<SecretKey<p256::NistP256>, PrivyExportError> {
+        let privy_hpke = PrivyHpke::new();
+        let body = WalletExportRequestBody {
+            encryption_type: HpkeEncryption::Hpke,
+            recipient_public_key: privy_hpke.public_key().unwrap(),
+        };
+
         let sig = generate_authorization_signatures(
             ctx,
             &self.app_id,
             crate::Method::POST,
             format!("{}/v1/wallets/{}/export", self.base_url, wallet_id),
-            body,
+            &body,
             None,
         )
         .await?;
 
-        Ok(self._export(wallet_id, Some(&sig), body).await?)
+        let resp = self._export(wallet_id, Some(&sig), &body).await?;
+
+        Ok(privy_hpke.decrypt(&resp.encapsulated_key, &resp.ciphertext)?)
+    }
+
+    /// Import a wallet into the Privy app
+    ///
+    /// # Errors
+    ///
+    ///
+    pub async fn import(
+        &self,
+        address: String,
+        private_key_hex: &str,
+        chain_type: WalletImportSupportedChains,
+        owner: Option<WalletImportSubmissionRequestOwner>,
+        policy_ids: Vec<String>,
+        additional_signers: Vec<WalletImportSubmissionRequestAdditionalSignersItem>,
+    ) -> Result<ResponseValue<Wallet>, PrivySignedApiError> {
+        let init_request =
+            crate::generated::types::WalletImportInitializationRequest::PrivateKeyInitInput(
+                PrivateKeyInitInput {
+                    address: address.clone(),
+                    chain_type: chain_type.clone(),
+                    encryption_type: HpkeEncryption::Hpke,
+                    entropy_type:
+                        crate::generated::types::PrivateKeyInitInputEntropyType::PrivateKey,
+                },
+            );
+
+        let response = self._init_import(&init_request).await?;
+        let import = WalletImport::new(self.clone(), response.into_inner(), address, chain_type);
+
+        Ok(import
+            .submit(private_key_hex, owner, policy_ids, additional_signers)
+            .await?)
+    }
+
+    pub(crate) async fn submit_import<'a>(
+        &'a self,
+        body: &'a types::WalletImportSubmissionRequest,
+    ) -> Result<ResponseValue<types::Wallet>, Error<()>> {
+        self._submit_import(body).await
     }
 
     /// Returns an `EthereumService` instance for interacting with the Ethereum API

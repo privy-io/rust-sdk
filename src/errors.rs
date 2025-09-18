@@ -29,6 +29,23 @@ pub enum PrivySignedApiError {
     SignatureGeneration(#[from] SignatureGenerationError),
 }
 
+/// Errors that can appear during wallet export.
+#[derive(Error, Debug)]
+pub enum PrivyExportError {
+    /// An error returned by the Privy API (e.g., 4xx or 5xx HTTP status codes).
+    /// Contains the raw response for further inspection.
+    #[error("API request failed")]
+    Api(#[from] PrivyApiError),
+
+    /// An error occurred during the signing process.
+    #[error("Signature generation failed: {0}")]
+    SignatureGeneration(#[from] SignatureGenerationError),
+
+    /// An error occurred during the decryption process.
+    #[error("Unable to decrypt key: {0}")]
+    Key(#[from] KeyError),
+}
+
 /// Errors related to cryptographic keys and operations.
 #[derive(Error, Debug)]
 pub enum CryptoError {
@@ -54,7 +71,7 @@ pub enum KeyError {
 
     /// Failed to decrypt an HPKE-encrypted payload.
     #[error("HPKE decryption failed: {0}")]
-    HpkeDecryption(String),
+    HpkeDecryption(#[from] hpke::HpkeError),
 
     /// An unknown error occurred.
     #[error(transparent)]

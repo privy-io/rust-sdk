@@ -8,7 +8,7 @@ use std::{
 use anyhow::Result;
 use jsonwebtoken::{Algorithm, EncodingKey, Header};
 use privy_rs::{
-    PrivyApiError, PrivyClient, PrivySignedApiError, client::PrivyClientOptions,
+    PrivyApiError, PrivyClient, PrivyExportError, PrivySignedApiError, client::PrivyClientOptions,
     generated::types::*,
 };
 use serde::Serialize;
@@ -30,6 +30,16 @@ impl IntoApi for PrivySignedApiError {
 impl IntoApi for PrivyApiError {
     fn into_api(self) -> Result<PrivyApiError, Self> {
         Ok(self)
+    }
+}
+
+impl IntoApi for PrivyExportError {
+    fn into_api(self) -> Result<PrivyApiError, Self> {
+        match self {
+            PrivyExportError::Api(e) => Ok(e),
+            PrivyExportError::SignatureGeneration(_) => Err(self),
+            PrivyExportError::Key(_) => Err(self),
+        }
     }
 }
 

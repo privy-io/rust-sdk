@@ -2789,10 +2789,10 @@
           "recovery_method",
           "verified_at",
           "first_verified_at",
-          "latest_verified_at",
-          "public_key"
+          "latest_verified_at"
         ],
-        "title": "Solana Embedded Wallet"
+        "title": "Solana Embedded Wallet",
+        "//comment": "We removed public key from this list since it is not being returned in some cases"
       },
       "LinkedAccountBitcoinSegwitEmbeddedWallet": {
         "type": "object",

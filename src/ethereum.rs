@@ -511,7 +511,7 @@ impl EthereumService {
     ///     gas_limit: None,
     ///     max_fee_per_gas: None,
     ///     max_priority_fee_per_gas: None,
-    ///     data: None,
+    ///     data: Some("0x".to_string()),
     ///     chain_id: None,
     ///     from: None,
     ///     gas_price: None,
