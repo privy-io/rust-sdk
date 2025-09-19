@@ -64,12 +64,21 @@ The main struct for interacting with the Privy API to sign transactions using em
 
 ## Environment Variables
 
-Create a `.env` file with your Privy credentials:
+Copy the example environment file and fill in your Privy credentials:
+
+```bash
+cp .env.example .env.local
+```
+
+Then edit `.env` with your actual Privy credentials:
 
 ```env
 PRIVY_APP_ID=your_app_id
 PRIVY_APP_SECRET=your_app_secret
+PRIVY_WALLET_ID=your_wallet_id
 ```
+
+See `.env.example` for all available environment variables including staging/testing configurations.
 
 ## Testing
 
