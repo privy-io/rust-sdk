@@ -21,7 +21,7 @@
 
 use anyhow::Result;
 use hex::ToHex;
-use privy_rust::{
+use privy_rs::{
     AuthorizationContext, JwtUser, PrivateKey, PrivyClient,
     generated::types::{HpkeEncryption, WalletExportRequestBody},
 };
@@ -50,7 +50,7 @@ async fn main() -> Result<()> {
     );
 
     // Generate HPKE key pair for encryption
-    let hpke_keypair = privy_rust::privy_hpke::PrivyHpke::new();
+    let hpke_keypair = privy_rs::privy_hpke::PrivyHpke::new();
     let recipient_public_key = hpke_keypair.public_key()?;
 
     tracing::info!("Generated HPKE key pair for encryption");

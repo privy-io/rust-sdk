@@ -19,7 +19,7 @@
 //! ```
 
 use anyhow::Result;
-use privy_rust::{
+use privy_rs::{
     AuthorizationContext, IntoKey, JwtUser, PrivateKey, PrivyApiError, PrivyClient,
     generated::types::{OwnerInput, UpdateWalletBody},
 };

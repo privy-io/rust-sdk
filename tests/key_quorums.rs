@@ -1,7 +1,7 @@
 use std::time::SystemTime;
 
 use anyhow::Result;
-use privy_rust::{
+use privy_rs::{
     AuthorizationContext, JwtUser,
     generated::types::{
         CreateKeyQuorumBody, CreateKeyQuorumBodyDisplayName, UpdateKeyQuorumBody,

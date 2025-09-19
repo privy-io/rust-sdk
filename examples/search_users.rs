@@ -17,7 +17,7 @@
 //! ```
 
 use anyhow::Result;
-use privy_rust::{PrivyClient, generated::types::SearchUsersBody};
+use privy_rs::{PrivyClient, generated::types::SearchUsersBody};
 use tracing_subscriber::EnvFilter;
 
 #[tokio::main]

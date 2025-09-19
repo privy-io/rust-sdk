@@ -69,7 +69,7 @@ impl AuthorizationContext {
     /// add a `PrivateKey` source which you can set yourself.
     ///
     /// ```rust
-    /// # use privy_rust::{AuthorizationContext, JwtUser, IntoSignature, PrivateKey, PrivyClient};
+    /// # use privy_rs::{AuthorizationContext, JwtUser, IntoSignature, PrivateKey, PrivyClient};
     /// # use p256::ecdsa::signature::SignerMut;
     /// # use p256::ecdsa::Signature;
     /// # use p256::elliptic_curve::SecretKey;
@@ -95,7 +95,7 @@ impl AuthorizationContext {
     /// according to the policy set in `AuthorizationContext`.
     ///
     /// ```rust
-    /// # use privy_rust::{AuthorizationContext, JwtUser, IntoSignature, PrivyClient};
+    /// # use privy_rs::{AuthorizationContext, JwtUser, IntoSignature, PrivyClient};
     /// # use p256::ecdsa::signature::SignerMut;
     /// # use p256::ecdsa::Signature;
     /// # use p256::elliptic_curve::SecretKey;
@@ -116,7 +116,7 @@ impl AuthorizationContext {
     /// or any other combinators on the `StreamExt` and `TryStreamExt` traits.
     ///
     /// ```rust
-    /// # use privy_rust::{AuthorizationContext, JwtUser, IntoSignature, PrivyClient};
+    /// # use privy_rs::{AuthorizationContext, JwtUser, IntoSignature, PrivyClient};
     /// # use p256::ecdsa::signature::SignerMut;
     /// # use p256::ecdsa::Signature;
     /// # use p256::elliptic_curve::SecretKey;
@@ -161,7 +161,7 @@ impl AuthorizationContext {
     /// valid.
     ///
     /// ```
-    /// # use privy_rust::{AuthorizationContext, JwtUser, IntoSignature, PrivyClient};
+    /// # use privy_rs::{AuthorizationContext, JwtUser, IntoSignature, PrivyClient};
     /// # use p256::ecdsa::signature::SignerMut;
     /// # use p256::ecdsa::Signature;
     /// # use p256::elliptic_curve::SecretKey;
@@ -228,7 +228,7 @@ pub trait IntoSignature {
     /// ```rust
     /// use std::path::PathBuf;
     ///
-    /// use privy_rust::{IntoSignature, PrivateKey};
+    /// use privy_rs::{IntoSignature, PrivateKey};
     ///
     /// # async fn example() -> Result<(), Box<dyn std::error::Error>> {
     /// # let my_key = include_str!("../tests/test_private_key.pem").to_string();

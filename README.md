@@ -1,4 +1,4 @@
-# privy-rust
+# privy-rs
 
 A Rust library for interacting with the Privy API, providing secure embedded wallet signing capabilities for Solana transactions. This library enables seamless integration with Privy's wallet infrastructure for transaction signing operations.
 
@@ -8,7 +8,7 @@ Add this to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-privy-rust = "0.1.0"
+privy-rs = "0.1.0"
 ```
 
 ## Usage
@@ -16,7 +16,7 @@ privy-rust = "0.1.0"
 First, set up your Privy credentials:
 
 ```rust
-use privy_rust::PrivyClient;
+use privy_rs::PrivyClient;
 
 let client = PrivyClient::new(
     env::var("PRIVY_APP_ID").unwrap(),

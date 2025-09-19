@@ -18,7 +18,7 @@
 
 use anyhow::Result;
 use base64::{Engine, engine::general_purpose::STANDARD};
-use privy_rust::{
+use privy_rs::{
     AuthorizationContext, JwtUser, PrivateKey, PrivyClient,
     generated::types::{
         SolanaSignMessageRpcInput, SolanaSignMessageRpcInputMethod,

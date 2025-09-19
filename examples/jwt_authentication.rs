@@ -18,7 +18,7 @@
 //! ```
 
 use anyhow::Result;
-use privy_rust::{PrivyClient, generated::types::AuthenticateBody};
+use privy_rs::{PrivyClient, generated::types::AuthenticateBody};
 use tracing_subscriber::EnvFilter;
 
 #[tokio::main]
