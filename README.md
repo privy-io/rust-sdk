@@ -202,9 +202,26 @@ tests/
 This project uses [mise](https://mise.jdx.dev/) to manage the development environment, including the Rust toolchain version and environment variables.
 
 1.  **Install mise:** Follow the instructions on the [mise website](https://mise.jdx.dev/getting-started.html).
-2.  **Activate Environment:** Run `mise trust` in the project root to approve the configuration. `mise` will automatically pick up the Rust version from the `rust-toolchain.toml` file.
+2.  **Install dependencies:** Run `mise install` in the project root to install the required Rust toolchain and other tools.
+3.  **Activate Environment:** Run `mise trust` in the project root to approve the configuration. `mise` will automatically pick up the Rust version from the `rust-toolchain.toml` file.
+4.  **Setup environment variables:** Copy `.env.example` to `.env` and fill in your Privy credentials.
 
 The `.mise.toml` file contains placeholders for the required environment variables. You can set them there or in a `.env` file for `mise` to load.
+
+### OpenAPI Spec Management
+
+This project uses Privy's OpenAPI specification to generate client code. To update the OpenAPI spec:
+
+```bash
+mise run pull-openapi
+```
+
+This command:
+1. Downloads the latest OpenAPI spec from `https://api.privy.io/v1/openapi.json`
+2. Applies local overlay from `openapi.overlay.json` to add operation IDs and other fixes
+3. Processes the spec to remove `privy-app-id` from operation parameters
+4. Replaces `anyOf` with `oneOf` for better code generation
+5. Saves the processed spec to `openapi.json`
 
 ### Rust Version Policy
 
