@@ -112,4 +112,4 @@ Some examples can be used as integration tests. Set `PRIVY_TEST_ENABLED=true` to
 
 For questions or issues with these examples, please refer to:
 - [Privy Documentation](https://docs.privy.io/)
-- [SDK Repository Issues](https://github.com/privy-io/privy-rust-sdk/issues)
+- [SDK Repository Issues](https://github.com/privy-io/rust-sdk/issues)

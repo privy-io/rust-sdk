@@ -1,7 +1,7 @@
 use std::{collections::HashMap, time::SystemTime};
 
 use anyhow::Result;
-use privy_rust::generated::types::{
+use privy_rs::generated::types::{
     CreateUserBody, CreateUserWalletBody, CreateUserWalletBodyWalletsItem,
     CreateUserWalletBodyWalletsItemChainType, CustomMetadataValue, LinkedAccountEmailInput,
     LinkedAccountEmailInputType, LinkedAccountInput, SearchUsersBody, UpdateUserCustomMetadataBody,

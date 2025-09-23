@@ -16,7 +16,7 @@
 //! ```
 
 use anyhow::Result;
-use privy_rust::{
+use privy_rs::{
     PrivyClient,
     generated::types::{
         CreateUserBody, LinkedAccountCustomJwtInput, LinkedAccountCustomJwtInputType,

@@ -41,8 +41,8 @@ use crate::{
 /// ```rust,no_run
 /// # use anyhow::Result;
 /// # async fn example() -> Result<()> {
-/// use privy_rust::{AuthorizationContext, generated::types::*};
-/// # use privy_rust::PrivyClient;
+/// use privy_rs::{AuthorizationContext, generated::types::*};
+/// # use privy_rs::PrivyClient;
 ///
 /// # let client = PrivyClient::new("app_id".to_string(), "app_secret".to_string())?;
 /// let ethereum_service = client.wallets().ethereum();
@@ -94,8 +94,8 @@ impl EthereumService {
     /// ```rust,no_run
     /// # use anyhow::Result;
     /// # async fn example() -> Result<()> {
-    /// use privy_rust::{AuthorizationContext, generated::types::*};
-    /// # use privy_rust::PrivyClient;
+    /// use privy_rs::{AuthorizationContext, generated::types::*};
+    /// # use privy_rs::PrivyClient;
     ///
     /// # let client = PrivyClient::new("app_id".to_string(), "app_secret".to_string())?;
     /// let ethereum_service = client.wallets().ethereum();
@@ -165,8 +165,8 @@ impl EthereumService {
     /// ```rust,no_run
     /// # use anyhow::Result;
     /// # async fn example() -> Result<()> {
-    /// use privy_rust::{AuthorizationContext, generated::types::*};
-    /// # use privy_rust::PrivyClient;
+    /// use privy_rs::{AuthorizationContext, generated::types::*};
+    /// # use privy_rs::PrivyClient;
     ///
     /// # let client = PrivyClient::new("app_id".to_string(), "app_secret".to_string())?;
     /// let ethereum_service = client.wallets().ethereum();
@@ -227,8 +227,8 @@ impl EthereumService {
     /// ```rust,no_run
     /// # use anyhow::Result;
     /// # async fn example() -> Result<()> {
-    /// use privy_rust::{AuthorizationContext, generated::types::*};
-    /// # use privy_rust::PrivyClient;
+    /// use privy_rs::{AuthorizationContext, generated::types::*};
+    /// # use privy_rs::PrivyClient;
     ///
     /// # let client = PrivyClient::new("app_id".to_string(), "app_secret".to_string())?;
     /// let ethereum_service = client.wallets().ethereum();
@@ -293,8 +293,8 @@ impl EthereumService {
     /// ```rust,no_run
     /// # use anyhow::Result;
     /// # async fn example() -> Result<()> {
-    /// use privy_rust::{AuthorizationContext, generated::types::*};
-    /// # use privy_rust::PrivyClient;
+    /// use privy_rs::{AuthorizationContext, generated::types::*};
+    /// # use privy_rs::PrivyClient;
     ///
     /// # let client = PrivyClient::new("app_id".to_string(), "app_secret".to_string())?;
     /// let ethereum_service = client.wallets().ethereum();
@@ -357,8 +357,8 @@ impl EthereumService {
     /// ```rust,no_run
     /// # use anyhow::Result;
     /// # async fn example() -> Result<()> {
-    /// use privy_rust::{AuthorizationContext, generated::types::*};
-    /// # use privy_rust::PrivyClient;
+    /// use privy_rs::{AuthorizationContext, generated::types::*};
+    /// # use privy_rs::PrivyClient;
     ///
     /// # let client = PrivyClient::new("app_id".to_string(), "app_secret".to_string())?;
     /// let ethereum_service = client.wallets().ethereum();
@@ -427,8 +427,8 @@ impl EthereumService {
     /// ```rust,no_run
     /// # use anyhow::Result;
     /// # async fn example() -> Result<()> {
-    /// use privy_rust::{AuthorizationContext, generated::types::*};
-    /// # use privy_rust::PrivyClient;
+    /// use privy_rs::{AuthorizationContext, generated::types::*};
+    /// # use privy_rs::PrivyClient;
     ///
     /// # let client = PrivyClient::new("app_id".to_string(), "app_secret".to_string())?;
     /// let ethereum_service = client.wallets().ethereum();
@@ -498,8 +498,8 @@ impl EthereumService {
     /// ```rust,no_run
     /// # use anyhow::Result;
     /// # async fn example() -> Result<()> {
-    /// use privy_rust::{AuthorizationContext, generated::types::*};
-    /// # use privy_rust::PrivyClient;
+    /// use privy_rs::{AuthorizationContext, generated::types::*};
+    /// # use privy_rs::PrivyClient;
     ///
     /// # let client = PrivyClient::new("app_id".to_string(), "app_secret".to_string())?;
     /// let ethereum_service = client.wallets().ethereum();

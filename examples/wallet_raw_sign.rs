@@ -17,7 +17,7 @@
 //! ```
 
 use anyhow::Result;
-use privy_rust::{
+use privy_rs::{
     AuthorizationContext, JwtUser, PrivateKey, PrivyClient,
     generated::{
         Error,

@@ -36,7 +36,7 @@ use crate::KeyError;
 /// # Usage Pattern
 ///
 /// ```rust,no_run
-/// use privy_rust::{PrivyHpke, generated::types::WithEncryptionEncryptedAuthorizationKey};
+/// use privy_rs::{PrivyHpke, generated::types::WithEncryptionEncryptedAuthorizationKey};
 ///
 /// # async fn get_encrypted_authorization_key() -> WithEncryptionEncryptedAuthorizationKey {
 /// #     todo!()
@@ -186,7 +186,7 @@ impl PrivyHpke {
     /// # Example Usage
     ///
     /// ```rust,no_run
-    /// use privy_rust::{PrivyHpke, generated::types::WithEncryptionEncryptedAuthorizationKey};
+    /// use privy_rs::{PrivyHpke, generated::types::WithEncryptionEncryptedAuthorizationKey};
     ///
     /// # async fn example(encrypted_authorization_key: WithEncryptionEncryptedAuthorizationKey) -> Result<(), Box<dyn std::error::Error>> {
     /// let hpke = PrivyHpke::new();

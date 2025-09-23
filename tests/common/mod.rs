@@ -5,7 +5,7 @@ use std::{
 
 use anyhow::Result;
 use jsonwebtoken::{Algorithm, EncodingKey, Header};
-use privy_rust::{
+use privy_rs::{
     PrivyClient,
     client::PrivyClientOptions,
     generated::types::{
@@ -155,11 +155,11 @@ pub async fn ensure_test_user(client: &PrivyClient) -> Result<User> {
         linked_accounts: vec![
             LinkedAccountInput::EmailInput(LinkedAccountEmailInput {
                 address: test_user_id.clone(),
-                type_: privy_rust::generated::types::LinkedAccountEmailInputType::Email,
+                type_: privy_rs::generated::types::LinkedAccountEmailInputType::Email,
             }),
             LinkedAccountInput::CustomJwtInput(LinkedAccountCustomJwtInput {
                 custom_user_id: test_user_id.parse().unwrap(),
-                type_: privy_rust::generated::types::LinkedAccountCustomJwtInputType::CustomAuth,
+                type_: privy_rs::generated::types::LinkedAccountCustomJwtInputType::CustomAuth,
             }),
         ],
         custom_metadata: None,

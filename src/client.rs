@@ -44,7 +44,7 @@ impl PrivyClient {
     ///
     /// # Usage
     /// ```no_run
-    /// # use privy_rust::{PrivyCreateError, PrivateKey, AuthorizationContext};
+    /// # use privy_rs::{PrivyCreateError, PrivateKey, AuthorizationContext};
     /// # async fn foo() -> Result<(), PrivyCreateError> {
     /// # let my_key = include_str!("../tests/test_private_key.pem").to_string();
     /// let ctx = AuthorizationContext::new();

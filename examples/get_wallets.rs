@@ -18,7 +18,7 @@
 //! ```
 
 use anyhow::Result;
-use privy_rust::PrivyClient;
+use privy_rs::PrivyClient;
 use tracing_subscriber::EnvFilter;
 
 #[tokio::main]

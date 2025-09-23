@@ -39,7 +39,7 @@ use crate::{
 ///
 /// ```rust,no_run
 /// # async fn example() -> Result<(), Box<dyn std::error::Error>> {
-/// use privy_rust::{AuthorizationContext, PrivyClient};
+/// use privy_rs::{AuthorizationContext, PrivyClient};
 ///
 /// let client = PrivyClient::new("app_id".to_string(), "app_secret".to_string())?;
 /// let solana_service = client.wallets().solana();
@@ -91,7 +91,7 @@ impl SolanaService {
     ///
     /// ```rust,no_run
     /// # async fn example() -> Result<(), Box<dyn std::error::Error>> {
-    /// use privy_rust::{AuthorizationContext, PrivyClient};
+    /// use privy_rs::{AuthorizationContext, PrivyClient};
     ///
     /// let client = PrivyClient::new("app_id".to_string(), "app_secret".to_string())?;
     /// let solana_service = client.wallets().solana();
@@ -171,7 +171,7 @@ impl SolanaService {
     ///
     /// ```rust,no_run
     /// # async fn example() -> Result<(), Box<dyn std::error::Error>> {
-    /// use privy_rust::{AuthorizationContext, PrivyClient};
+    /// use privy_rs::{AuthorizationContext, PrivyClient};
     ///
     /// let client = PrivyClient::new("app_id".to_string(), "app_secret".to_string())?;
     /// let solana_service = client.wallets().solana();
@@ -242,7 +242,7 @@ impl SolanaService {
     ///
     /// ```rust,no_run
     /// # async fn example() -> Result<(), Box<dyn std::error::Error>> {
-    /// use privy_rust::{AuthorizationContext, PrivyClient};
+    /// use privy_rs::{AuthorizationContext, PrivyClient};
     ///
     /// let client = PrivyClient::new("app_id".to_string(), "app_secret".to_string())?;
     /// let solana_service = client.wallets().solana();

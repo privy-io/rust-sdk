@@ -1417,7 +1417,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "privy-rust"
+name = "privy-rs"
 version = "0.1.0"
 dependencies = [
  "anyhow",
