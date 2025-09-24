@@ -1,4 +1,34 @@
 {
+	"components": {
+		"schemas": {
+			"OwnerInput": {
+				"anyOf": [
+					{
+						"type": "object",
+						"properties": {
+							"public_key": {
+								"type": "string"
+							}
+						},
+						"required": ["public_key"],
+						"description": "The P-256 public key of the owner of the resource. If you provide this, do not specify an owner_id as it will be generated automatically.",
+						"title": "Public key owner"
+					},
+					{
+						"type": "object",
+						"properties": {
+							"user_id": {
+								"type": "string"
+							}
+						},
+						"required": ["user_id"],
+						"description": "The user ID of the owner of the resource. The user must already exist, and this value must start with \"did:privy:\". If you provide this, do not specify an owner_id as it will be generated automatically.",
+						"title": "User owner"
+					}
+				]
+			}
+		}
+	},
 	"paths": {
 		"/v1/users": {
 			"post": {
@@ -236,6 +266,12 @@
 		"/v1/users/{user_id}/fiat/kyc": {
 			"post": {
 				"operationId": "initiateUserFiatKyc"
+			},
+			"get": {
+				"operationId": "getUserFiatKycStatus"
+			},
+			"patch": {
+				"operationId": "updateUserFiatKycStatus"
 			}
 		},
 		"/v1/users/{user_id}/fiat/kyc_link": {
@@ -264,6 +300,76 @@
 		"/v1/apps/{app_id}/fiat": {
 			"post": {
 				"operationId": "configureAppForFiatOnOffRamping"
+			}
+		},
+		"/v1/users/email/address": {
+			"post": {
+				"operationId": "lookUpUserByEmail"
+			}
+		},
+		"/v1/users/custom_auth/id": {
+			"post": {
+				"operationId": "lookUpUserByCustomAuthId"
+			}
+		},
+		"/v1/users/wallet/address": {
+			"post": {
+				"operationId": "lookUpUserByWalletAddress"
+			}
+		},
+		"/v1/users/farcaster/fid": {
+			"post": {
+				"operationId": "lookUpUserByFarcasterId"
+			}
+		},
+		"/v1/users/phone/number": {
+			"post": {
+				"operationId": "lookUpUserByPhoneNumber"
+			}
+		},
+		"/v1/users/smart_wallet/address": {
+			"post": {
+				"operationId": "lookUpUserBySmartWalletAddress"
+			}
+		},
+		"/v1/users/discord/username": {
+			"post": {
+				"operationId": "lookUpUserByDiscordUsername"
+			}
+		},
+		"/v1/users/github/username": {
+			"post": {
+				"operationId": "lookUpUserByGithubUsername"
+			}
+		},
+		"/v1/users/twitter/username": {
+			"post": {
+				"operationId": "lookUpUserByTwitterUsername"
+			}
+		},
+		"/v1/users/twitter/subject": {
+			"post": {
+				"operationId": "lookUpUserByTwitterSubject"
+			}
+		},
+		"/v1/users/telegram/telegram_user_id": {
+			"post": {
+				"operationId": "lookUpUserByTelegramUserId"
+			}
+		},
+		"/v1/users/telegram/username": {
+			"post": {
+				"operationId": "lookUpUserByTelegramUsername"
+			}
+		},
+		"/v1/users/{user_id}/accounts": {
+			"post": {
+				"operationId": "addOrUpdateUserLinkedAccount"
+			}
+		},
+		"/v1/users/{user_id}/accounts/unlink": {
+			"post": {
+				"operationId": "unlinkUserLinkedAccount"
 			}
 		}
 	}

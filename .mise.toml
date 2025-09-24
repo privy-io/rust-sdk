@@ -6,6 +6,9 @@ rust = { version = "{{ exec(command='./scripts/rust-version.sh') }}", components
 cargo-binstall = "latest"
 "cargo:bacon" = "latest"
 
+# this can be removed when progenitor pulls in the latest version of typify
+"cargo:https://github.com/arlyon/progenitor" = {version = "branch:privy", crate = "cargo-progenitor"}
+
 [env]
 _.file = ['.env', '.env.local']
 
@@ -34,6 +37,14 @@ run = [
   #   - we are being unintentionally loose with our definitions
   #   - this will be fixed upstream and removed
   "curl https://api.privy.io/v1/openapi.json | jq -s -f 'scripts/openapi.jq' openapi.overlay.json - | sed \"s/anyOf/oneOf/g\" > openapi.json",
+]
+
+[tasks.gen-openapi]
+description = "Generate the Rust code for the Privy API"
+depends = ["pull-openapi"]
+run = [
+  "cargo-progenitor progenitor --input openapi.json --name privy-openapi -o crates/privy-openapi --version 0.1.0 --no-rustfmt true --license-name \"MIT OR Apache-2.0\"",
+  "cargo +nightly fmt"
 ]
 
 [tasks.gen-p256-key]

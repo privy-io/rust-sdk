@@ -58,7 +58,7 @@ impl PoliciesClient {
         &'a self,
         policy_id: &'a crate::generated::types::CreatePolicyRulePolicyId,
         ctx: &'a AuthorizationContext,
-        body: &'a crate::generated::types::PolicyRule,
+        body: &'a crate::generated::types::PolicyRuleRequestBody,
     ) -> Result<ResponseValue<crate::generated::types::PolicyRuleResponse>, Error<()>> {
         let sig = generate_authorization_signatures(
             ctx,
@@ -79,7 +79,7 @@ impl PoliciesClient {
         policy_id: &'a crate::generated::types::UpdatePolicyRulePolicyId,
         rule_id: &'a crate::generated::types::UpdatePolicyRuleRuleId,
         ctx: &'a AuthorizationContext,
-        body: &'a crate::generated::types::PolicyRule,
+        body: &'a crate::generated::types::PolicyRuleRequestBody,
     ) -> Result<ResponseValue<crate::generated::types::UpdatePolicyRuleResponse>, Error<()>> {
         let sig = generate_authorization_signatures(
             ctx,

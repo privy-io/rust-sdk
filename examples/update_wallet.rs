@@ -68,9 +68,7 @@ async fn main() -> Result<()> {
             &wallet_id,
             &ctx,
             &UpdateWalletBody {
-                owner: Some(OwnerInput::PublicKeyOwner {
-                    public_key: public_key.to_string(),
-                }),
+                owner: Some(OwnerInput::PublicKey(public_key.to_string())),
                 ..Default::default()
             },
         )
