@@ -108,30 +108,11 @@ pub fn get_test_client() -> Result<PrivyClient> {
     Ok(client)
 }
 
-pub async fn get_test_wallet_id_by_type(
+pub async fn get_test_wallet_by_type(
     client: &PrivyClient,
     chain_type: WalletChainType,
     owner: Option<&str>,
-) -> Result<String> {
-    let wallet_id = match chain_type {
-        WalletChainType::Solana => env::var("PRIVY_TEST_SOLANA_WALLET_ID")
-            .or_else(|_| env::var("PRIVY_TEST_WALLET_ID"))
-            .ok(),
-        WalletChainType::Ethereum => env::var("PRIVY_TEST_ETH_WALLET_ID")
-            .or_else(|_| env::var("PRIVY_TEST_WALLET_ID"))
-            .ok(),
-        _ => env::var("PRIVY_TEST_WALLET_ID").ok(),
-    };
-
-    if let Some(id) = wallet_id {
-        return Ok(id);
-    }
-
-    tracing::info!(
-        "No wallet ID found for {:?}, creating new wallet...",
-        chain_type
-    );
-
+) -> Result<Wallet> {
     let wallet = client
         .wallets()
         .create(
@@ -148,7 +129,17 @@ pub async fn get_test_wallet_id_by_type(
 
     tracing::info!("Created new {:?} wallet with ID: {}", chain_type, wallet.id);
     tracing::debug!("Wallet: {:?}", wallet);
-    Ok(wallet.into_inner().id)
+    Ok(wallet.into_inner())
+}
+
+pub async fn get_test_wallet_id_by_type(
+    client: &PrivyClient,
+    chain_type: WalletChainType,
+    owner: Option<&str>,
+) -> Result<String> {
+    get_test_wallet_by_type(client, chain_type, owner)
+        .await
+        .map(|w| w.id)
 }
 
 /// Create a test user with a linked email address (for use with JWT authentication)

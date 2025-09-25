@@ -103,6 +103,13 @@ impl JwtExchange {
             }
         };
 
+        // NOTE: ugly hack ahead
+        //
+        // privy's caches are a little slow sometimes which means we need to insert an
+        // artificial delay to increase the likelihood of the cache being populated.
+        // good news is that retries will not need a new key so retries will be fast.
+        tokio::time::sleep(Duration::from_millis(1000)).await;
+
         {
             let mut cache = self.0.lock().expect("lock poisoned");
             cache.push(jwt.clone(), (expiry, key.clone()));

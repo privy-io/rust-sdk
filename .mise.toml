@@ -16,8 +16,6 @@ _.file = ['.env', '.env.local']
 # You can set these values here, or in a .env.local file that mise will load.
 # PRIVY_APP_ID = ""
 # PRIVY_APP_SECRET = ""
-# PRIVY_WALLET_ID = ""
-# PRIVY_PUBLIC_KEY = ""
 
 [tasks.pull-openapi]
 description = "Pull the latest OpenAPI spec from the Privy API repo and apply our overlay"

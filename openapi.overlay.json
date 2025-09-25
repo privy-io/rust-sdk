@@ -26,6 +26,26 @@
 						"title": "User owner"
 					}
 				]
+			},
+			"LinkedAccountSolanaEmbeddedWallet": {
+				"//comment": "We removed public key from this list since it is not being returned in some cases",
+				"required": [
+					"id",
+					"type",
+					"address",
+					"imported",
+					"delegated",
+					"wallet_index",
+					"chain_id",
+					"chain_type",
+					"wallet_client",
+					"wallet_client_type",
+					"connector_type",
+					"recovery_method",
+					"verified_at",
+					"first_verified_at",
+					"latest_verified_at"
+				]
 			}
 		}
 	},

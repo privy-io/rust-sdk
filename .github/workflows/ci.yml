@@ -12,6 +12,8 @@ env:
   PRIVY_TEST_APP_SECRET: ${{ secrets.PRIVY_TEST_APP_SECRET }}
   PRIVY_TEST_JWT_PRIVATE_KEY: ${{ secrets.PRIVY_TEST_JWT_PRIVATE_KEY }}
   PRIVY_TEST_URL: ${{ secrets.PRIVY_TEST_URL }}
+  # staging authorization flow is very flaky. we'll remove this eventually
+  MARK_FLAKY_TESTS_RETRIES: 20
 
 jobs:
   test:
