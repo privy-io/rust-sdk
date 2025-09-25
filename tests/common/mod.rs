@@ -1,4 +1,4 @@
-#![allow(dead_code)]
+#![allow(dead_code)] // tests are compiled module by module so not all functions are used in every test
 
 use std::{
     env,
