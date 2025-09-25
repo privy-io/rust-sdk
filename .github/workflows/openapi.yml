@@ -14,8 +14,7 @@ jobs:
         uses: jdx/mise-action@v2
 
       - name: Run Codegen
-        run: mise pull-openapi
-        working-directory: openapi
+        run: mise gen-openapi
 
       - name: create pull request
         uses: peter-evans/create-pull-request@v3

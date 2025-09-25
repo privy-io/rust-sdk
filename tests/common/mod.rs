@@ -118,9 +118,7 @@ pub async fn get_test_wallet_id_by_type(
             &CreateWalletBody {
                 chain_type,
                 additional_signers: None,
-                owner: owner.map(|o| OwnerInput::UserOwner {
-                    user_id: o.to_string(),
-                }),
+                owner: owner.map(|o| OwnerInput::UserId(o.to_string())),
                 owner_id: None,
                 policy_ids: vec![],
             },

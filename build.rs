@@ -33,7 +33,7 @@
 use std::{collections::HashMap, fs};
 
 use heck::{ToPascalCase, ToSnakeCase};
-use progenitor::{GenerationSettings, OperationIdStrategy};
+use progenitor::GenerationSettings;
 use quote::quote;
 use serde_yaml::Value;
 use syn::{File, Item, ItemImpl, Signature};
@@ -70,9 +70,7 @@ fn main() {
 
     // Step 1: Generate the base progenitor code
     let openapi_spec = load_openapi_spec();
-    let mut generator = progenitor::Generator::new(
-        GenerationSettings::default().with_operation_id_strategy(OperationIdStrategy::OmitMissing),
-    );
+    let mut generator = progenitor::Generator::new(&GenerationSettings::default());
     let tokens = generator.generate_tokens(&openapi_spec).unwrap();
     let ast = syn::parse2(tokens).unwrap();
     let content = prettyplease::unparse(&ast);

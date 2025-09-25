@@ -12,7 +12,7 @@ pub mod privy_hpke;
 pub mod solana;
 
 pub mod generated {
-    include!(concat!(env!("OUT_DIR"), "/codegen.rs"));
+    pub use privy_openapi::*;
 }
 
 pub mod subclients;

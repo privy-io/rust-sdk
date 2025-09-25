@@ -35,6 +35,18 @@
     {
       "name": "Fiat",
       "description": "Operations related to fiat onramping and offramping"
+    },
+    {
+      "name": "Auth",
+      "description": "Operations related to user authentication"
+    },
+    {
+      "name": "Auth.passkeys",
+      "description": "Operations related to user authentication with passkeys"
+    },
+    {
+      "name": "Auth.passwordless",
+      "description": "Operations related to user authentication with passwordless email"
     }
   ],
   "servers": [
@@ -64,7 +76,8 @@
           "near",
           "spark",
           "ton",
-          "starknet"
+          "starknet",
+          "movement"
         ],
         "description": "Chain type of the wallet"
       },
@@ -95,9 +108,6 @@
             ],
             "description": "The user ID of the owner of the resource. The user must already exist, and this value must start with \"did:privy:\". If you provide this, do not specify an owner_id as it will be generated automatically.",
             "title": "User owner"
-          },
-          {
-            "nullable": true
           }
         ],
         "description": "The owner of the resource. If you provide this, do not specify an owner_id as it will be generated automatically. When updating a wallet, you can set the owner to null to remove the owner."
@@ -1072,25 +1082,11 @@
               "hash",
               "caip2"
             ]
-          },
-          "error": {
-            "type": "object",
-            "properties": {
-              "code": {
-                "type": "string"
-              },
-              "message": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "code",
-              "message"
-            ]
           }
         },
         "required": [
-          "method"
+          "method",
+          "data"
         ]
       },
       "EthereumPersonalSignRpcResponse": {
@@ -1224,25 +1220,11 @@
             "required": [
               "authorization"
             ]
-          },
-          "error": {
-            "type": "object",
-            "properties": {
-              "code": {
-                "type": "string"
-              },
-              "message": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "code",
-              "message"
-            ]
           }
         },
         "required": [
-          "method"
+          "method",
+          "data"
         ]
       },
       "EthereumSecp256k1SignRpcResponse": {
@@ -1338,25 +1320,11 @@
               "hash",
               "caip2"
             ]
-          },
-          "error": {
-            "type": "object",
-            "properties": {
-              "code": {
-                "type": "string"
-              },
-              "message": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "code",
-              "message"
-            ]
           }
         },
         "required": [
-          "method"
+          "method",
+          "data"
         ]
       },
       "SolanaSignMessageRpcResponse": {
@@ -3233,6 +3201,90 @@
           "is_guest": false
         }
       },
+      "OAuthTokens": {
+        "type": "object",
+        "properties": {
+          "provider": {
+            "type": "string"
+          },
+          "access_token": {
+            "type": "string"
+          },
+          "access_token_expires_in_seconds": {
+            "type": "number"
+          },
+          "refresh_token": {
+            "type": "string"
+          },
+          "refresh_token_expires_in_seconds": {
+            "type": "number"
+          },
+          "scopes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "provider",
+          "access_token"
+        ],
+        "description": "OAuth tokens associated with the user.",
+        "title": "OAuthTokens"
+      },
+      "AuthenticatedUser": {
+        "type": "object",
+        "properties": {
+          "user": {
+            "$ref": "#/components/schemas/User"
+          },
+          "token": {
+            "type": "string",
+            "nullable": true,
+            "minLength": 1
+          },
+          "privy_access_token": {
+            "type": "string",
+            "nullable": true,
+            "minLength": 1
+          },
+          "refresh_token": {
+            "type": "string",
+            "nullable": true,
+            "minLength": 1
+          },
+          "identity_token": {
+            "type": "string",
+            "minLength": 1
+          },
+          "is_new_user": {
+            "type": "boolean"
+          },
+          "oauth_tokens": {
+            "$ref": "#/components/schemas/OAuthTokens"
+          },
+          "session_update_action": {
+            "type": "string",
+            "enum": [
+              "set",
+              "ignore",
+              "clear"
+            ],
+            "description": "Instructs the client on how to handle tokens received",
+            "example": "set"
+          }
+        },
+        "required": [
+          "user",
+          "token",
+          "privy_access_token",
+          "refresh_token",
+          "session_update_action"
+        ],
+        "description": "The authenticated user.",
+        "title": "AuthenticatedUser"
+      },
       "LinkedAccountWalletInput": {
         "type": "object",
         "properties": {
@@ -4225,7 +4277,7 @@
         "description": "Action to take if the conditions are true.",
         "title": "PolicyAction"
       },
-      "PolicyRule": {
+      "PolicyRuleRequestBody": {
         "type": "object",
         "properties": {
           "name": {
@@ -4260,12 +4312,12 @@
         ],
         "additionalProperties": false,
         "description": "The rules that apply to each method the policy covers.",
-        "title": "PolicyRule"
+        "title": "PolicyRuleRequestBody"
       },
       "PolicyRuleResponse": {
         "allOf": [
           {
-            "$ref": "#/components/schemas/PolicyRule"
+            "$ref": "#/components/schemas/PolicyRuleRequestBody"
           },
           {
             "type": "object",
@@ -4296,6 +4348,40 @@
           ],
           "action": "ALLOW"
         }
+      },
+      "PolicyRequestBody": {
+        "type": "object",
+        "properties": {
+          "policy_id": {
+            "type": "string",
+            "minLength": 24,
+            "maxLength": 24
+          }
+        },
+        "required": [
+          "policy_id"
+        ],
+        "description": "Unique ID of the policy to take actions on."
+      },
+      "PolicyRuleRequestParams": {
+        "type": "object",
+        "properties": {
+          "policy_id": {
+            "type": "string",
+            "minLength": 24,
+            "maxLength": 24
+          },
+          "rule_id": {
+            "type": "string",
+            "minLength": 24,
+            "maxLength": 24
+          }
+        },
+        "required": [
+          "policy_id",
+          "rule_id"
+        ],
+        "description": "Unique IDs of the policy and the rule within the policy to take actions on."
       },
       "Policy": {
         "type": "object",
@@ -4371,6 +4457,613 @@
           "version": "1.0",
           "created_at": 1741833088894
         }
+      },
+      "PasskeyAuthenticatorRegistrationOptions": {
+        "type": "object",
+        "properties": {
+          "rp": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "id": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "name"
+            ]
+          },
+          "user": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "display_name": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "name",
+              "display_name"
+            ]
+          },
+          "challenge": {
+            "type": "string"
+          },
+          "pub_key_cred_params": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "alg": {
+                  "type": "number"
+                },
+                "type": {
+                  "type": "string",
+                  "enum": [
+                    "public-key"
+                  ]
+                }
+              },
+              "required": [
+                "alg",
+                "type"
+              ]
+            }
+          },
+          "timeout": {
+            "type": "number"
+          },
+          "exclude_credentials": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "type": {
+                  "type": "string"
+                },
+                "transports": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "required": [
+                "id",
+                "type"
+              ]
+            }
+          },
+          "authenticator_selection": {
+            "type": "object",
+            "properties": {
+              "authenticator_attachment": {
+                "type": "string"
+              },
+              "require_resident_key": {
+                "type": "boolean"
+              },
+              "resident_key": {
+                "type": "string"
+              },
+              "user_verification": {
+                "type": "string"
+              }
+            }
+          },
+          "attestation": {
+            "type": "string"
+          },
+          "extensions": {
+            "type": "object",
+            "properties": {
+              "app_id": {
+                "type": "string"
+              },
+              "cred_props": {
+                "type": "object",
+                "properties": {
+                  "rk": {
+                    "type": "boolean"
+                  }
+                }
+              },
+              "hmac_create_secret": {
+                "type": "boolean"
+              }
+            }
+          }
+        },
+        "required": [
+          "rp",
+          "user",
+          "challenge",
+          "pub_key_cred_params"
+        ],
+        "description": "The passkey registration options.",
+        "title": "PasskeyAuthenticatorRegistrationOptions"
+      },
+      "PasskeyAuthenticatorRegistrationCredential": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "raw_id": {
+            "type": "string"
+          },
+          "response": {
+            "type": "object",
+            "properties": {
+              "client_data_json": {
+                "type": "string"
+              },
+              "attestation_object": {
+                "type": "string"
+              },
+              "authenticator_data": {
+                "type": "string"
+              },
+              "transports": {
+                "type": "array",
+                "items": {
+                  "nullable": true
+                }
+              },
+              "public_key_algorithm": {
+                "type": "number"
+              },
+              "public_key": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "client_data_json",
+              "attestation_object"
+            ]
+          },
+          "authenticator_attachment": {
+            "type": "string"
+          },
+          "client_extension_results": {
+            "type": "object",
+            "properties": {
+              "app_id": {
+                "type": "boolean"
+              },
+              "cred_props": {
+                "type": "object",
+                "properties": {
+                  "rk": {
+                    "type": "boolean"
+                  }
+                }
+              },
+              "hmac_create_secret": {
+                "type": "boolean"
+              }
+            }
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "public-key"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "raw_id",
+          "response",
+          "client_extension_results",
+          "type"
+        ],
+        "description": "The passkey registration credential.",
+        "title": "PasskeyAuthenticatorRegistrationCredential"
+      },
+      "PasskeyAuthenticatorAuthenticationOptions": {
+        "type": "object",
+        "properties": {
+          "challenge": {
+            "type": "string"
+          },
+          "timeout": {
+            "type": "number"
+          },
+          "rp_id": {
+            "type": "string"
+          },
+          "allow_credentials": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "type": {
+                  "type": "string"
+                },
+                "transports": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "required": [
+                "id",
+                "type"
+              ]
+            }
+          },
+          "user_verification": {
+            "type": "string"
+          },
+          "extensions": {
+            "type": "object",
+            "properties": {
+              "app_id": {
+                "type": "string"
+              },
+              "cred_props": {
+                "type": "boolean"
+              },
+              "hmac_create_secret": {
+                "type": "boolean"
+              }
+            }
+          }
+        },
+        "required": [
+          "challenge"
+        ],
+        "description": "The passkey authentication options.",
+        "title": "PasskeyAuthenticatorAuthenticationOptions"
+      },
+      "PasskeyAuthenticatorAuthenticationCredential": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "raw_id": {
+            "type": "string"
+          },
+          "response": {
+            "type": "object",
+            "properties": {
+              "client_data_json": {
+                "type": "string"
+              },
+              "authenticator_data": {
+                "type": "string"
+              },
+              "signature": {
+                "type": "string"
+              },
+              "user_handle": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "client_data_json",
+              "authenticator_data",
+              "signature"
+            ]
+          },
+          "authenticator_attachment": {
+            "type": "string"
+          },
+          "client_extension_results": {
+            "type": "object",
+            "properties": {
+              "app_id": {
+                "type": "boolean"
+              },
+              "cred_props": {
+                "type": "object",
+                "properties": {
+                  "rk": {
+                    "type": "boolean"
+                  }
+                }
+              },
+              "hmac_create_secret": {
+                "type": "boolean"
+              }
+            }
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "public-key"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "raw_id",
+          "response",
+          "client_extension_results",
+          "type"
+        ],
+        "description": "The passkey authentication credential.",
+        "title": "PasskeyAuthenticatorAuthenticationCredential"
+      },
+      "PasskeyRelyingPartyUrl": {
+        "type": "string",
+        "format": "uri",
+        "title": "PasskeyRelyingPartyUrl"
+      },
+      "AuthPasskeyInitRequestBody": {
+        "type": "object",
+        "properties": {
+          "relying_party": {
+            "$ref": "#/components/schemas/PasskeyRelyingPartyUrl"
+          }
+        },
+        "description": "The request body for initiating a passkey ceremony.",
+        "title": "AuthPasskeyInitRequestBody"
+      },
+      "AuthPasskeyLinkInitRequestBody": {
+        "type": "object",
+        "properties": {
+          "relying_party": {
+            "$ref": "#/components/schemas/PasskeyRelyingPartyUrl"
+          },
+          "user_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "user_id"
+        ],
+        "description": "The request body for initiating a passkey registration ceremony linked to a user account.",
+        "title": "AuthPasskeyLinkInitRequestBody"
+      },
+      "AuthPasskeyAuthenticationInitResponseBody": {
+        "type": "object",
+        "properties": {
+          "relying_party": {
+            "$ref": "#/components/schemas/PasskeyRelyingPartyUrl"
+          },
+          "options": {
+            "$ref": "#/components/schemas/PasskeyAuthenticatorAuthenticationOptions"
+          }
+        },
+        "required": [
+          "options"
+        ],
+        "description": "The response body for initiating a passkey authentication ceremony.",
+        "title": "AuthPasskeyAuthenticationInitResponseBody"
+      },
+      "AuthPasskeyRegistrationInitResponseBody": {
+        "type": "object",
+        "properties": {
+          "relying_party": {
+            "$ref": "#/components/schemas/PasskeyRelyingPartyUrl"
+          },
+          "options": {
+            "$ref": "#/components/schemas/PasskeyAuthenticatorRegistrationOptions"
+          }
+        },
+        "required": [
+          "options"
+        ],
+        "description": "The response body for initiating a passkey registration ceremony.",
+        "title": "AuthPasskeyRegistrationInitResponseBody"
+      },
+      "AuthPasskeyAuthenticationRequestBody": {
+        "type": "object",
+        "properties": {
+          "relying_party": {
+            "type": "string",
+            "format": "uri"
+          },
+          "challenge": {
+            "type": "string"
+          },
+          "authenticator_response": {
+            "$ref": "#/components/schemas/PasskeyAuthenticatorAuthenticationCredential"
+          }
+        },
+        "required": [
+          "challenge",
+          "authenticator_response"
+        ],
+        "description": "The authenticator response for the authentication ceremony.",
+        "title": "AuthPasskeyAuthenticationRequestBody"
+      },
+      "AuthPasskeyRegistrationRequestBody": {
+        "type": "object",
+        "properties": {
+          "relying_party": {
+            "type": "string",
+            "format": "uri"
+          },
+          "authenticator_response": {
+            "$ref": "#/components/schemas/PasskeyAuthenticatorRegistrationCredential"
+          }
+        },
+        "required": [
+          "authenticator_response"
+        ],
+        "description": "The authenticator response for the registration ceremony.",
+        "title": "AuthPasskeyRegistrationRequestBody"
+      },
+      "AuthPasskeyLinkedRegistrationRequestBody": {
+        "type": "object",
+        "properties": {
+          "relying_party": {
+            "type": "string",
+            "format": "uri"
+          },
+          "authenticator_response": {
+            "$ref": "#/components/schemas/PasskeyAuthenticatorRegistrationCredential"
+          },
+          "user_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "authenticator_response",
+          "user_id"
+        ],
+        "description": "The authenticator response for the registration ceremony linked to a user account.",
+        "title": "AuthPasskeyLinkedRegistrationRequestBody"
+      },
+      "AuthPasskeyUnlinkRequestBody": {
+        "type": "object",
+        "properties": {
+          "credential_id": {
+            "type": "string"
+          },
+          "remove_as_mfa": {
+            "type": "boolean",
+            "default": true
+          },
+          "user_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "credential_id",
+          "remove_as_mfa",
+          "user_id"
+        ],
+        "description": "The request body for unlinking a passkey from a user account.",
+        "title": "AuthPasskeyUnlinkRequestBody"
+      },
+      "SendCodeToEmailRequestBody": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email"
+          }
+        },
+        "required": [
+          "email"
+        ],
+        "title": "SendCodeToEmailRequestBody"
+      },
+      "SendCodeToEmailResponseBody": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "success"
+        ],
+        "title": "SendCodeToEmailResponseBody"
+      },
+      "AuthenticateWithEmailRequestBody": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "code": {
+            "type": "string",
+            "minLength": 6,
+            "maxLength": 6
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "no-signup",
+              "login-or-sign-up"
+            ]
+          }
+        },
+        "required": [
+          "email",
+          "code"
+        ],
+        "title": "AuthenticateWithEmailRequestBody"
+      },
+      "LinkEmailRequestBody": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "code": {
+            "type": "string",
+            "minLength": 6,
+            "maxLength": 6
+          },
+          "user_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "email",
+          "code",
+          "user_id"
+        ],
+        "title": "LinkEmailRequestBody"
+      },
+      "UnlinkEmailRequestBody": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string",
+            "format": "email"
+          },
+          "user_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "address",
+          "user_id"
+        ],
+        "title": "UnlinkEmailRequestBody"
+      },
+      "UpdateEmailRequestBody": {
+        "type": "object",
+        "properties": {
+          "oldAddress": {
+            "type": "string",
+            "format": "email"
+          },
+          "newAddress": {
+            "type": "string",
+            "format": "email"
+          },
+          "code": {
+            "type": "string",
+            "minLength": 6,
+            "maxLength": 6
+          },
+          "user_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "oldAddress",
+          "newAddress",
+          "code",
+          "user_id"
+        ],
+        "title": "UpdateEmailRequestBody"
       },
       "Transaction": {
         "type": "object",
@@ -6554,7 +7247,8 @@
               }
             }
           }
-        }
+        },
+        "operationId": "lookUpUserByEmail"
       }
     },
     "/v1/users/custom_auth/id": {
@@ -6599,7 +7293,8 @@
               }
             }
           }
-        }
+        },
+        "operationId": "lookUpUserByCustomAuthId"
       }
     },
     "/v1/users/wallet/address": {
@@ -6651,7 +7346,8 @@
               }
             }
           }
-        }
+        },
+        "operationId": "lookUpUserByWalletAddress"
       }
     },
     "/v1/users/farcaster/fid": {
@@ -6696,7 +7392,8 @@
               }
             }
           }
-        }
+        },
+        "operationId": "lookUpUserByFarcasterId"
       }
     },
     "/v1/users/phone/number": {
@@ -6741,7 +7438,8 @@
               }
             }
           }
-        }
+        },
+        "operationId": "lookUpUserByPhoneNumber"
       }
     },
     "/v1/users/smart_wallet/address": {
@@ -6786,7 +7484,8 @@
               }
             }
           }
-        }
+        },
+        "operationId": "lookUpUserBySmartWalletAddress"
       }
     },
     "/v1/users/discord/username": {
@@ -6831,7 +7530,8 @@
               }
             }
           }
-        }
+        },
+        "operationId": "lookUpUserByDiscordUsername"
       }
     },
     "/v1/users/github/username": {
@@ -6876,7 +7576,8 @@
               }
             }
           }
-        }
+        },
+        "operationId": "lookUpUserByGithubUsername"
       }
     },
     "/v1/users/twitter/username": {
@@ -6921,7 +7622,8 @@
               }
             }
           }
-        }
+        },
+        "operationId": "lookUpUserByTwitterUsername"
       }
     },
     "/v1/users/twitter/subject": {
@@ -6966,7 +7668,8 @@
               }
             }
           }
-        }
+        },
+        "operationId": "lookUpUserByTwitterSubject"
       }
     },
     "/v1/users/telegram/telegram_user_id": {
@@ -7011,7 +7714,8 @@
               }
             }
           }
-        }
+        },
+        "operationId": "lookUpUserByTelegramUserId"
       }
     },
     "/v1/users/telegram/username": {
@@ -7056,7 +7760,8 @@
               }
             }
           }
-        }
+        },
+        "operationId": "lookUpUserByTelegramUsername"
       }
     },
     "/v1/users/search": {
@@ -7310,7 +8015,8 @@
               }
             }
           }
-        }
+        },
+        "operationId": "addOrUpdateUserLinkedAccount"
       }
     },
     "/v1/users/{user_id}/accounts/unlink": {
@@ -7398,7 +8104,8 @@
               }
             }
           }
-        }
+        },
+        "operationId": "unlinkUserLinkedAccount"
       }
     },
     "/v1/policies": {
@@ -7449,7 +8156,7 @@
                   "rules": {
                     "type": "array",
                     "items": {
-                      "$ref": "#/components/schemas/PolicyRule"
+                      "$ref": "#/components/schemas/PolicyRuleRequestBody"
                     }
                   },
                   "owner": {
@@ -7578,7 +8285,7 @@
                   "rules": {
                     "type": "array",
                     "items": {
-                      "$ref": "#/components/schemas/PolicyRule"
+                      "$ref": "#/components/schemas/PolicyRuleRequestBody"
                     }
                   },
                   "owner": {
@@ -7676,6 +8383,7 @@
           "Policies"
         ],
         "summary": "Create Policy Rule",
+        "operationId": "createPolicyRule",
         "description": "Create a new rule for a policy.",
         "security": [
           {
@@ -7708,7 +8416,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/PolicyRule"
+                "$ref": "#/components/schemas/PolicyRuleRequestBody"
               }
             }
           }
@@ -7724,8 +8432,7 @@
               }
             }
           }
-        },
-        "operationId": "createPolicyRule"
+        }
       }
     },
     "/v1/policies/{policy_id}/rules/{rule_id}": {
@@ -7734,6 +8441,7 @@
           "Policies"
         ],
         "summary": "Get Policy Rule",
+        "operationId": "getPolicyRule",
         "description": "Get a rule by policy ID and rule ID.",
         "security": [
           {
@@ -7773,14 +8481,14 @@
               }
             }
           }
-        },
-        "operationId": "getPolicyRule"
+        }
       },
       "patch": {
         "tags": [
           "Policies"
         ],
         "summary": "Update Policy Rule",
+        "operationId": "updatePolicyRule",
         "description": "Update a rule by policy ID and rule ID.",
         "security": [
           {
@@ -7823,7 +8531,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/PolicyRule"
+                "$ref": "#/components/schemas/PolicyRuleRequestBody"
               }
             }
           }
@@ -7859,14 +8567,14 @@
               }
             }
           }
-        },
-        "operationId": "updatePolicyRule"
+        }
       },
       "delete": {
         "tags": [
           "Policies"
         ],
         "summary": "Delete Policy Rule",
+        "operationId": "deletePolicyRule",
         "description": "Delete a rule by policy ID and rule ID.",
         "security": [
           {
@@ -7927,8 +8635,463 @@
               }
             }
           }
+        }
+      }
+    },
+    "/v1/user-accounts/passkeys/authenticate/init": {
+      "post": {
+        "tags": [
+          "Auth.passkeys"
+        ],
+        "operationId": "initPasskeyAuthentication",
+        "summary": "Initiate Passkey Authentication",
+        "description": "Request a passkey authentication challenge.",
+        "security": [
+          {
+            "appSecretAuth": []
+          }
+        ],
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AuthPasskeyInitRequestBody"
+              }
+            }
+          }
         },
-        "operationId": "deletePolicyRule"
+        "responses": {
+          "200": {
+            "description": "The passkey authentication challenge.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthPasskeyAuthenticationInitResponseBody"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/user-accounts/passkeys/authenticate": {
+      "post": {
+        "tags": [
+          "Auth.passkeys"
+        ],
+        "operationId": "authenticateWithPasskey",
+        "summary": "Authenticate With Passkey",
+        "description": "Authenticate a user account with a passkey.",
+        "security": [
+          {
+            "appSecretAuth": []
+          }
+        ],
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AuthPasskeyAuthenticationRequestBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The authenticated user account.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthenticatedUser"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/user-accounts/passkeys/register/init": {
+      "post": {
+        "tags": [
+          "Auth.passkeys"
+        ],
+        "operationId": "initPasskeyRegistration",
+        "summary": "Initiate Passkey Registration",
+        "description": "Request a passkey registration challenge",
+        "security": [
+          {
+            "appSecretAuth": []
+          }
+        ],
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AuthPasskeyInitRequestBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The passkey registration challenge.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthPasskeyRegistrationInitResponseBody"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/user-accounts/passkeys/register": {
+      "post": {
+        "tags": [
+          "Auth.passkeys"
+        ],
+        "operationId": "registerWithPasskey",
+        "summary": "Register With Passkey",
+        "description": "Register a new user account with a passkey.",
+        "security": [
+          {
+            "appSecretAuth": []
+          }
+        ],
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AuthPasskeyRegistrationRequestBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The authenticated user account.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthenticatedUser"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/user-accounts/passkeys/link/init": {
+      "post": {
+        "tags": [
+          "Auth.passkeys"
+        ],
+        "operationId": "initPasskeyLink",
+        "summary": "Initiate Passkey Link",
+        "description": "Request a passkey registration challenge linked to a user account.",
+        "security": [
+          {
+            "appSecretAuth": []
+          }
+        ],
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AuthPasskeyLinkInitRequestBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The passkey registration challenge.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthPasskeyRegistrationInitResponseBody"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/user-accounts/passkeys/link": {
+      "post": {
+        "tags": [
+          "Auth.passkeys"
+        ],
+        "operationId": "linkPasskey",
+        "summary": "Link Passkey",
+        "description": "Link a passkey to an existing user account.",
+        "security": [
+          {
+            "appSecretAuth": []
+          }
+        ],
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AuthPasskeyLinkedRegistrationRequestBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The updated user account.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/user-accounts/passkeys/unlink": {
+      "post": {
+        "tags": [
+          "Auth.passkeys"
+        ],
+        "operationId": "unlinkPasskey",
+        "summary": "Unlink Passkey",
+        "description": "Unlink a passkey from a user account.",
+        "security": [
+          {
+            "appSecretAuth": []
+          }
+        ],
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AuthPasskeyUnlinkRequestBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The updated user account.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/user-accounts/passwordless/init": {
+      "post": {
+        "tags": [
+          "Auth.email"
+        ],
+        "operationId": "sendCodeToEmail",
+        "summary": "Initiate Passwordless Authentication",
+        "description": "Request a one time code to be sent to the user's email.",
+        "security": [
+          {
+            "appSecretAuth": []
+          }
+        ],
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SendCodeToEmailRequestBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The result of sending the one time code to the user's email.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SendCodeToEmailResponseBody"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/user-accounts/passwordless/authenticate": {
+      "post": {
+        "tags": [
+          "Auth.email"
+        ],
+        "operationId": "authenticateWithEmail",
+        "summary": "Authenticate With Passwordless",
+        "description": "Authenticate a user account with an email and code.",
+        "security": [
+          {
+            "appSecretAuth": []
+          }
+        ],
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AuthenticateWithEmailRequestBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The authenticated user account.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthenticatedUser"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/user-accounts/passwordless/link": {
+      "post": {
+        "tags": [
+          "Auth.email"
+        ],
+        "operationId": "linkEmail",
+        "summary": "Link Passwordless",
+        "description": "Link an email to an existing user account.",
+        "security": [
+          {
+            "appSecretAuth": []
+          }
+        ],
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LinkEmailRequestBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The updated user account.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/user-accounts/passwordless/unlink": {
+      "post": {
+        "tags": [
+          "Auth.email"
+        ],
+        "operationId": "unlinkEmail",
+        "summary": "Unlink Passwordless",
+        "description": "Unlink an email from a user account.",
+        "security": [
+          {
+            "appSecretAuth": []
+          }
+        ],
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UnlinkEmailRequestBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The updated user account.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/user-accounts/passwordless/update": {
+      "post": {
+        "tags": [
+          "Auth.email"
+        ],
+        "operationId": "updateEmail",
+        "summary": "Update Passwordless",
+        "description": "Update a user's linked email account.",
+        "security": [
+          {
+            "appSecretAuth": []
+          }
+        ],
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateEmailRequestBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The updated user account.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/v1/transactions/{transaction_id}": {
@@ -8211,433 +9374,10 @@
       }
     },
     "/v1/wallets_with_recovery": {
-      "post": {
-        "tags": [
-          "User signers"
-        ],
-        "deprecated": true,
-        "summary": "Create wallets with an associated recovery user.",
-        "description": "Create wallets with an associated recovery user.",
-        "security": [
-          {
-            "appSecretAuth": []
-          }
-        ],
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "wallets": {
-                    "type": "array",
-                    "items": {
-                      "type": "object",
-                      "properties": {
-                        "chain_type": {
-                          "$ref": "#/components/schemas/WalletChainType"
-                        },
-                        "policy_ids": {
-                          "type": "array",
-                          "items": {
-                            "type": "string",
-                            "minLength": 24,
-                            "maxLength": 24
-                          },
-                          "maxItems": 1,
-                          "description": "List of policy IDs for policies that should be enforced on the wallet. Currently, only one policy is supported per wallet."
-                        }
-                      },
-                      "required": [
-                        "chain_type"
-                      ]
-                    }
-                  },
-                  "primary_signer": {
-                    "type": "object",
-                    "properties": {
-                      "subject_id": {
-                        "type": "string",
-                        "description": "The JWT subject ID of the user."
-                      }
-                    },
-                    "required": [
-                      "subject_id"
-                    ],
-                    "additionalProperties": false
-                  },
-                  "recovery_user": {
-                    "type": "object",
-                    "properties": {
-                      "linked_accounts": {
-                        "type": "array",
-                        "items": {
-                          "oneOf": [
-                            {
-                              "type": "object",
-                              "properties": {
-                                "type": {
-                                  "type": "string",
-                                  "enum": [
-                                    "email"
-                                  ]
-                                },
-                                "address": {
-                                  "type": "string",
-                                  "format": "email",
-                                  "description": "The email address of the user."
-                                }
-                              },
-                              "required": [
-                                "type",
-                                "address"
-                              ]
-                            },
-                            {
-                              "type": "object",
-                              "properties": {
-                                "type": {
-                                  "type": "string",
-                                  "enum": [
-                                    "custom_auth"
-                                  ]
-                                },
-                                "custom_user_id": {
-                                  "type": "string",
-                                  "minLength": 1,
-                                  "maxLength": 256,
-                                  "description": "The JWT subject ID of the user."
-                                }
-                              },
-                              "required": [
-                                "type",
-                                "custom_user_id"
-                              ]
-                            }
-                          ]
-                        },
-                        "minItems": 1,
-                        "maxItems": 2
-                      }
-                    },
-                    "required": [
-                      "linked_accounts"
-                    ],
-                    "additionalProperties": false
-                  }
-                },
-                "required": [
-                  "wallets",
-                  "primary_signer",
-                  "recovery_user"
-                ],
-                "additionalProperties": false,
-                "example": {
-                  "wallets": [
-                    {
-                      "chain_type": "ethereum",
-                      "policy_ids": []
-                    },
-                    {
-                      "chain_type": "solana",
-                      "policy_ids": []
-                    }
-                  ],
-                  "primary_signer": {
-                    "subject_id": "cm7oxq1el000e11o8iwp7d0d0"
-                  },
-                  "recovery_user": {
-                    "linked_accounts": [
-                      {
-                        "type": "email",
-                        "address": "john@doe.com"
-                      }
-                    ]
-                  }
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Object with user and wallet data.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "wallets": {
-                      "type": "array",
-                      "items": {
-                        "$ref": "#/components/schemas/Wallet"
-                      },
-                      "description": "The wallets that were created."
-                    },
-                    "recovery_user_id": {
-                      "type": "string",
-                      "description": "The ID of the created user."
-                    }
-                  },
-                  "required": [
-                    "wallets",
-                    "recovery_user_id"
-                  ],
-                  "example": {
-                    "wallets": [
-                      {
-                        "id": "ubul5xhljqorce73sf82u0p3",
-                        "address": "0x3DE69Fd93873d40459f27Ce5B74B42536f8d6149",
-                        "chain_type": "ethereum",
-                        "policy_ids": [],
-                        "additional_signers": [],
-                        "created_at": 1744300912643,
-                        "owner_id": "lzjb3xnjk2ntod3w1hgwa358",
-                        "exported_at": null,
-                        "imported_at": null
-                      },
-                      {
-                        "id": "sb4y18l68xze8gfszafmyv3q",
-                        "address": "9wtGmqMamnKfz49XBwnJASbjcVnnKnT78qKopCL54TAk",
-                        "chain_type": "solana",
-                        "policy_ids": [],
-                        "additional_signers": [],
-                        "created_at": 1744300912644,
-                        "owner_id": "lzjb3xnjk2ntod3w1hgwa358",
-                        "exported_at": null,
-                        "imported_at": null
-                      }
-                    ],
-                    "recovery_user_id": "so6bsadjfi3ihhkyt9hlqv6x"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
+      "post": null
     },
     "/v1/user_signers/authenticate": {
-      "post": {
-        "tags": [
-          "User signers"
-        ],
-        "deprecated": true,
-        "summary": "Obtain a user session signer to enable wallet access.",
-        "description": "Obtain a user session signer to enable wallet access.",
-        "security": [
-          {
-            "appSecretAuth": []
-          }
-        ],
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "user_jwt": {
-                    "type": "string",
-                    "description": "The user's JWT, to be used to authenticate the user."
-                  },
-                  "encryption_type": {
-                    "type": "string",
-                    "enum": [
-                      "HPKE"
-                    ],
-                    "description": "The encryption type for the authentication response. Currently only supports HPKE."
-                  },
-                  "recipient_public_key": {
-                    "type": "string",
-                    "description": "The public key of your ECDH keypair, in base64-encoded, SPKI-format, whose private key will be able to decrypt the session key."
-                  }
-                },
-                "required": [
-                  "user_jwt"
-                ],
-                "example": {
-                  "user_jwt": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWUsImlhdCI6MTUxNjIzOTAyMn0.KMUFsIDTnFmyG3nMiGM6H9FNFUROf3wh7SmqJp-QV30",
-                  "encryption_type": "HPKE",
-                  "recipient_public_key": "DAQcDQgAEx4aoeD72yykviK+fckqE2CItVIGn1rCnvCXZ1HgpOcMEMialRmTrqIK4oZlYd1"
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Object with authorization key and wallet IDs.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "oneOf": [
-                    {
-                      "type": "object",
-                      "properties": {
-                        "encrypted_authorization_key": {
-                          "type": "object",
-                          "properties": {
-                            "encryption_type": {
-                              "type": "string",
-                              "enum": [
-                                "HPKE"
-                              ],
-                              "description": "The encryption type used. Currently only supports HPKE."
-                            },
-                            "encapsulated_key": {
-                              "type": "string",
-                              "description": "Base64-encoded ephemeral public key used in the HPKE encryption process. Required for decryption."
-                            },
-                            "ciphertext": {
-                              "type": "string",
-                              "description": "The encrypted authorization key corresponding to the user's current authentication session."
-                            }
-                          },
-                          "required": [
-                            "encryption_type",
-                            "encapsulated_key",
-                            "ciphertext"
-                          ],
-                          "description": "The encrypted authorization key data."
-                        },
-                        "expires_at": {
-                          "type": "number",
-                          "description": "The expiration time of the authorization key in seconds since the epoch."
-                        },
-                        "wallets": {
-                          "type": "array",
-                          "items": {
-                            "$ref": "#/components/schemas/Wallet"
-                          }
-                        }
-                      },
-                      "required": [
-                        "encrypted_authorization_key",
-                        "expires_at",
-                        "wallets"
-                      ],
-                      "title": "With encryption",
-                      "example": {
-                        "encrypted_authorization_key": {
-                          "encryption_type": "HPKE",
-                          "encapsulated_key": "BECqbgIAcs3TpP5GadS6F8mXkSktR2DR8WNtd3e0Qcy7PpoRHEygpzjFWttntS+SEM3VSr4Thewh18ZP9chseLE=",
-                          "ciphertext": "MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgsqM8IKMlpFxVypBUa/Q2QvB1AmS/g5WHPp3SKq9A75uhRANCAATeX6BDghwclKAH8+/7IjvS1tCpvIfZ570IR44acX93pUGz5iEvpkg+HGaalHAXubuoUMq9CUWRm4wo+3090Nus"
-                        },
-                        "expires_at": 1697059200000,
-                        "wallets": [
-                          {
-                            "id": "ubul5xhljqorce73sf82u0p3",
-                            "address": "0x3DE69Fd93873d40459f27Ce5B74B42536f8d6149",
-                            "chain_type": "ethereum",
-                            "policy_ids": [],
-                            "additional_signers": [
-                              {
-                                "signer_id": "p3cyj3n8mt9f9u2htfize511",
-                                "override_policy_ids": []
-                              }
-                            ],
-                            "created_at": 1744300912643,
-                            "owner_id": "lzjb3xnjk2ntod3w1hgwa358",
-                            "exported_at": null,
-                            "imported_at": null
-                          },
-                          {
-                            "id": "sb4y18l68xze8gfszafmyv3q",
-                            "address": "9wtGmqMamnKfz49XBwnJASbjcVnnKnT78qKopCL54TAk",
-                            "chain_type": "solana",
-                            "policy_ids": [],
-                            "additional_signers": [
-                              {
-                                "signer_id": "p3cyj3n8mt9f9u2htfize511",
-                                "override_policy_ids": []
-                              }
-                            ],
-                            "created_at": 1744300912644,
-                            "owner_id": "lzjb3xnjk2ntod3w1hgwa358",
-                            "exported_at": null,
-                            "imported_at": null
-                          }
-                        ]
-                      }
-                    },
-                    {
-                      "type": "object",
-                      "properties": {
-                        "authorization_key": {
-                          "type": "string",
-                          "description": "The raw authorization key data."
-                        },
-                        "expires_at": {
-                          "type": "number",
-                          "description": "The expiration time of the authorization key in seconds since the epoch."
-                        },
-                        "wallets": {
-                          "type": "array",
-                          "items": {
-                            "$ref": "#/components/schemas/Wallet"
-                          }
-                        }
-                      },
-                      "required": [
-                        "authorization_key",
-                        "expires_at",
-                        "wallets"
-                      ],
-                      "title": "Without encryption"
-                    }
-                  ],
-                  "example": {
-                    "encrypted_authorization_key": {
-                      "encryption_type": "HPKE",
-                      "encapsulated_key": "BECqbgIAcs3TpP5GadS6F8mXkSktR2DR8WNtd3e0Qcy7PpoRHEygpzjFWttntS+SEM3VSr4Thewh18ZP9chseLE=",
-                      "ciphertext": "MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgsqM8IKMlpFxVypBUa/Q2QvB1AmS/g5WHPp3SKq9A75uhRANCAATeX6BDghwclKAH8+/7IjvS1tCpvIfZ570IR44acX93pUGz5iEvpkg+HGaalHAXubuoUMq9CUWRm4wo+3090Nus"
-                    },
-                    "expires_at": 1697059200000,
-                    "wallets": [
-                      {
-                        "id": "ubul5xhljqorce73sf82u0p3",
-                        "address": "0x3DE69Fd93873d40459f27Ce5B74B42536f8d6149",
-                        "chain_type": "ethereum",
-                        "policy_ids": [],
-                        "additional_signers": [
-                          {
-                            "signer_id": "p3cyj3n8mt9f9u2htfize511",
-                            "override_policy_ids": []
-                          }
-                        ],
-                        "created_at": 1744300912643,
-                        "owner_id": "lzjb3xnjk2ntod3w1hgwa358",
-                        "exported_at": null,
-                        "imported_at": null
-                      },
-                      {
-                        "id": "sb4y18l68xze8gfszafmyv3q",
-                        "address": "9wtGmqMamnKfz49XBwnJASbjcVnnKnT78qKopCL54TAk",
-                        "chain_type": "solana",
-                        "policy_ids": [],
-                        "additional_signers": [
-                          {
-                            "signer_id": "p3cyj3n8mt9f9u2htfize511",
-                            "override_policy_ids": []
-                          }
-                        ],
-                        "created_at": 1744300912644,
-                        "owner_id": "lzjb3xnjk2ntod3w1hgwa358",
-                        "exported_at": null,
-                        "imported_at": null
-                      }
-                    ]
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
+      "post": null
     },
     "/v1/users/{user_id}/fiat/status": {
       "post": {
@@ -9884,7 +10624,8 @@
               }
             }
           }
-        }
+        },
+        "operationId": "getUserFiatKycStatus"
       },
       "patch": {
         "tags": [
@@ -10597,7 +11338,8 @@
               }
             }
           }
-        }
+        },
+        "operationId": "updateUserFiatKycStatus"
       }
     },
     "/v1/users/{user_id}/fiat/kyc_link": {
