@@ -3,6 +3,7 @@ use hpke::{
     Deserializable, OpModeS, Serializable, aead::ChaCha20Poly1305, kdf::HkdfSha256,
     kem::DhP256HkdfSha256,
 };
+use privy_openapi::types::WalletImportInitializationRequest;
 
 use crate::{
     generated::{
@@ -24,15 +25,24 @@ pub struct WalletImport {
 }
 
 impl WalletImport {
-    pub(crate) fn new(
+    pub(crate) async fn new(
         client: WalletsClient,
-        initialization_response: WalletImportInitializationResponse,
-        address: String,
-        chain_type: WalletImportSupportedChains,
+        request: WalletImportInitializationRequest,
     ) -> Self {
+        let (address, chain_type) = match &request {
+            WalletImportInitializationRequest::PrivateKeyInitInput(input) => {
+                (input.address.to_owned(), input.chain_type)
+            }
+            WalletImportInitializationRequest::HdInitInput(input) => {
+                (input.address.to_owned(), input.chain_type)
+            }
+        };
+
+        let initialization_response = client._init_import(&request).await.unwrap();
+
         Self {
             client,
-            initialization_response,
+            initialization_response: initialization_response.into_inner(),
             address,
             chain_type,
         }

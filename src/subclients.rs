@@ -7,7 +7,7 @@
 use p256::elliptic_curve::SecretKey;
 
 use crate::{
-    AuthorizationContext, PrivyExportError, PrivyHpke, PrivySignedApiError,
+    AuthorizationContext, PrivyApiError, PrivyExportError, PrivyHpke, PrivySignedApiError,
     ethereum::EthereumService,
     generate_authorization_signatures,
     generated::types::{
@@ -356,8 +356,9 @@ impl WalletsClient {
         owner: Option<WalletImportSubmissionRequestOwner>,
         policy_ids: Vec<String>,
         additional_signers: Vec<WalletImportSubmissionRequestAdditionalSignersItem>,
-    ) -> Result<ResponseValue<Wallet>, PrivySignedApiError> {
-        let init_request =
+    ) -> Result<ResponseValue<Wallet>, PrivyApiError> {
+        WalletImport::new(
+            self.clone(),
             crate::generated::types::WalletImportInitializationRequest::PrivateKeyInitInput(
                 PrivateKeyInitInput {
                     address: address.clone(),
@@ -366,14 +367,11 @@ impl WalletsClient {
                     entropy_type:
                         crate::generated::types::PrivateKeyInitInputEntropyType::PrivateKey,
                 },
-            );
-
-        let response = self._init_import(&init_request).await?;
-        let import = WalletImport::new(self.clone(), response.into_inner(), address, chain_type);
-
-        Ok(import
-            .submit(private_key_hex, owner, policy_ids, additional_signers)
-            .await?)
+            ),
+        )
+        .await
+        .submit(private_key_hex, owner, policy_ids, additional_signers)
+        .await
     }
 
     pub(crate) async fn submit_import<'a>(
