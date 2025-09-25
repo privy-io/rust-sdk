@@ -1823,13 +1823,11 @@ pub mod types {
     #[doc = "        \"1.0\""]
     #[doc = "      ]"]
     #[doc = "    }"]
-    #[doc = "  },"]
-    #[doc = "  \"additionalProperties\": false"]
+    #[doc = "  }"]
     #[doc = "}"]
     #[doc = r" ```"]
     #[doc = r" </details>"]
     #[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
-    #[serde(deny_unknown_fields)]
     pub struct CreatePolicyBody {
         pub chain_type: PolicyChainType,
         #[doc = "Name to assign to policy."]
@@ -5758,8 +5756,7 @@ pub mod types {
     #[doc = "                \"signer_id\": {"]
     #[doc = "                  \"type\": \"string\""]
     #[doc = "                }"]
-    #[doc = "              },"]
-    #[doc = "              \"additionalProperties\": false"]
+    #[doc = "              }"]
     #[doc = "            }"]
     #[doc = "          },"]
     #[doc = "          \"chain_type\": {"]
@@ -5788,8 +5785,7 @@ pub mod types {
     #[doc = "            },"]
     #[doc = "            \"maxItems\": 1"]
     #[doc = "          }"]
-    #[doc = "        },"]
-    #[doc = "        \"additionalProperties\": false"]
+    #[doc = "        }"]
     #[doc = "      }"]
     #[doc = "    }"]
     #[doc = "  }"]
@@ -5834,8 +5830,7 @@ pub mod types {
     #[doc = "          \"signer_id\": {"]
     #[doc = "            \"type\": \"string\""]
     #[doc = "          }"]
-    #[doc = "        },"]
-    #[doc = "        \"additionalProperties\": false"]
+    #[doc = "        }"]
     #[doc = "      }"]
     #[doc = "    },"]
     #[doc = "    \"chain_type\": {"]
@@ -5864,13 +5859,11 @@ pub mod types {
     #[doc = "      },"]
     #[doc = "      \"maxItems\": 1"]
     #[doc = "    }"]
-    #[doc = "  },"]
-    #[doc = "  \"additionalProperties\": false"]
+    #[doc = "  }"]
     #[doc = "}"]
     #[doc = r" ```"]
     #[doc = r" </details>"]
     #[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
-    #[serde(deny_unknown_fields)]
     pub struct CreateUserWalletBodyWalletsItem {
         #[serde(default, skip_serializing_if = "::std::vec::Vec::is_empty")]
         pub additional_signers:
@@ -5907,13 +5900,11 @@ pub mod types {
     #[doc = "    \"signer_id\": {"]
     #[doc = "      \"type\": \"string\""]
     #[doc = "    }"]
-    #[doc = "  },"]
-    #[doc = "  \"additionalProperties\": false"]
+    #[doc = "  }"]
     #[doc = "}"]
     #[doc = r" ```"]
     #[doc = r" </details>"]
     #[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
-    #[serde(deny_unknown_fields)]
     pub struct CreateUserWalletBodyWalletsItemAdditionalSignersItem {
         #[serde(default, skip_serializing_if = "::std::vec::Vec::is_empty")]
         pub override_policy_ids: ::std::vec::Vec<::std::string::String>,
@@ -6999,16 +6990,13 @@ pub mod types {
     #[doc = "        \"message\": {"]
     #[doc = "          \"type\": \"string\""]
     #[doc = "        }"]
-    #[doc = "      },"]
-    #[doc = "      \"additionalProperties\": false"]
+    #[doc = "      }"]
     #[doc = "    }"]
-    #[doc = "  },"]
-    #[doc = "  \"additionalProperties\": false"]
+    #[doc = "  }"]
     #[doc = "}"]
     #[doc = r" ```"]
     #[doc = r" </details>"]
     #[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
-    #[serde(deny_unknown_fields)]
     pub struct EthereumPersonalSignRpcInput {
         #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
         pub address: ::std::option::Option<::std::string::String>,
@@ -7197,13 +7185,11 @@ pub mod types {
     #[doc = "    \"message\": {"]
     #[doc = "      \"type\": \"string\""]
     #[doc = "    }"]
-    #[doc = "  },"]
-    #[doc = "  \"additionalProperties\": false"]
+    #[doc = "  }"]
     #[doc = "}"]
     #[doc = r" ```"]
     #[doc = r" </details>"]
     #[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
-    #[serde(deny_unknown_fields)]
     pub struct EthereumPersonalSignRpcInputParams {
         pub encoding: EthereumPersonalSignRpcInputParamsEncoding,
         pub message: ::std::string::String,
@@ -7574,16 +7560,13 @@ pub mod types {
     #[doc = "        \"hash\": {"]
     #[doc = "          \"type\": \"string\""]
     #[doc = "        }"]
-    #[doc = "      },"]
-    #[doc = "      \"additionalProperties\": false"]
+    #[doc = "      }"]
     #[doc = "    }"]
-    #[doc = "  },"]
-    #[doc = "  \"additionalProperties\": false"]
+    #[doc = "  }"]
     #[doc = "}"]
     #[doc = r" ```"]
     #[doc = r" </details>"]
     #[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
-    #[serde(deny_unknown_fields)]
     pub struct EthereumSecp256k1SignRpcInput {
         #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
         pub address: ::std::option::Option<::std::string::String>,
@@ -7755,13 +7738,11 @@ pub mod types {
     #[doc = "    \"hash\": {"]
     #[doc = "      \"type\": \"string\""]
     #[doc = "    }"]
-    #[doc = "  },"]
-    #[doc = "  \"additionalProperties\": false"]
+    #[doc = "  }"]
     #[doc = "}"]
     #[doc = r" ```"]
     #[doc = r" </details>"]
     #[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
-    #[serde(deny_unknown_fields)]
     pub struct EthereumSecp256k1SignRpcInputParams {
         pub hash: ::std::string::String,
     }
@@ -8163,22 +8144,18 @@ pub mod types {
     #[doc = "                }"]
     #[doc = "              ]"]
     #[doc = "            }"]
-    #[doc = "          },"]
-    #[doc = "          \"additionalProperties\": false"]
+    #[doc = "          }"]
     #[doc = "        }"]
-    #[doc = "      },"]
-    #[doc = "      \"additionalProperties\": false"]
+    #[doc = "      }"]
     #[doc = "    },"]
     #[doc = "    \"sponsor\": {"]
     #[doc = "      \"type\": \"boolean\""]
     #[doc = "    }"]
-    #[doc = "  },"]
-    #[doc = "  \"additionalProperties\": false"]
+    #[doc = "  }"]
     #[doc = "}"]
     #[doc = r" ```"]
     #[doc = r" </details>"]
     #[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
-    #[serde(deny_unknown_fields)]
     pub struct EthereumSendTransactionRpcInput {
         #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
         pub address: ::std::option::Option<::std::string::String>,
@@ -8549,16 +8526,13 @@ pub mod types {
     #[doc = "            }"]
     #[doc = "          ]"]
     #[doc = "        }"]
-    #[doc = "      },"]
-    #[doc = "      \"additionalProperties\": false"]
+    #[doc = "      }"]
     #[doc = "    }"]
-    #[doc = "  },"]
-    #[doc = "  \"additionalProperties\": false"]
+    #[doc = "  }"]
     #[doc = "}"]
     #[doc = r" ```"]
     #[doc = r" </details>"]
     #[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
-    #[serde(deny_unknown_fields)]
     pub struct EthereumSendTransactionRpcInputParams {
         pub transaction: EthereumSendTransactionRpcInputParamsTransaction,
     }
@@ -8692,13 +8666,11 @@ pub mod types {
     #[doc = "        }"]
     #[doc = "      ]"]
     #[doc = "    }"]
-    #[doc = "  },"]
-    #[doc = "  \"additionalProperties\": false"]
+    #[doc = "  }"]
     #[doc = "}"]
     #[doc = r" ```"]
     #[doc = r" </details>"]
     #[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
-    #[serde(deny_unknown_fields)]
     pub struct EthereumSendTransactionRpcInputParamsTransaction {
         #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
         pub chain_id:
@@ -9438,8 +9410,7 @@ pub mod types {
     #[doc = "                }"]
     #[doc = "              ]"]
     #[doc = "            }"]
-    #[doc = "          },"]
-    #[doc = "          \"additionalProperties\": false"]
+    #[doc = "          }"]
     #[doc = "        }"]
     #[doc = "      }"]
     #[doc = "    },"]
@@ -9605,8 +9576,7 @@ pub mod types {
     #[doc = "            }"]
     #[doc = "          ]"]
     #[doc = "        }"]
-    #[doc = "      },"]
-    #[doc = "      \"additionalProperties\": false"]
+    #[doc = "      }"]
     #[doc = "    }"]
     #[doc = "  }"]
     #[doc = "}"]
@@ -9837,13 +9807,11 @@ pub mod types {
     #[doc = "        }"]
     #[doc = "      ]"]
     #[doc = "    }"]
-    #[doc = "  },"]
-    #[doc = "  \"additionalProperties\": false"]
+    #[doc = "  }"]
     #[doc = "}"]
     #[doc = r" ```"]
     #[doc = r" </details>"]
     #[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
-    #[serde(deny_unknown_fields)]
     pub struct EthereumSendTransactionRpcResponseDataTransactionRequest {
         #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
         pub chain_id:
@@ -10621,16 +10589,13 @@ pub mod types {
     #[doc = "            }"]
     #[doc = "          ]"]
     #[doc = "        }"]
-    #[doc = "      },"]
-    #[doc = "      \"additionalProperties\": false"]
+    #[doc = "      }"]
     #[doc = "    }"]
-    #[doc = "  },"]
-    #[doc = "  \"additionalProperties\": false"]
+    #[doc = "  }"]
     #[doc = "}"]
     #[doc = r" ```"]
     #[doc = r" </details>"]
     #[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
-    #[serde(deny_unknown_fields)]
     pub struct EthereumSign7702AuthorizationRpcInput {
         #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
         pub address: ::std::option::Option<::std::string::String>,
@@ -10837,13 +10802,11 @@ pub mod types {
     #[doc = "        }"]
     #[doc = "      ]"]
     #[doc = "    }"]
-    #[doc = "  },"]
-    #[doc = "  \"additionalProperties\": false"]
+    #[doc = "  }"]
     #[doc = "}"]
     #[doc = r" ```"]
     #[doc = r" </details>"]
     #[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
-    #[serde(deny_unknown_fields)]
     pub struct EthereumSign7702AuthorizationRpcInputParams {
         pub chain_id: EthereumSign7702AuthorizationRpcInputParamsChainId,
         pub contract: ::std::string::String,
@@ -11500,19 +11463,15 @@ pub mod types {
     #[doc = "                }"]
     #[doc = "              ]"]
     #[doc = "            }"]
-    #[doc = "          },"]
-    #[doc = "          \"additionalProperties\": false"]
+    #[doc = "          }"]
     #[doc = "        }"]
-    #[doc = "      },"]
-    #[doc = "      \"additionalProperties\": false"]
+    #[doc = "      }"]
     #[doc = "    }"]
-    #[doc = "  },"]
-    #[doc = "  \"additionalProperties\": false"]
+    #[doc = "  }"]
     #[doc = "}"]
     #[doc = r" ```"]
     #[doc = r" </details>"]
     #[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
-    #[serde(deny_unknown_fields)]
     pub struct EthereumSignTransactionRpcInput {
         #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
         pub address: ::std::option::Option<::std::string::String>,
@@ -11799,16 +11758,13 @@ pub mod types {
     #[doc = "            }"]
     #[doc = "          ]"]
     #[doc = "        }"]
-    #[doc = "      },"]
-    #[doc = "      \"additionalProperties\": false"]
+    #[doc = "      }"]
     #[doc = "    }"]
-    #[doc = "  },"]
-    #[doc = "  \"additionalProperties\": false"]
+    #[doc = "  }"]
     #[doc = "}"]
     #[doc = r" ```"]
     #[doc = r" </details>"]
     #[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
-    #[serde(deny_unknown_fields)]
     pub struct EthereumSignTransactionRpcInputParams {
         pub transaction: EthereumSignTransactionRpcInputParamsTransaction,
     }
@@ -11942,13 +11898,11 @@ pub mod types {
     #[doc = "        }"]
     #[doc = "      ]"]
     #[doc = "    }"]
-    #[doc = "  },"]
-    #[doc = "  \"additionalProperties\": false"]
+    #[doc = "  }"]
     #[doc = "}"]
     #[doc = r" ```"]
     #[doc = r" </details>"]
     #[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
-    #[serde(deny_unknown_fields)]
     pub struct EthereumSignTransactionRpcInputParamsTransaction {
         #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
         pub chain_id:
@@ -12852,19 +12806,15 @@ pub mod types {
     #[doc = "                }"]
     #[doc = "              }"]
     #[doc = "            }"]
-    #[doc = "          },"]
-    #[doc = "          \"additionalProperties\": false"]
+    #[doc = "          }"]
     #[doc = "        }"]
-    #[doc = "      },"]
-    #[doc = "      \"additionalProperties\": false"]
+    #[doc = "      }"]
     #[doc = "    }"]
-    #[doc = "  },"]
-    #[doc = "  \"additionalProperties\": false"]
+    #[doc = "  }"]
     #[doc = "}"]
     #[doc = r" ```"]
     #[doc = r" </details>"]
     #[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
-    #[serde(deny_unknown_fields)]
     pub struct EthereumSignTypedDataRpcInput {
         #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
         pub address: ::std::option::Option<::std::string::String>,
@@ -13074,16 +13024,13 @@ pub mod types {
     #[doc = "            }"]
     #[doc = "          }"]
     #[doc = "        }"]
-    #[doc = "      },"]
-    #[doc = "      \"additionalProperties\": false"]
+    #[doc = "      }"]
     #[doc = "    }"]
-    #[doc = "  },"]
-    #[doc = "  \"additionalProperties\": false"]
+    #[doc = "  }"]
     #[doc = "}"]
     #[doc = r" ```"]
     #[doc = r" </details>"]
     #[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
-    #[serde(deny_unknown_fields)]
     pub struct EthereumSignTypedDataRpcInputParams {
         pub typed_data: EthereumSignTypedDataRpcInputParamsTypedData,
     }
@@ -13140,13 +13087,11 @@ pub mod types {
     #[doc = "        }"]
     #[doc = "      }"]
     #[doc = "    }"]
-    #[doc = "  },"]
-    #[doc = "  \"additionalProperties\": false"]
+    #[doc = "  }"]
     #[doc = "}"]
     #[doc = r" ```"]
     #[doc = r" </details>"]
     #[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
-    #[serde(deny_unknown_fields)]
     pub struct EthereumSignTypedDataRpcInputParamsTypedData {
         pub domain: ::serde_json::Map<::std::string::String, ::serde_json::Value>,
         pub message: ::serde_json::Map<::std::string::String, ::serde_json::Value>,
@@ -26851,13 +26796,11 @@ pub mod types {
     #[doc = "        \"apple_oauth\""]
     #[doc = "      ]"]
     #[doc = "    }"]
-    #[doc = "  },"]
-    #[doc = "  \"additionalProperties\": false"]
+    #[doc = "  }"]
     #[doc = "}"]
     #[doc = r" ```"]
     #[doc = r" </details>"]
     #[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
-    #[serde(deny_unknown_fields)]
     pub struct LinkedAccountAppleInput {
         #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
         pub email: ::std::option::Option<::std::string::String>,
@@ -28836,13 +28779,11 @@ pub mod types {
     #[doc = "        \"custom_auth\""]
     #[doc = "      ]"]
     #[doc = "    }"]
-    #[doc = "  },"]
-    #[doc = "  \"additionalProperties\": false"]
+    #[doc = "  }"]
     #[doc = "}"]
     #[doc = r" ```"]
     #[doc = r" </details>"]
     #[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
-    #[serde(deny_unknown_fields)]
     pub struct LinkedAccountCustomJwtInput {
         pub custom_user_id: LinkedAccountCustomJwtInputCustomUserId,
         #[serde(rename = "type")]
@@ -29108,13 +29049,11 @@ pub mod types {
     #[doc = "      \"type\": \"string\","]
     #[doc = "      \"pattern\": \"^(?!discord|everyone|here)[0-9a-zA-Z_.]{2,32}(?:#(?:[0-9]{4}|0))?$\""]
     #[doc = "    }"]
-    #[doc = "  },"]
-    #[doc = "  \"additionalProperties\": false"]
+    #[doc = "  }"]
     #[doc = "}"]
     #[doc = r" ```"]
     #[doc = r" </details>"]
     #[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
-    #[serde(deny_unknown_fields)]
     pub struct LinkedAccountDiscordInput {
         #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
         pub email: ::std::option::Option<::std::string::String>,
@@ -30806,13 +30745,11 @@ pub mod types {
     #[doc = "      \"type\": \"string\","]
     #[doc = "      \"maxLength\": 256"]
     #[doc = "    }"]
-    #[doc = "  },"]
-    #[doc = "  \"additionalProperties\": false"]
+    #[doc = "  }"]
     #[doc = "}"]
     #[doc = r" ```"]
     #[doc = r" </details>"]
     #[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
-    #[serde(deny_unknown_fields)]
     pub struct LinkedAccountFarcasterInput {
         #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
         pub bio: ::std::option::Option<LinkedAccountFarcasterInputBio>,
@@ -31392,13 +31329,11 @@ pub mod types {
     #[doc = "      \"maxLength\": 39,"]
     #[doc = "      \"pattern\": \"^[a-zA-Z0-9]+(?:-[a-zA-Z0-9]+)*$\""]
     #[doc = "    }"]
-    #[doc = "  },"]
-    #[doc = "  \"additionalProperties\": false"]
+    #[doc = "  }"]
     #[doc = "}"]
     #[doc = r" ```"]
     #[doc = r" </details>"]
     #[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
-    #[serde(deny_unknown_fields)]
     pub struct LinkedAccountGithubInput {
         #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
         pub email: ::std::option::Option<::std::string::String>,
@@ -31830,13 +31765,11 @@ pub mod types {
     #[doc = "        \"google_oauth\""]
     #[doc = "      ]"]
     #[doc = "    }"]
-    #[doc = "  },"]
-    #[doc = "  \"additionalProperties\": false"]
+    #[doc = "  }"]
     #[doc = "}"]
     #[doc = r" ```"]
     #[doc = r" </details>"]
     #[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
-    #[serde(deny_unknown_fields)]
     pub struct LinkedAccountGoogleInput {
         pub email: ::std::string::String,
         pub name: ::std::string::String,
@@ -32341,13 +32274,11 @@ pub mod types {
     #[doc = "      \"type\": \"string\","]
     #[doc = "      \"pattern\": \"^(?!instagram|everyone|here)[0-9a-zA-Z._]{2,32}$\""]
     #[doc = "    }"]
-    #[doc = "  },"]
-    #[doc = "  \"additionalProperties\": false"]
+    #[doc = "  }"]
     #[doc = "}"]
     #[doc = r" ```"]
     #[doc = r" </details>"]
     #[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
-    #[serde(deny_unknown_fields)]
     pub struct LinkedAccountInstagramInput {
         pub subject: LinkedAccountInstagramInputSubject,
         #[serde(rename = "type")]
@@ -32767,13 +32698,11 @@ pub mod types {
     #[doc = "        \"line_oauth\""]
     #[doc = "      ]"]
     #[doc = "    }"]
-    #[doc = "  },"]
-    #[doc = "  \"additionalProperties\": false"]
+    #[doc = "  }"]
     #[doc = "}"]
     #[doc = r" ```"]
     #[doc = r" </details>"]
     #[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
-    #[serde(deny_unknown_fields)]
     pub struct LinkedAccountLineInput {
         #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
         pub email: ::std::option::Option<::std::string::String>,
@@ -33203,13 +33132,11 @@ pub mod types {
     #[doc = "    \"vanityName\": {"]
     #[doc = "      \"type\": \"string\""]
     #[doc = "    }"]
-    #[doc = "  },"]
-    #[doc = "  \"additionalProperties\": false"]
+    #[doc = "  }"]
     #[doc = "}"]
     #[doc = r" ```"]
     #[doc = r" </details>"]
     #[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
-    #[serde(deny_unknown_fields)]
     pub struct LinkedAccountLinkedInInput {
         #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
         pub email: ::std::option::Option<::std::string::String>,
@@ -35123,13 +35050,11 @@ pub mod types {
     #[doc = "        \"spotify_oauth\""]
     #[doc = "      ]"]
     #[doc = "    }"]
-    #[doc = "  },"]
-    #[doc = "  \"additionalProperties\": false"]
+    #[doc = "  }"]
     #[doc = "}"]
     #[doc = r" ```"]
     #[doc = r" </details>"]
     #[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
-    #[serde(deny_unknown_fields)]
     pub struct LinkedAccountSpotifyInput {
         #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
         pub email: ::std::option::Option<::std::string::String>,
@@ -35492,13 +35417,11 @@ pub mod types {
     #[doc = "      \"type\": \"string\","]
     #[doc = "      \"maxLength\": 255"]
     #[doc = "    }"]
-    #[doc = "  },"]
-    #[doc = "  \"additionalProperties\": false"]
+    #[doc = "  }"]
     #[doc = "}"]
     #[doc = r" ```"]
     #[doc = r" </details>"]
     #[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
-    #[serde(deny_unknown_fields)]
     pub struct LinkedAccountTelegramInput {
         #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
         pub first_name: ::std::option::Option<LinkedAccountTelegramInputFirstName>,
@@ -36077,13 +36000,11 @@ pub mod types {
     #[doc = "      \"type\": \"string\","]
     #[doc = "      \"pattern\": \"^(?!tiktok|everyone|here)[0-9a-zA-Z]{2,32}$\""]
     #[doc = "    }"]
-    #[doc = "  },"]
-    #[doc = "  \"additionalProperties\": false"]
+    #[doc = "  }"]
     #[doc = "}"]
     #[doc = r" ```"]
     #[doc = r" </details>"]
     #[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
-    #[serde(deny_unknown_fields)]
     pub struct LinkedAccountTiktokInput {
         pub name: ::std::option::Option<LinkedAccountTiktokInputName>,
         pub subject: LinkedAccountTiktokInputSubject,
@@ -36585,13 +36506,11 @@ pub mod types {
     #[doc = "      \"type\": \"string\","]
     #[doc = "      \"pattern\": \"^[0-9a-zA-Z|\\\\_]{1,15}$\""]
     #[doc = "    }"]
-    #[doc = "  },"]
-    #[doc = "  \"additionalProperties\": false"]
+    #[doc = "  }"]
     #[doc = "}"]
     #[doc = r" ```"]
     #[doc = r" </details>"]
     #[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
-    #[serde(deny_unknown_fields)]
     pub struct LinkedAccountTwitterInput {
         pub name: LinkedAccountTwitterInputName,
         #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
@@ -40341,13 +40260,11 @@ pub mod types {
     #[doc = "        \"1.0\""]
     #[doc = "      ]"]
     #[doc = "    }"]
-    #[doc = "  },"]
-    #[doc = "  \"additionalProperties\": false"]
+    #[doc = "  }"]
     #[doc = "}"]
     #[doc = r" ```"]
     #[doc = r" </details>"]
     #[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
-    #[serde(deny_unknown_fields)]
     pub struct Policy {
         pub chain_type: PolicyChainType,
         pub created_at: f64,
@@ -41031,13 +40948,11 @@ pub mod types {
     #[doc = "      \"type\": \"string\","]
     #[doc = "      \"maxLength\": 50"]
     #[doc = "    }"]
-    #[doc = "  },"]
-    #[doc = "  \"additionalProperties\": false"]
+    #[doc = "  }"]
     #[doc = "}"]
     #[doc = r" ```"]
     #[doc = r" </details>"]
     #[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
-    #[serde(deny_unknown_fields)]
     pub struct PolicyRuleRequestBody {
         pub action: PolicyAction,
         pub conditions: ::std::vec::Vec<PolicyCondition>,
@@ -41313,7 +41228,7 @@ pub mod types {
                 })
         }
     }
-    #[doc = "`PolicyRuleResponse`"]
+    #[doc = "A rule that defines the conditions and action to take if the conditions are true."]
     #[doc = r""]
     #[doc = r" <details><summary>JSON schema</summary>"]
     #[doc = r""]
@@ -41350,30 +41265,96 @@ pub mod types {
     #[doc = "        \"id\": {"]
     #[doc = "          \"type\": \"string\""]
     #[doc = "        }"]
-    #[doc = "      },"]
-    #[doc = "      \"additionalProperties\": false"]
+    #[doc = "      }"]
     #[doc = "    }"]
     #[doc = "  ]"]
     #[doc = "}"]
     #[doc = r" ```"]
     #[doc = r" </details>"]
-    #[derive(
-        :: serde :: Deserialize,
-        :: serde :: Serialize,
-        Clone,
-        Copy,
-        Debug,
-        Eq,
-        Hash,
-        Ord,
-        PartialEq,
-        PartialOrd,
-    )]
-    #[serde(deny_unknown_fields)]
-    pub enum PolicyRuleResponse {}
-    impl ::std::convert::From<&Self> for PolicyRuleResponse {
+    #[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+    pub struct PolicyRuleResponse {
+        pub action: PolicyAction,
+        pub conditions: ::std::vec::Vec<PolicyCondition>,
+        pub id: ::std::string::String,
+        pub method: PolicyMethod,
+        pub name: PolicyRuleResponseName,
+    }
+    impl ::std::convert::From<&PolicyRuleResponse> for PolicyRuleResponse {
         fn from(value: &PolicyRuleResponse) -> Self {
             value.clone()
+        }
+    }
+    #[doc = "`PolicyRuleResponseName`"]
+    #[doc = r""]
+    #[doc = r" <details><summary>JSON schema</summary>"]
+    #[doc = r""]
+    #[doc = r" ```json"]
+    #[doc = "{"]
+    #[doc = "  \"type\": \"string\","]
+    #[doc = "  \"maxLength\": 50"]
+    #[doc = "}"]
+    #[doc = r" ```"]
+    #[doc = r" </details>"]
+    #[derive(:: serde :: Serialize, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+    #[serde(transparent)]
+    pub struct PolicyRuleResponseName(::std::string::String);
+    impl ::std::ops::Deref for PolicyRuleResponseName {
+        type Target = ::std::string::String;
+        fn deref(&self) -> &::std::string::String {
+            &self.0
+        }
+    }
+    impl ::std::convert::From<PolicyRuleResponseName> for ::std::string::String {
+        fn from(value: PolicyRuleResponseName) -> Self {
+            value.0
+        }
+    }
+    impl ::std::convert::From<&PolicyRuleResponseName> for PolicyRuleResponseName {
+        fn from(value: &PolicyRuleResponseName) -> Self {
+            value.clone()
+        }
+    }
+    impl ::std::str::FromStr for PolicyRuleResponseName {
+        type Err = self::error::ConversionError;
+        fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+            if value.chars().count() > 50usize {
+                return Err("longer than 50 characters".into());
+            }
+            Ok(Self(value.to_string()))
+        }
+    }
+    impl ::std::convert::TryFrom<&str> for PolicyRuleResponseName {
+        type Error = self::error::ConversionError;
+        fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+            value.parse()
+        }
+    }
+    impl ::std::convert::TryFrom<&::std::string::String> for PolicyRuleResponseName {
+        type Error = self::error::ConversionError;
+        fn try_from(
+            value: &::std::string::String,
+        ) -> ::std::result::Result<Self, self::error::ConversionError> {
+            value.parse()
+        }
+    }
+    impl ::std::convert::TryFrom<::std::string::String> for PolicyRuleResponseName {
+        type Error = self::error::ConversionError;
+        fn try_from(
+            value: ::std::string::String,
+        ) -> ::std::result::Result<Self, self::error::ConversionError> {
+            value.parse()
+        }
+    }
+    impl<'de> ::serde::Deserialize<'de> for PolicyRuleResponseName {
+        fn deserialize<D>(deserializer: D) -> ::std::result::Result<Self, D::Error>
+        where
+            D: ::serde::Deserializer<'de>,
+        {
+            ::std::string::String::deserialize(deserializer)?
+                .parse()
+                .map_err(|e: self::error::ConversionError| {
+                    <D::Error as ::serde::de::Error>::custom(e.to_string())
+                })
         }
     }
     #[doc = "Version of the policy. Currently, 1.0 is the only version."]
@@ -41729,13 +41710,11 @@ pub mod types {
     #[doc = "        }"]
     #[doc = "      }"]
     #[doc = "    }"]
-    #[doc = "  },"]
-    #[doc = "  \"additionalProperties\": false"]
+    #[doc = "  }"]
     #[doc = "}"]
     #[doc = r" ```"]
     #[doc = r" </details>"]
     #[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
-    #[serde(deny_unknown_fields)]
     pub struct RawSign {
         pub params: RawSignParams,
     }
@@ -41806,13 +41785,11 @@ pub mod types {
     #[doc = "        }"]
     #[doc = "      }"]
     #[doc = "    }"]
-    #[doc = "  },"]
-    #[doc = "  \"additionalProperties\": false"]
+    #[doc = "  }"]
     #[doc = "}"]
     #[doc = r" ```"]
     #[doc = r" </details>"]
     #[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
-    #[serde(deny_unknown_fields)]
     pub struct RawSignResponse {
         pub data: RawSignResponseData,
     }
@@ -42457,19 +42434,16 @@ pub mod types {
     #[doc = "        \"transaction\": {"]
     #[doc = "          \"type\": \"string\""]
     #[doc = "        }"]
-    #[doc = "      },"]
-    #[doc = "      \"additionalProperties\": false"]
+    #[doc = "      }"]
     #[doc = "    },"]
     #[doc = "    \"sponsor\": {"]
     #[doc = "      \"type\": \"boolean\""]
     #[doc = "    }"]
-    #[doc = "  },"]
-    #[doc = "  \"additionalProperties\": false"]
+    #[doc = "  }"]
     #[doc = "}"]
     #[doc = r" ```"]
     #[doc = r" </details>"]
     #[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
-    #[serde(deny_unknown_fields)]
     pub struct SolanaSignAndSendTransactionRpcInput {
         #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
         pub address: ::std::option::Option<::std::string::String>,
@@ -42740,13 +42714,11 @@ pub mod types {
     #[doc = "    \"transaction\": {"]
     #[doc = "      \"type\": \"string\""]
     #[doc = "    }"]
-    #[doc = "  },"]
-    #[doc = "  \"additionalProperties\": false"]
+    #[doc = "  }"]
     #[doc = "}"]
     #[doc = r" ```"]
     #[doc = r" </details>"]
     #[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
-    #[serde(deny_unknown_fields)]
     pub struct SolanaSignAndSendTransactionRpcInputParams {
         pub encoding: SolanaSignAndSendTransactionRpcInputParamsEncoding,
         pub transaction: ::std::string::String,
@@ -43133,16 +43105,13 @@ pub mod types {
     #[doc = "        \"message\": {"]
     #[doc = "          \"type\": \"string\""]
     #[doc = "        }"]
-    #[doc = "      },"]
-    #[doc = "      \"additionalProperties\": false"]
+    #[doc = "      }"]
     #[doc = "    }"]
-    #[doc = "  },"]
-    #[doc = "  \"additionalProperties\": false"]
+    #[doc = "  }"]
     #[doc = "}"]
     #[doc = r" ```"]
     #[doc = r" </details>"]
     #[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
-    #[serde(deny_unknown_fields)]
     pub struct SolanaSignMessageRpcInput {
         #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
         pub address: ::std::option::Option<::std::string::String>,
@@ -43321,13 +43290,11 @@ pub mod types {
     #[doc = "    \"message\": {"]
     #[doc = "      \"type\": \"string\""]
     #[doc = "    }"]
-    #[doc = "  },"]
-    #[doc = "  \"additionalProperties\": false"]
+    #[doc = "  }"]
     #[doc = "}"]
     #[doc = r" ```"]
     #[doc = r" </details>"]
     #[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
-    #[serde(deny_unknown_fields)]
     pub struct SolanaSignMessageRpcInputParams {
         pub encoding: SolanaSignMessageRpcInputParamsEncoding,
         pub message: ::std::string::String,
@@ -43681,16 +43648,13 @@ pub mod types {
     #[doc = "        \"transaction\": {"]
     #[doc = "          \"type\": \"string\""]
     #[doc = "        }"]
-    #[doc = "      },"]
-    #[doc = "      \"additionalProperties\": false"]
+    #[doc = "      }"]
     #[doc = "    }"]
-    #[doc = "  },"]
-    #[doc = "  \"additionalProperties\": false"]
+    #[doc = "  }"]
     #[doc = "}"]
     #[doc = r" ```"]
     #[doc = r" </details>"]
     #[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
-    #[serde(deny_unknown_fields)]
     pub struct SolanaSignTransactionRpcInput {
         #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
         pub address: ::std::option::Option<::std::string::String>,
@@ -43869,13 +43833,11 @@ pub mod types {
     #[doc = "    \"transaction\": {"]
     #[doc = "      \"type\": \"string\""]
     #[doc = "    }"]
-    #[doc = "  },"]
-    #[doc = "  \"additionalProperties\": false"]
+    #[doc = "  }"]
     #[doc = "}"]
     #[doc = r" ```"]
     #[doc = r" </details>"]
     #[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
-    #[serde(deny_unknown_fields)]
     pub struct SolanaSignTransactionRpcInputParams {
         pub encoding: SolanaSignTransactionRpcInputParamsEncoding,
         pub transaction: ::std::string::String,
@@ -45692,13 +45654,11 @@ pub mod types {
     #[doc = "        \"$ref\": \"#/components/schemas/PolicyRuleRequestBody\""]
     #[doc = "      }"]
     #[doc = "    }"]
-    #[doc = "  },"]
-    #[doc = "  \"additionalProperties\": false"]
+    #[doc = "  }"]
     #[doc = "}"]
     #[doc = r" ```"]
     #[doc = r" </details>"]
     #[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
-    #[serde(deny_unknown_fields)]
     pub struct UpdatePolicyBody {
         #[doc = "Name to assign to policy."]
         #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
@@ -45989,23 +45949,90 @@ pub mod types {
     #[doc = "}"]
     #[doc = r" ```"]
     #[doc = r" </details>"]
-    #[derive(
-        :: serde :: Deserialize,
-        :: serde :: Serialize,
-        Clone,
-        Copy,
-        Debug,
-        Eq,
-        Hash,
-        Ord,
-        PartialEq,
-        PartialOrd,
-    )]
-    #[serde(deny_unknown_fields)]
-    pub enum UpdatePolicyRuleResponse {}
-    impl ::std::convert::From<&Self> for UpdatePolicyRuleResponse {
+    #[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+    pub struct UpdatePolicyRuleResponse {
+        pub action: PolicyAction,
+        pub conditions: ::std::vec::Vec<PolicyCondition>,
+        pub id: ::std::string::String,
+        pub method: PolicyMethod,
+        pub name: UpdatePolicyRuleResponseName,
+    }
+    impl ::std::convert::From<&UpdatePolicyRuleResponse> for UpdatePolicyRuleResponse {
         fn from(value: &UpdatePolicyRuleResponse) -> Self {
             value.clone()
+        }
+    }
+    #[doc = "`UpdatePolicyRuleResponseName`"]
+    #[doc = r""]
+    #[doc = r" <details><summary>JSON schema</summary>"]
+    #[doc = r""]
+    #[doc = r" ```json"]
+    #[doc = "{"]
+    #[doc = "  \"type\": \"string\","]
+    #[doc = "  \"maxLength\": 50"]
+    #[doc = "}"]
+    #[doc = r" ```"]
+    #[doc = r" </details>"]
+    #[derive(:: serde :: Serialize, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+    #[serde(transparent)]
+    pub struct UpdatePolicyRuleResponseName(::std::string::String);
+    impl ::std::ops::Deref for UpdatePolicyRuleResponseName {
+        type Target = ::std::string::String;
+        fn deref(&self) -> &::std::string::String {
+            &self.0
+        }
+    }
+    impl ::std::convert::From<UpdatePolicyRuleResponseName> for ::std::string::String {
+        fn from(value: UpdatePolicyRuleResponseName) -> Self {
+            value.0
+        }
+    }
+    impl ::std::convert::From<&UpdatePolicyRuleResponseName> for UpdatePolicyRuleResponseName {
+        fn from(value: &UpdatePolicyRuleResponseName) -> Self {
+            value.clone()
+        }
+    }
+    impl ::std::str::FromStr for UpdatePolicyRuleResponseName {
+        type Err = self::error::ConversionError;
+        fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+            if value.chars().count() > 50usize {
+                return Err("longer than 50 characters".into());
+            }
+            Ok(Self(value.to_string()))
+        }
+    }
+    impl ::std::convert::TryFrom<&str> for UpdatePolicyRuleResponseName {
+        type Error = self::error::ConversionError;
+        fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+            value.parse()
+        }
+    }
+    impl ::std::convert::TryFrom<&::std::string::String> for UpdatePolicyRuleResponseName {
+        type Error = self::error::ConversionError;
+        fn try_from(
+            value: &::std::string::String,
+        ) -> ::std::result::Result<Self, self::error::ConversionError> {
+            value.parse()
+        }
+    }
+    impl ::std::convert::TryFrom<::std::string::String> for UpdatePolicyRuleResponseName {
+        type Error = self::error::ConversionError;
+        fn try_from(
+            value: ::std::string::String,
+        ) -> ::std::result::Result<Self, self::error::ConversionError> {
+            value.parse()
+        }
+    }
+    impl<'de> ::serde::Deserialize<'de> for UpdatePolicyRuleResponseName {
+        fn deserialize<D>(deserializer: D) -> ::std::result::Result<Self, D::Error>
+        where
+            D: ::serde::Deserializer<'de>,
+        {
+            ::std::string::String::deserialize(deserializer)?
+                .parse()
+                .map_err(|e: self::error::ConversionError| {
+                    <D::Error as ::serde::de::Error>::custom(e.to_string())
+                })
         }
     }
     #[doc = "`UpdatePolicyRuleRuleId`"]
@@ -55635,8 +55662,7 @@ pub mod types {
     #[doc = "          \"signer_id\": {"]
     #[doc = "            \"type\": \"string\""]
     #[doc = "          }"]
-    #[doc = "        },"]
-    #[doc = "        \"additionalProperties\": false"]
+    #[doc = "        }"]
     #[doc = "      }"]
     #[doc = "    },"]
     #[doc = "    \"owner\": {"]
@@ -55650,8 +55676,7 @@ pub mod types {
     #[doc = "            \"user_id\": {"]
     #[doc = "              \"type\": \"string\""]
     #[doc = "            }"]
-    #[doc = "          },"]
-    #[doc = "          \"additionalProperties\": false"]
+    #[doc = "          }"]
     #[doc = "        },"]
     #[doc = "        {"]
     #[doc = "          \"type\": \"object\","]
@@ -55662,8 +55687,7 @@ pub mod types {
     #[doc = "            \"public_key\": {"]
     #[doc = "              \"type\": \"string\""]
     #[doc = "            }"]
-    #[doc = "          },"]
-    #[doc = "          \"additionalProperties\": false"]
+    #[doc = "          }"]
     #[doc = "        },"]
     #[doc = "        {},"]
     #[doc = "        {}"]
@@ -55692,13 +55716,11 @@ pub mod types {
     #[doc = "        }"]
     #[doc = "      ]"]
     #[doc = "    }"]
-    #[doc = "  },"]
-    #[doc = "  \"additionalProperties\": false"]
+    #[doc = "  }"]
     #[doc = "}"]
     #[doc = r" ```"]
     #[doc = r" </details>"]
     #[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
-    #[serde(deny_unknown_fields)]
     pub struct WalletImportSubmissionRequest {
         #[serde(default, skip_serializing_if = "::std::vec::Vec::is_empty")]
         pub additional_signers: ::std::vec::Vec<WalletImportSubmissionRequestAdditionalSignersItem>,
@@ -55736,13 +55758,11 @@ pub mod types {
     #[doc = "    \"signer_id\": {"]
     #[doc = "      \"type\": \"string\""]
     #[doc = "    }"]
-    #[doc = "  },"]
-    #[doc = "  \"additionalProperties\": false"]
+    #[doc = "  }"]
     #[doc = "}"]
     #[doc = r" ```"]
     #[doc = r" </details>"]
     #[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
-    #[serde(deny_unknown_fields)]
     pub struct WalletImportSubmissionRequestAdditionalSignersItem {
         #[serde(default, skip_serializing_if = "::std::vec::Vec::is_empty")]
         pub override_policy_ids: ::std::vec::Vec<::std::string::String>,
@@ -55771,8 +55791,7 @@ pub mod types {
     #[doc = "        \"user_id\": {"]
     #[doc = "          \"type\": \"string\""]
     #[doc = "        }"]
-    #[doc = "      },"]
-    #[doc = "      \"additionalProperties\": false"]
+    #[doc = "      }"]
     #[doc = "    },"]
     #[doc = "    {"]
     #[doc = "      \"type\": \"object\","]
@@ -55783,8 +55802,7 @@ pub mod types {
     #[doc = "        \"public_key\": {"]
     #[doc = "          \"type\": \"string\""]
     #[doc = "        }"]
-    #[doc = "      },"]
-    #[doc = "      \"additionalProperties\": false"]
+    #[doc = "      }"]
     #[doc = "    },"]
     #[doc = "    {},"]
     #[doc = "    {}"]
@@ -55793,7 +55811,7 @@ pub mod types {
     #[doc = r" ```"]
     #[doc = r" </details>"]
     #[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
-    #[serde(untagged, deny_unknown_fields)]
+    #[serde(untagged)]
     pub enum WalletImportSubmissionRequestOwner {
         Variant0 { user_id: ::std::string::String },
         Variant1 { public_key: ::std::string::String },

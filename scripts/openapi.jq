@@ -8,4 +8,10 @@
   then null
   else .
   end
+) | walk(
+  # we use additionalProperties inappropriate almost everywhere so just remove it
+  if type == "object" and .additionalProperties == false
+  then del(.additionalProperties)
+  else .
+  end
 )

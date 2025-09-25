@@ -243,8 +243,7 @@
             "required": [
               "message",
               "encoding"
-            ],
-            "additionalProperties": false
+            ]
           },
           "address": {
             "type": "string"
@@ -259,8 +258,7 @@
         "required": [
           "method",
           "params"
-        ],
-        "additionalProperties": false
+        ]
       },
       "EthereumSignTransactionRpcInput": {
         "type": "object",
@@ -392,14 +390,12 @@
                       }
                     ]
                   }
-                },
-                "additionalProperties": false
+                }
               }
             },
             "required": [
               "transaction"
-            ],
-            "additionalProperties": false
+            ]
           },
           "address": {
             "type": "string"
@@ -414,8 +410,7 @@
         "required": [
           "method",
           "params"
-        ],
-        "additionalProperties": false
+        ]
       },
       "EthereumSendTransactionRpcInput": {
         "type": "object",
@@ -551,14 +546,12 @@
                       }
                     ]
                   }
-                },
-                "additionalProperties": false
+                }
               }
             },
             "required": [
               "transaction"
-            ],
-            "additionalProperties": false
+            ]
           },
           "sponsor": {
             "type": "boolean"
@@ -577,8 +570,7 @@
           "method",
           "caip2",
           "params"
-        ],
-        "additionalProperties": false
+        ]
       },
       "EthereumSignTypedDataRpcInput": {
         "type": "object",
@@ -637,14 +629,12 @@
                   "types",
                   "message",
                   "primary_type"
-                ],
-                "additionalProperties": false
+                ]
               }
             },
             "required": [
               "typed_data"
-            ],
-            "additionalProperties": false
+            ]
           },
           "address": {
             "type": "string"
@@ -659,8 +649,7 @@
         "required": [
           "method",
           "params"
-        ],
-        "additionalProperties": false
+        ]
       },
       "EthereumSign7702AuthorizationRpcInput": {
         "type": "object",
@@ -705,8 +694,7 @@
             "required": [
               "contract",
               "chain_id"
-            ],
-            "additionalProperties": false
+            ]
           },
           "address": {
             "type": "string"
@@ -721,8 +709,7 @@
         "required": [
           "method",
           "params"
-        ],
-        "additionalProperties": false
+        ]
       },
       "EthereumSecp256k1SignRpcInput": {
         "type": "object",
@@ -742,8 +729,7 @@
             },
             "required": [
               "hash"
-            ],
-            "additionalProperties": false
+            ]
           },
           "address": {
             "type": "string"
@@ -758,8 +744,7 @@
         "required": [
           "method",
           "params"
-        ],
-        "additionalProperties": false
+        ]
       },
       "SolanaSignTransactionRpcInput": {
         "type": "object",
@@ -786,8 +771,7 @@
             "required": [
               "transaction",
               "encoding"
-            ],
-            "additionalProperties": false
+            ]
           },
           "address": {
             "type": "string"
@@ -802,8 +786,7 @@
         "required": [
           "method",
           "params"
-        ],
-        "additionalProperties": false
+        ]
       },
       "SolanaSignAndSendTransactionRpcInput": {
         "type": "object",
@@ -834,8 +817,7 @@
             "required": [
               "transaction",
               "encoding"
-            ],
-            "additionalProperties": false
+            ]
           },
           "sponsor": {
             "type": "boolean"
@@ -854,8 +836,7 @@
           "method",
           "caip2",
           "params"
-        ],
-        "additionalProperties": false
+        ]
       },
       "SolanaSignMessageRpcInput": {
         "type": "object",
@@ -882,8 +863,7 @@
             "required": [
               "message",
               "encoding"
-            ],
-            "additionalProperties": false
+            ]
           },
           "address": {
             "type": "string"
@@ -898,8 +878,7 @@
         "required": [
           "method",
           "params"
-        ],
-        "additionalProperties": false
+        ]
       },
       "EthereumSignTransactionRpcResponse": {
         "type": "object",
@@ -1074,8 +1053,7 @@
                       }
                     ]
                   }
-                },
-                "additionalProperties": false
+                }
               }
             },
             "required": [
@@ -1399,8 +1377,7 @@
         },
         "required": [
           "data"
-        ],
-        "additionalProperties": false
+        ]
       },
       "PrivateKeyInitInput": {
         "type": "object",
@@ -3385,7 +3362,6 @@
           "email",
           "name"
         ],
-        "additionalProperties": false,
         "title": "Google"
       },
       "LinkedAccountTwitterInput": {
@@ -3421,7 +3397,6 @@
           "name",
           "username"
         ],
-        "additionalProperties": false,
         "title": "Twitter"
       },
       "LinkedAccountDiscordInput": {
@@ -3451,7 +3426,6 @@
           "subject",
           "username"
         ],
-        "additionalProperties": false,
         "title": "Discord"
       },
       "LinkedAccountGithubInput": {
@@ -3485,7 +3459,6 @@
           "subject",
           "username"
         ],
-        "additionalProperties": false,
         "title": "Github"
       },
       "LinkedAccountSpotifyInput": {
@@ -3512,7 +3485,6 @@
           "type",
           "subject"
         ],
-        "additionalProperties": false,
         "title": "Spotify"
       },
       "LinkedAccountInstagramInput": {
@@ -3538,7 +3510,6 @@
           "subject",
           "username"
         ],
-        "additionalProperties": false,
         "title": "Instagram"
       },
       "LinkedAccountTiktokInput": {
@@ -3571,7 +3542,6 @@
           "username",
           "name"
         ],
-        "additionalProperties": false,
         "title": "Tiktok"
       },
       "LinkedAccountLineInput": {
@@ -3605,7 +3575,6 @@
           "type",
           "subject"
         ],
-        "additionalProperties": false,
         "title": "LINE"
       },
       "LinkedAccountAppleInput": {
@@ -3630,7 +3599,6 @@
           "type",
           "subject"
         ],
-        "additionalProperties": false,
         "title": "Apple"
       },
       "LinkedAccountLinkedInInput": {
@@ -3661,7 +3629,6 @@
           "type",
           "subject"
         ],
-        "additionalProperties": false,
         "title": "LinkedIn"
       },
       "LinkedAccountFarcasterInput": {
@@ -3705,7 +3672,6 @@
           "fid",
           "owner_address"
         ],
-        "additionalProperties": false,
         "title": "Farcaster"
       },
       "LinkedAccountTelegramInput": {
@@ -3743,7 +3709,6 @@
           "type",
           "telegram_user_id"
         ],
-        "additionalProperties": false,
         "title": "Telegram"
       },
       "LinkedAccountCustomJWTInput": {
@@ -3765,7 +3730,6 @@
           "type",
           "custom_user_id"
         ],
-        "additionalProperties": false,
         "title": "Custom JWT"
       },
       "LinkedAccountInput": {
@@ -4310,7 +4274,6 @@
           "conditions",
           "action"
         ],
-        "additionalProperties": false,
         "description": "The rules that apply to each method the policy covers.",
         "title": "PolicyRuleRequestBody"
       },
@@ -4328,8 +4291,7 @@
             },
             "required": [
               "id"
-            ],
-            "additionalProperties": false
+            ]
           }
         ],
         "description": "A rule that defines the conditions and action to take if the conditions are true.",
@@ -4432,7 +4394,6 @@
           "created_at",
           "rules"
         ],
-        "additionalProperties": false,
         "example": {
           "id": "tb54eps4z44ed0jepousxi4n",
           "name": "Allowlisted stablecoins",
@@ -5893,7 +5854,6 @@
                 "required": [
                   "params"
                 ],
-                "additionalProperties": false,
                 "title": "raw_sign",
                 "example": {
                   "params": {
@@ -6754,8 +6714,7 @@
                       },
                       "required": [
                         "signer_id"
-                      ],
-                      "additionalProperties": false
+                      ]
                     }
                   },
                   "owner": {
@@ -6769,8 +6728,7 @@
                         },
                         "required": [
                           "user_id"
-                        ],
-                        "additionalProperties": false
+                        ]
                       },
                       {
                         "type": "object",
@@ -6781,8 +6739,7 @@
                         },
                         "required": [
                           "public_key"
-                        ],
-                        "additionalProperties": false
+                        ]
                       },
                       {
                         "nullable": true
@@ -6800,7 +6757,6 @@
                 "required": [
                   "wallet"
                 ],
-                "additionalProperties": false,
                 "title": "Wallet import submission request",
                 "example": {
                   "wallet": {
@@ -7903,8 +7859,7 @@
                             },
                             "required": [
                               "signer_id"
-                            ],
-                            "additionalProperties": false
+                            ]
                           }
                         },
                         "policy_ids": {
@@ -7937,8 +7892,7 @@
                       },
                       "required": [
                         "chain_type"
-                      ],
-                      "additionalProperties": false
+                      ]
                     }
                   }
                 },
@@ -8178,8 +8132,7 @@
                   "name",
                   "chain_type",
                   "rules"
-                ],
-                "additionalProperties": false
+                ]
               }
             }
           }
@@ -8301,8 +8254,7 @@
                       }
                     ]
                   }
-                },
-                "additionalProperties": false
+                }
               }
             }
           }
