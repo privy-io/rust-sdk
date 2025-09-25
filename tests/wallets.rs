@@ -102,10 +102,9 @@ async fn test_wallets_authenticate_with_jwt() -> Result<()> {
 }
 
 #[tokio::test]
-#[ignore = "both solana and ethereum are 'not supported for this low-level signature endpoint'"]
 async fn test_wallets_raw_sign_with_auth_context() -> Result<()> {
     let client = get_test_client()?;
-    let wallet_id = get_test_wallet_id_by_type(&client, WalletChainType::Ethereum, None).await?;
+    let wallet_id = get_test_wallet_id_by_type(&client, WalletChainType::Tron, None).await?;
 
     let raw_sign_body = privy_rs::generated::types::RawSign {
         params: RawSignParams {
