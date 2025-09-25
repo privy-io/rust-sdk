@@ -160,7 +160,8 @@ fn parse_resource_config(name: &str, config: &Value) -> ResourceConfig {
                     _ => continue,
                 };
 
-                let private = method_name_str.starts_with('_');
+                // we still want to allow private methods to be used for advanced use-cases
+                let private = false;
 
                 methods.push(MethodConfig {
                     name: method_name_str.to_string(),
