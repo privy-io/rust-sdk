@@ -59,7 +59,7 @@ use crate::KeyError;
 /// let encrypted_authorization_key = get_encrypted_authorization_key().await;
 ///
 /// // 4. Decrypt the authorization key
-/// let auth_key = hpke.decrypt(
+/// let auth_key = hpke.decrypt_p256(
 ///     &encrypted_authorization_key.encapsulated_key,
 ///     &encrypted_authorization_key.ciphertext,
 /// )?;
@@ -155,6 +155,36 @@ impl PrivyHpke {
         Ok(base64::engine::general_purpose::STANDARD.encode(spki_doc.as_bytes()))
     }
 
+    /// Decrypts an HPKE-encrypted authorization key from Privy's authentication response
+    /// into a `p256::ecdsa::SigningKey` for wallet signing.
+    ///
+    /// For more, see the `decrypt_raw` method.
+    pub fn decrypt_p256(
+        self,
+        encapsulated_key: &str,
+        ciphertext: &str,
+    ) -> Result<SecretKey<p256::NistP256>, KeyError> {
+        let decrypted_key_bytes = self.decrypt_raw(encapsulated_key, ciphertext)?;
+        // Parse the decrypted bytes as a UTF-8 base64 DER string, then parse as a private key
+        let key_b64 = String::from_utf8(decrypted_key_bytes)
+            .map_err(|_| KeyError::InvalidFormat("decrypted key is not valid UTF-8".to_string()))?;
+
+        tracing::debug!("Decrypted authorization key (base64 DER): {}", key_b64);
+
+        // Decode the base64 to get DER bytes
+        let der_bytes = base64::engine::general_purpose::STANDARD
+            .decode(&key_b64)
+            .map_err(|_| {
+                KeyError::InvalidFormat("decrypted key is not valid base64".to_string())
+            })?;
+
+        // Parse as PKCS#8 DER format (which is what the output format appears to be)
+        SecretKey::<p256::NistP256>::from_pkcs8_der(&der_bytes).map_err(|e| {
+            tracing::error!("Failed to parse decrypted PKCS#8 DER key: {:?}", e);
+            KeyError::InvalidFormat("decrypted PKCS#8 DER key".to_string())
+        })
+    }
+
     /// Decrypts an HPKE-encrypted authorization key from Privy's authentication response.
     ///
     /// # HPKE Decryption Process
@@ -197,7 +227,7 @@ impl PrivyHpke {
     /// # async fn example(encrypted_authorization_key: WithEncryptionEncryptedAuthorizationKey) -> Result<(), Box<dyn std::error::Error>> {
     /// let hpke = PrivyHpke::new();
     ///
-    /// let auth_key = hpke.decrypt(
+    /// let auth_key = hpke.decrypt_p256(
     ///     &encrypted_authorization_key.encapsulated_key,
     ///     &encrypted_authorization_key.ciphertext
     /// )?;
@@ -206,11 +236,11 @@ impl PrivyHpke {
     /// # Ok(())
     /// # }
     /// ```
-    pub fn decrypt(
+    pub fn decrypt_raw(
         self,
         encapsulated_key: &str,
         ciphertext: &str,
-    ) -> Result<SecretKey<p256::NistP256>, KeyError> {
+    ) -> Result<Vec<u8>, KeyError> {
         let encapped_key_bytes = base64::engine::general_purpose::STANDARD
             .decode(encapsulated_key)
             .map_err(|_| KeyError::InvalidFormat("base64 encapsulated key".to_string()))?;
@@ -220,9 +250,8 @@ impl PrivyHpke {
             .map_err(|_| KeyError::InvalidFormat("base64 ciphertext".to_string()))?;
 
         tracing::debug!(
-            "Deserializing encapsulated key len {}: {:?}",
-            encapped_key_bytes.len(),
-            encapped_key_bytes
+            "Deserializing encapsulated key len {}",
+            encapped_key_bytes.len()
         );
 
         let encapped_key = <DhP256HkdfSha256 as Kem>::EncappedKey::from_bytes(&encapped_key_bytes)
@@ -240,26 +269,7 @@ impl PrivyHpke {
         )?;
 
         // Decrypt the authorization key using the ciphertext
-        let decrypted_key_bytes = context.open(&ciphertext_bytes, &[])?;
-
-        // Parse the decrypted bytes as a UTF-8 base64 DER string, then parse as a private key
-        let key_b64 = String::from_utf8(decrypted_key_bytes)
-            .map_err(|_| KeyError::InvalidFormat("decrypted key is not valid UTF-8".to_string()))?;
-
-        tracing::debug!("Decrypted authorization key (base64 DER): {}", key_b64);
-
-        // Decode the base64 to get DER bytes
-        let der_bytes = base64::engine::general_purpose::STANDARD
-            .decode(&key_b64)
-            .map_err(|_| {
-                KeyError::InvalidFormat("decrypted key is not valid base64".to_string())
-            })?;
-
-        // Parse as PKCS#8 DER format (which is what the output format appears to be)
-        SecretKey::<p256::NistP256>::from_pkcs8_der(&der_bytes).map_err(|e| {
-            tracing::error!("Failed to parse decrypted PKCS#8 DER key: {:?}", e);
-            KeyError::InvalidFormat("decrypted PKCS#8 DER key".to_string())
-        })
+        Ok(context.open(&ciphertext_bytes, &[])?)
     }
 }
 

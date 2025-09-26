@@ -42,7 +42,7 @@ impl Default for PrivyClientOptions {
     fn default() -> Self {
         Self {
             cache_size: NonZeroUsize::new(1000).expect("non-zero"),
-            base_url: String::from("https://api.privy.com"),
+            base_url: String::from("https://api.privy.io"),
         }
     }
 }

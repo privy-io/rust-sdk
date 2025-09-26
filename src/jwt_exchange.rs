@@ -85,7 +85,7 @@ impl JwtExchange {
             } => {
                 tracing::debug!("Received encrypted authorization key, starting HPKE decryption");
 
-                let key = hpke_manager.decrypt(
+                let key = hpke_manager.decrypt_p256(
                     &encrypted_authorization_key.encapsulated_key,
                     &encrypted_authorization_key.ciphertext,
                 )?;
