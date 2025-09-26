@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 use std::{
     env,
     time::{Duration, SystemTime},
@@ -5,14 +7,7 @@ use std::{
 
 use anyhow::Result;
 use jsonwebtoken::{Algorithm, EncodingKey, Header};
-use privy_rs::{
-    PrivyClient,
-    client::PrivyClientOptions,
-    generated::types::{
-        CreateUserBody, CreateWalletBody, LinkedAccountCustomJwtInput, LinkedAccountEmailInput,
-        LinkedAccountInput, OwnerInput, SearchUsersBody, User, WalletChainType,
-    },
-};
+use privy_rs::{PrivyClient, client::PrivyClientOptions, generated::types::*};
 use serde::Serialize;
 
 #[macro_export]
@@ -167,6 +162,35 @@ pub async fn ensure_test_user(client: &PrivyClient) -> Result<User> {
     .map(|r| r.into_inner())?;
 
     Ok(user)
+}
+
+pub async fn ensure_test_policy(
+    client: &PrivyClient,
+    rules: Vec<PolicyRuleRequestBody>,
+) -> Result<Policy> {
+    ensure_test_policy_with_user(client, rules, None).await
+}
+
+pub async fn ensure_test_policy_with_user(
+    client: &PrivyClient,
+    rules: Vec<PolicyRuleRequestBody>,
+    user: Option<OwnerInput>,
+) -> Result<Policy> {
+    let unique_name = format!("test-policy-{}", chrono::Utc::now().timestamp());
+    let policy_body = CreatePolicyBody {
+        chain_type: PolicyChainType::Solana,
+        name: CreatePolicyBodyName::try_from(unique_name).unwrap(),
+        owner: user,
+        owner_id: None,
+        rules,
+        version: CreatePolicyBodyVersion::try_from("1.0").unwrap(),
+    };
+
+    Ok(
+        debug_response!(client.policies().create(None, &policy_body))
+            .await
+            .map(|r| r.into_inner())?,
+    )
 }
 
 pub fn mint_staging_jwt(sub: &str) -> Result<String> {
