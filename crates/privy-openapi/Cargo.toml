@@ -1,0 +1,17 @@
+[package]
+name = "privy-openapi"
+version = "0.1.0"
+edition = "2021"
+license = "MIT OR Apache-2.0"
+
+[dependencies]
+bytes = "1.9"
+futures-core = "0.3"
+progenitor-client = "0.11.0"
+regress = "0.10"
+reqwest = { version = "0.12", default-features=false, features = ["json", "stream"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+serde_urlencoded = "0.7"
+uuid = { version = "1.0", features = ["serde", "v4"] }
+

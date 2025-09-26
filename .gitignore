@@ -1,0 +1,5 @@
+.env.local
+target
+*.pem
+!tests/test_private_key.pem
+!tests/test_public_key.pem

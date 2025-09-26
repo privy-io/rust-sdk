@@ -1,0 +1,29 @@
+name: OpenAPI
+on:
+  schedule:
+    # run every Monday at 10am UTC
+    - cron: "0 10 * * 1"
+  workflow_dispatch:
+jobs:
+  update-openapi:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install toolchains
+        uses: jdx/mise-action@v2
+
+      - name: Run Codegen
+        run: mise gen-openapi
+
+      - name: create pull request
+        uses: peter-evans/create-pull-request@v3
+        with:
+          token: ${{ secrets.REPO_SCOPED_TOKEN }}
+          commit-message: Generate latest changes from OpenApi spec
+          title: Generate latest changes from OpenApi spec
+          body: |
+            This is an automated PR that tries to build the latest changes generated from the [Stripe OpenApi spec](https://github.com/stripe/openapi).
+          branch: openapi
+          branch-suffix: timestamp
+          reviewers: arlyon
