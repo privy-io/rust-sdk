@@ -103,8 +103,7 @@ async fn test_policies_update_with_auth_context() {
     .await
     .unwrap();
 
-    let ctx = AuthorizationContext::new();
-    ctx.push(key);
+    let ctx = AuthorizationContext::new().push(key);
 
     let update_body = UpdatePolicyBody {
         owner: Some(OwnerInput::PublicKey(pubkey.to_string())),
@@ -146,10 +145,8 @@ async fn test_policies_update_with_auth_context() {
 async fn test_policies_delete() {
     let client = common::get_test_client().unwrap();
 
-    let ctx = AuthorizationContext::new();
-
     let private_key = include_str!("./test_private_key.pem");
-    ctx.push(PrivateKey(private_key.into()));
+    let ctx = AuthorizationContext::new().push(PrivateKey(private_key.into()));
 
     // First create a policy to delete
     let unique_name = format!("delete-policy-{}", chrono::Utc::now().timestamp());
@@ -197,10 +194,8 @@ async fn test_policies_create_rule() {
     let client = common::get_test_client().unwrap();
     let policy = common::ensure_test_policy(&client, vec![]).await.unwrap();
 
-    let ctx = AuthorizationContext::new();
-
     let private_key = include_str!("./test_private_key.pem");
-    ctx.push(PrivateKey(private_key.into()));
+    let ctx = AuthorizationContext::new().push(PrivateKey(private_key.into()));
 
     let unique_rule_name = format!("test-rule-{}", chrono::Utc::now().timestamp());
     let rule = PolicyRuleRequestBody {
@@ -255,9 +250,8 @@ async fn test_policies_update_rule() {
 
     rule.action = PolicyAction::Allow;
 
-    let ctx = AuthorizationContext::new();
     let private_key = include_str!("./test_private_key.pem");
-    ctx.push(PrivateKey(private_key.into()));
+    let ctx = AuthorizationContext::new().push(PrivateKey(private_key.into()));
 
     let result = client
         .policies()
@@ -291,10 +285,8 @@ async fn test_policies_delete_rule() {
         name: PolicyRuleRequestBodyName::try_from("my-unique-rule").unwrap(),
     }]).await.unwrap();
 
-    let ctx = AuthorizationContext::new();
-
     let private_key = include_str!("./test_private_key.pem");
-    ctx.push(PrivateKey(private_key.into()));
+    let ctx = AuthorizationContext::new().push(PrivateKey(private_key.into()));
 
     let policy_id = DeletePolicyRulePolicyId::try_from(&*policy.id).unwrap();
     let rule_id = DeletePolicyRuleRuleId::try_from(&*policy.rules.first().unwrap().id).unwrap();

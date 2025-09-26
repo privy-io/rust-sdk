@@ -111,10 +111,7 @@ async fn test_users_set_custom_metadata() -> Result<()> {
         .users()
         .set_custom_metadata(&user_id, &metadata_body)
         .await;
-    assert!(
-        result.is_ok(),
-        "Failed to set custom metadata: {result:?}"
-    );
+    assert!(result.is_ok(), "Failed to set custom metadata: {result:?}");
 
     let metadata_response = result.unwrap();
     println!("Set custom metadata response: {metadata_response:?}");
@@ -142,10 +139,7 @@ async fn test_users_pregenerate_wallets() -> Result<()> {
             .pregenerate_wallets(&user_id, &pregenerate_body)
     )
     .await;
-    assert!(
-        result.is_ok(),
-        "Failed to pregenerate wallets: {result:?}"
-    );
+    assert!(result.is_ok(), "Failed to pregenerate wallets: {result:?}");
 
     let pregenerate_response = result.unwrap();
     println!("Pregenerate wallets response: {pregenerate_response:?}");

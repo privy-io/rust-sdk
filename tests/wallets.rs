@@ -168,7 +168,7 @@ async fn test_wallets_update_with_auth_context() -> Result<()> {
         panic!("Expected an error when removing an owner");
     }
 
-    ctx.push(private_key);
+    let ctx = ctx.push(private_key);
 
     let wallet = debug_response!(client.wallets().update(&wallet_id, &ctx, &update_body)).await?;
 
@@ -194,9 +194,8 @@ async fn test_wallets_export() -> Result<()> {
         })
         .unwrap();
 
-    let ctx = AuthorizationContext::new();
     let jwt = mint_staging_jwt(sub)?;
-    ctx.push(JwtUser(client.clone(), jwt));
+    let ctx = AuthorizationContext::new().push(JwtUser(client.clone(), jwt));
 
     let exported = debug_response!(client.wallets().export(&wallet_id, &ctx)).await?;
 
@@ -377,8 +376,7 @@ async fn test_wallets_solana_sign_and_send_transaction() -> Result<()> {
             sponsor: Some(false),
         });
 
-    let ctx = AuthorizationContext::new();
-    ctx.push(JwtUser(
+    let ctx = AuthorizationContext::new().push(JwtUser(
         client.clone(),
         mint_staging_jwt(&funded_solana_wallet_owner_subject_id)?,
     ));
@@ -672,8 +670,7 @@ async fn test_wallets_ethereum_send_transaction() -> Result<()> {
         },
     );
 
-    let ctx = AuthorizationContext::new();
-    ctx.push(JwtUser(
+    let ctx = AuthorizationContext::new().push(JwtUser(
         client.clone(),
         mint_staging_jwt(&funded_ethereum_wallet_owner_subject_id)?,
     ));
