@@ -325,7 +325,7 @@ impl WalletsClient {
         let privy_hpke = PrivyHpke::new();
         let body = WalletExportRequestBody {
             encryption_type: HpkeEncryption::Hpke,
-            recipient_public_key: privy_hpke.public_key().unwrap(),
+            recipient_public_key: privy_hpke.public_key()?,
         };
 
         let sig = generate_authorization_signatures(
@@ -362,14 +362,14 @@ impl WalletsClient {
             crate::generated::types::WalletImportInitializationRequest::PrivateKeyInitInput(
                 PrivateKeyInitInput {
                     address: address.clone(),
-                    chain_type: chain_type.clone(),
+                    chain_type,
                     encryption_type: HpkeEncryption::Hpke,
                     entropy_type:
                         crate::generated::types::PrivateKeyInitInputEntropyType::PrivateKey,
                 },
             ),
         )
-        .await
+        .await?
         .submit(private_key_hex, owner, policy_ids, additional_signers)
         .await
     }

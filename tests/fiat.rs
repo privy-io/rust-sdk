@@ -14,15 +14,15 @@ async fn test_fiat_configure_app() -> Result<()> {
         api_key: "".parse()?,
     };
 
-    let result = client.fiat().configure_app(&app_id, &body).await;
+    let result = client.fiat().configure_app(app_id, &body).await;
 
     match result {
         Ok(response) => {
-            println!("Configure app response: {:?}", response);
+            println!("Configure app response: {response:?}");
             Ok(())
         }
         Err(e) => {
-            println!("Configure app failed (expected in test): {:?}", e);
+            println!("Configure app failed (expected in test): {e:?}");
             Ok(())
         }
     }
@@ -41,11 +41,11 @@ async fn test_fiat_get_status() -> Result<()> {
 
     match result {
         Ok(response) => {
-            println!("Fiat status response: {:?}", response);
+            println!("Fiat status response: {response:?}");
             Ok(())
         }
         Err(e) => {
-            println!("Get status failed (expected in test): {:?}", e);
+            println!("Get status failed (expected in test): {e:?}");
             Ok(())
         }
     }
@@ -69,11 +69,11 @@ async fn test_fiat_get_kyc_link() -> Result<()> {
 
     match result {
         Ok(response) => {
-            println!("KYC link response: {:?}", response);
+            println!("KYC link response: {response:?}");
             Ok(())
         }
         Err(e) => {
-            println!("Get KYC link failed (expected in test): {:?}", e);
+            println!("Get KYC link failed (expected in test): {e:?}");
             Ok(())
         }
     }
@@ -92,11 +92,11 @@ async fn test_fiat_accounts_get() -> Result<()> {
 
     match result {
         Ok(response) => {
-            println!("Fiat accounts response: {:?}", response);
+            println!("Fiat accounts response: {response:?}");
             Ok(())
         }
         Err(e) => {
-            println!("Get fiat accounts failed (expected in test): {:?}", e);
+            println!("Get fiat accounts failed (expected in test): {e:?}");
             Ok(())
         }
     }
@@ -124,11 +124,11 @@ async fn test_fiat_accounts_create() -> Result<()> {
 
     match result {
         Ok(response) => {
-            println!("Create fiat account response: {:?}", response);
+            println!("Create fiat account response: {response:?}");
             Ok(())
         }
         Err(e) => {
-            println!("Create fiat account failed (expected in test): {:?}", e);
+            println!("Create fiat account failed (expected in test): {e:?}");
             Ok(())
         }
     }
@@ -183,11 +183,11 @@ async fn test_fiat_kyc_create() -> Result<()> {
 
     match result {
         Ok(response) => {
-            println!("Initiate KYC response: {:?}", response);
+            println!("Initiate KYC response: {response:?}");
             Ok(())
         }
         Err(e) => {
-            println!("Initiate KYC failed (expected in test): {:?}", e);
+            println!("Initiate KYC failed (expected in test): {e:?}");
             Ok(())
         }
     }
@@ -216,11 +216,11 @@ async fn test_fiat_onramp_create() -> Result<()> {
 
     match result {
         Ok(response) => {
-            println!("Create onramp response: {:?}", response);
+            println!("Create onramp response: {response:?}");
             Ok(())
         }
         Err(e) => {
-            println!("Create onramp failed (expected in test): {:?}", e);
+            println!("Create onramp failed (expected in test): {e:?}");
             Ok(())
         }
     }
@@ -250,11 +250,11 @@ async fn test_fiat_offramp_create() -> Result<()> {
 
     match result {
         Ok(response) => {
-            println!("Create offramp response: {:?}", response);
+            println!("Create offramp response: {response:?}");
             Ok(())
         }
         Err(e) => {
-            println!("Create offramp failed (expected in test): {:?}", e);
+            println!("Create offramp failed (expected in test): {e:?}");
             Ok(())
         }
     }

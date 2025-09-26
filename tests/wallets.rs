@@ -124,7 +124,7 @@ async fn test_wallets_raw_sign_with_auth_context() -> Result<()> {
     let sig = result.into_inner().data.signature;
 
     assert_ne!(sig.len(), 0);
-    println!("Raw signature created: {:?}", sig);
+    println!("Raw signature created: {sig:?}");
 
     Ok(())
 }
@@ -159,10 +159,11 @@ async fn test_wallets_update_with_auth_context() -> Result<()> {
     };
 
     // we now have an owner, lets try to update, and expect an error
-    if let Ok(_) = client
+    if client
         .wallets()
         .update(&wallet_id, &ctx, &update_body)
         .await
+        .is_ok()
     {
         panic!("Expected an error when removing an owner");
     }
@@ -172,7 +173,7 @@ async fn test_wallets_update_with_auth_context() -> Result<()> {
     let wallet = debug_response!(client.wallets().update(&wallet_id, &ctx, &update_body)).await?;
 
     assert_eq!(wallet.id, wallet_id);
-    println!("Updated wallet owner for: {}", wallet_id);
+    println!("Updated wallet owner for: {wallet_id}");
 
     Ok(())
 }
@@ -194,12 +195,12 @@ async fn test_wallets_export() -> Result<()> {
         .unwrap();
 
     let ctx = AuthorizationContext::new();
-    let jwt = mint_staging_jwt(&sub)?;
+    let jwt = mint_staging_jwt(sub)?;
     ctx.push(JwtUser(client.clone(), jwt));
 
     let exported = debug_response!(client.wallets().export(&wallet_id, &ctx)).await?;
 
-    println!("Wallet exported successfully {:?}", exported);
+    println!("Wallet exported successfully {exported:?}");
 
     Ok(())
 }
@@ -248,7 +249,7 @@ async fn test_wallets_balance_get() -> Result<()> {
 
     let balance = balance.into_inner();
 
-    println!("Wallet balance retrieved: {:?}", balance);
+    println!("Wallet balance retrieved: {balance:?}");
 
     // new wallet, must be 0
     match balance.balances.as_slice() {
@@ -259,7 +260,7 @@ async fn test_wallets_balance_get() -> Result<()> {
         ] => {
             assert_eq!(*raw_value_decimals, 0.0);
         }
-        resp => panic!("Unexpected balance response {:?}", resp),
+        resp => panic!("Unexpected balance response {resp:?}"),
     }
 
     Ok(())
@@ -292,7 +293,7 @@ async fn test_wallets_solana_sign_message() -> Result<()> {
     ))
     .await?;
 
-    println!("Solana message signed successfully: {:?}", result);
+    println!("Solana message signed successfully: {result:?}");
 
     Ok(())
 }
@@ -323,7 +324,7 @@ async fn test_wallets_solana_sign_transaction() -> Result<()> {
     ))
     .await?;
 
-    println!("Solana transaction signed successfully: {:?}", result);
+    println!("Solana transaction signed successfully: {result:?}");
 
     Ok(())
 }
@@ -390,10 +391,7 @@ async fn test_wallets_solana_sign_and_send_transaction() -> Result<()> {
     ))
     .await?;
 
-    println!(
-        "Solana transaction signed and sent successfully: {:?}",
-        result
-    );
+    println!("Solana transaction signed and sent successfully: {result:?}");
 
     Ok(())
 }
@@ -425,7 +423,7 @@ async fn test_wallets_ethereum_sign_message() -> Result<()> {
     .await?;
 
     // Just verify we got a valid response
-    println!("Ethereum message signed via RPC: {:?}", result);
+    println!("Ethereum message signed via RPC: {result:?}");
 
     Ok(())
 }
@@ -535,7 +533,7 @@ async fn test_wallets_ethereum_sign_typed_data() -> Result<()> {
     .await?;
 
     // Just verify we got a valid response
-    println!("Ethereum typed data signed via RPC: {:?}", result);
+    println!("Ethereum typed data signed via RPC: {result:?}");
 
     Ok(())
 }
@@ -563,7 +561,7 @@ async fn test_wallets_ethereum_sign_secp256k1() -> Result<()> {
     .await?;
 
     // Just verify we got a valid response
-    println!("Ethereum secp256k1 signature via RPC: {:?}", result);
+    println!("Ethereum secp256k1 signature via RPC: {result:?}");
 
     Ok(())
 }
@@ -595,7 +593,7 @@ async fn test_wallets_ethereum_sign_7702_authorization() -> Result<()> {
     .await?;
 
     // Just verify we got a valid response
-    println!("Ethereum 7702 authorization signed via RPC: {:?}", result);
+    println!("Ethereum 7702 authorization signed via RPC: {result:?}");
 
     Ok(())
 }
@@ -628,7 +626,7 @@ async fn test_wallets_ethereum_sign_transaction() -> Result<()> {
     .await?;
 
     // Just verify we got a valid response
-    println!("Ethereum transaction signed via RPC: {:?}", result);
+    println!("Ethereum transaction signed via RPC: {result:?}");
 
     Ok(())
 }
@@ -689,7 +687,7 @@ async fn test_wallets_ethereum_send_transaction() -> Result<()> {
     .await?;
 
     // Just verify we got a valid response
-    println!("Ethereum transaction sent via RPC: {:?}", result);
+    println!("Ethereum transaction sent via RPC: {result:?}");
 
     Ok(())
 }
@@ -710,7 +708,7 @@ async fn test_ethereum_wallet_import() -> Result<()> {
     // address is the last 20 bytes of the keccak256 hash of the public key
     let address: String = format!(
         "0x{}",
-        sha3::Keccak256::digest(&public)[12..]
+        sha3::Keccak256::digest(public)[12..]
             .iter()
             .encode_hex::<String>()
     );

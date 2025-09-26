@@ -3,15 +3,16 @@ use hpke::{
     Deserializable, OpModeS, Serializable, aead::ChaCha20Poly1305, kdf::HkdfSha256,
     kem::DhP256HkdfSha256,
 };
-use privy_openapi::types::WalletImportInitializationRequest;
 
 use crate::{
+    PrivyApiError,
     generated::{
         Error, ResponseValue,
         types::{
-            PrivateKeySubmitInput, Wallet, WalletImportInitializationResponse,
-            WalletImportSubmissionRequest, WalletImportSubmissionRequestOwner,
-            WalletImportSubmissionRequestWallet, WalletImportSupportedChains,
+            PrivateKeySubmitInput, Wallet, WalletImportInitializationRequest,
+            WalletImportInitializationResponse, WalletImportSubmissionRequest,
+            WalletImportSubmissionRequestOwner, WalletImportSubmissionRequestWallet,
+            WalletImportSupportedChains,
         },
     },
     subclients::WalletsClient,
@@ -28,7 +29,7 @@ impl WalletImport {
     pub(crate) async fn new(
         client: WalletsClient,
         request: WalletImportInitializationRequest,
-    ) -> Self {
+    ) -> Result<Self, PrivyApiError> {
         let (address, chain_type) = match &request {
             WalletImportInitializationRequest::PrivateKeyInitInput(input) => {
                 (input.address.to_owned(), input.chain_type)
@@ -38,14 +39,14 @@ impl WalletImport {
             }
         };
 
-        let initialization_response = client._init_import(&request).await.unwrap();
+        let initialization_response = client._init_import(&request).await?;
 
-        Self {
+        Ok(Self {
             client,
             initialization_response: initialization_response.into_inner(),
             address,
             chain_type,
-        }
+        })
     }
 
     fn encrypt_private_key(
@@ -58,7 +59,7 @@ impl WalletImport {
 
         // Deserialize the public key using HPKE trait
         let public_key = <DhP256HkdfSha256 as hpke::Kem>::PublicKey::from_bytes(&public_key_bytes)
-            .map_err(|e| format!("Failed to deserialize public key: {:?}", e))?;
+            .map_err(|e| format!("Failed to deserialize public key: {e:?}"))?;
 
         // Convert hex private key to bytes (remove 0x prefix if present)
         let private_key_hex = private_key_hex
@@ -75,17 +76,17 @@ impl WalletImport {
                 &[],
                 &mut rng,
             )
-            .map_err(|e| format!("HPKE setup failed: {:?}", e))?;
+            .map_err(|e| format!("HPKE setup failed: {e:?}"))?;
 
         // Encrypt the private key
         let ciphertext = encryption_context
             .seal(&private_key_bytes, &[])
-            .map_err(|e| format!("HPKE encryption failed: {:?}", e))?;
+            .map_err(|e| format!("HPKE encryption failed: {e:?}"))?;
 
         // Encode results as base64
         let ciphertext_b64 = base64::engine::general_purpose::STANDARD.encode(&ciphertext);
         let encapsulated_key_b64 =
-            base64::engine::general_purpose::STANDARD.encode(&encapsulated_key.to_bytes());
+            base64::engine::general_purpose::STANDARD.encode(encapsulated_key.to_bytes());
 
         Ok((ciphertext_b64, encapsulated_key_b64))
     }
@@ -98,7 +99,7 @@ impl WalletImport {
         additional_signers: Vec<
             crate::generated::types::WalletImportSubmissionRequestAdditionalSignersItem,
         >,
-    ) -> Result<ResponseValue<Wallet>, Error<()>> {
+    ) -> Result<ResponseValue<Wallet>, PrivyApiError> {
         // Encrypt the private key using HPKE
         let (ciphertext, encapsulated_key) = self
             .encrypt_private_key(private_key_hex)
