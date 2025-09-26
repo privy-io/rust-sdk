@@ -63,7 +63,7 @@ async fn main() -> Result<()> {
     tracing::warn!("SECURITY WARNING: Private key exported and decrypted!");
     println!(
         "Decrypted private key (hex): {}",
-        secret_key.to_bytes().encode_hex::<String>()
+        secret_key.encode_hex::<String>()
     );
 
     Ok(())

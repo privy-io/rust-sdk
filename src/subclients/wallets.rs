@@ -1,5 +1,3 @@
-use p256::elliptic_curve::SecretKey;
-
 use crate::{
     AuthorizationContext, PrivyApiError, PrivyExportError, PrivyHpke, PrivySignedApiError,
     ethereum::EthereumService,
@@ -114,7 +112,7 @@ impl WalletsClient {
         &'a self,
         wallet_id: &'a str,
         ctx: &'a AuthorizationContext,
-    ) -> Result<SecretKey<p256::NistP256>, PrivyExportError> {
+    ) -> Result<Vec<u8>, PrivyExportError> {
         let privy_hpke = PrivyHpke::new();
         let body = WalletExportRequestBody {
             encryption_type: HpkeEncryption::Hpke,
@@ -133,7 +131,9 @@ impl WalletsClient {
 
         let resp = self._export(wallet_id, Some(&sig), &body).await?;
 
-        Ok(privy_hpke.decrypt(&resp.encapsulated_key, &resp.ciphertext)?)
+        tracing::debug!("Encapsulated key: {:?}", resp);
+
+        Ok(privy_hpke.decrypt_raw(&resp.encapsulated_key, &resp.ciphertext)?)
     }
 
     /// Import a wallet into the Privy app
