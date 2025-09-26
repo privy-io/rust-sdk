@@ -1,5 +1,6 @@
 [package]
 name = "privy-rs"
+description = "Privy SDK for Rust"
 version = "0.1.0-alpha.0"
 rust-version = "1.87"
 edition = "2024"
