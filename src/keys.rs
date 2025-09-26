@@ -409,7 +409,7 @@ mod tests {
         let app_secret =
             std::env::var("STAGING_APP_SECRET").unwrap_or_else(|_| "test_app_secret".to_string());
         let url =
-            std::env::var("STAGING_URL").unwrap_or_else(|_| "https://api.privy.com".to_string());
+            std::env::var("STAGING_URL").unwrap_or_else(|_| "https://api.privy.io".to_string());
 
         Ok(PrivyClient::new_with_options(
             app_id,
