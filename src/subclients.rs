@@ -347,7 +347,6 @@ impl WalletsClient {
     ///
     /// # Errors
     ///
-    ///
     pub async fn import(
         &self,
         address: String,

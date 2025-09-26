@@ -115,13 +115,11 @@ async fn test_key_quorums_update_with_auth_context() -> Result<()> {
     let key_quorum_id = created.into_inner().id;
 
     // Set up authorization context for the update
-    let ctx = AuthorizationContext::new();
-    ctx.push(JwtUser(client.clone(), jwt));
+    let ctx = AuthorizationContext::new().push(JwtUser(client.clone(), jwt));
 
     // Update the key quorum
-    let updated_display_name = UpdateKeyQuorumBodyDisplayName::try_from(
-        format!("Updated Test KQ {timestamp}").as_str(),
-    )?;
+    let updated_display_name =
+        UpdateKeyQuorumBodyDisplayName::try_from(format!("Updated Test KQ {timestamp}").as_str())?;
 
     let update_body = UpdateKeyQuorumBody {
         authorization_threshold: Some(1.0),
@@ -188,8 +186,7 @@ async fn test_key_quorums_delete() -> Result<()> {
     let key_quorum_id = created.into_inner().id;
 
     // Set up authorization context for the delete
-    let ctx = AuthorizationContext::new();
-    ctx.push(JwtUser(client.clone(), jwt));
+    let ctx = AuthorizationContext::new().push(JwtUser(client.clone(), jwt));
 
     // Delete the key quorum
     let result = debug_response!(client.key_quorums().delete(&key_quorum_id, &ctx)).await?;

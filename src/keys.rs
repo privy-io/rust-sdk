@@ -84,8 +84,9 @@ impl AuthorizationContext {
     /// context.push(key);
     /// # }
     /// ```
-    pub fn push<T: IntoSignature + 'static + Send + Sync>(&self, key: T) {
+    pub fn push<T: IntoSignature + 'static + Send + Sync>(self, key: T) -> Self {
         self.0.lock().expect("lock poisoned").push(Arc::new(key));
+        self
     }
 
     /// Sign a message with all the keys in the context.
@@ -525,9 +526,8 @@ mod tests {
     #[tokio::test]
     #[traced_test]
     async fn test_authorization_context_single_key() {
-        let ctx = AuthorizationContext::new();
         let key = PrivateKey(TEST_PRIVATE_KEY_PEM.to_string());
-        ctx.push(key);
+        let ctx = AuthorizationContext::new().push(key);
 
         let signatures: Vec<_> = ctx.sign(b"test").try_collect().await.unwrap();
         assert_eq!(
@@ -540,15 +540,14 @@ mod tests {
     #[tokio::test]
     #[traced_test]
     async fn test_authorization_context_multiple_keys() {
-        let ctx = AuthorizationContext::new();
-
-        // Add multiple keys
-        ctx.push(PrivateKey(TEST_PRIVATE_KEY_PEM.to_string()));
-
         // Create another deterministic key for testing
         let key_bytes = [2u8; 32]; // Different from test key
         let second_key = SecretKey::<p256::NistP256>::from_bytes(&key_bytes.into()).unwrap();
-        ctx.push(second_key);
+
+        // Add multiple keys
+        let ctx = AuthorizationContext::new()
+            .push(PrivateKey(TEST_PRIVATE_KEY_PEM.to_string()))
+            .push(second_key);
 
         let signatures: Vec<_> = ctx.sign(b"test").try_collect().await.unwrap();
         assert_eq!(
@@ -568,8 +567,7 @@ mod tests {
     #[traced_test]
     async fn test_authorization_context_validation() {
         // Test successful validation
-        let ctx = AuthorizationContext::new();
-        ctx.push(PrivateKey(TEST_PRIVATE_KEY_PEM.to_string()));
+        let ctx = AuthorizationContext::new().push(PrivateKey(TEST_PRIVATE_KEY_PEM.to_string()));
         let errors = ctx.validate().await;
         assert!(
             errors.is_empty(),
@@ -577,8 +575,7 @@ mod tests {
         );
 
         // Test validation failure
-        let ctx2 = AuthorizationContext::new();
-        ctx2.push(PrivateKey("invalid_key_data".to_string()));
+        let ctx2 = AuthorizationContext::new().push(PrivateKey("invalid_key_data".to_string()));
         let errors2 = ctx2.validate().await;
         assert!(
             !errors2.is_empty(),
@@ -629,7 +626,7 @@ mod tests {
     #[tokio::test]
     #[traced_test]
     async fn test_authorization_context_concurrent_signing() {
-        let ctx = AuthorizationContext::new();
+        let mut ctx = AuthorizationContext::new();
 
         // Add multiple keys for concurrent testing
         for i in 0..5 {
@@ -637,7 +634,7 @@ mod tests {
             let mut key_bytes = [1u8; 32];
             key_bytes[0] = i as u8 + 1; // Make each key different
             let key = SecretKey::<p256::NistP256>::from_bytes(&key_bytes.into()).unwrap();
-            ctx.push(key);
+            ctx = ctx.push(key);
         }
 
         let message = b"concurrent test message";
@@ -708,13 +705,12 @@ mod tests {
     #[tokio::test]
     #[traced_test]
     async fn test_authorization_context_mixed_sources() {
-        let ctx = AuthorizationContext::new();
-
         // Add path-based key and pre-computed signature
-        ctx.push(PrivateKey(
-            include_str!("../tests/test_private_key.pem").to_string(),
-        ));
-        ctx.push(Signature::from_bytes(GenericArray::from_slice(&STANDARD.decode("J7GLk/CIqvCNCOSJ8sUZb0rCsqWF9l1H1VgYfsAd1ew2uBJHE5hoY+kV7CSzdKkgOhtdvzj22gXA7gcn5gSqvQ==").unwrap())).expect("right size"));
+        let ctx = AuthorizationContext::new()
+            .push(PrivateKey(
+                include_str!("../tests/test_private_key.pem").to_string(),
+            ))
+            .push(Signature::from_bytes(GenericArray::from_slice(&STANDARD.decode("J7GLk/CIqvCNCOSJ8sUZb0rCsqWF9l1H1VgYfsAd1ew2uBJHE5hoY+kV7CSzdKkgOhtdvzj22gXA7gcn5gSqvQ==").unwrap())).expect("right size"));
 
         let sigs = ctx
             .sign(&[0, 1, 2, 3])
@@ -755,8 +751,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_authorization_context_clone_and_debug() {
-        let ctx1 = AuthorizationContext::new();
-        ctx1.push(PrivateKey(TEST_PRIVATE_KEY_PEM.to_string()));
+        let ctx1 = AuthorizationContext::new().push(PrivateKey(TEST_PRIVATE_KEY_PEM.to_string()));
 
         // Test clone functionality
         let ctx2 = ctx1.clone();

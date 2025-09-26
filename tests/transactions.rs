@@ -37,9 +37,7 @@ async fn test_transactions_get() -> Result<()> {
         println!("Retrieved transaction: {result:?}");
         assert_eq!(result.into_inner().id, *transaction_id);
     } else {
-        println!(
-            "No transactions found for wallet {wallet_id}, skipping transaction get test"
-        );
+        println!("No transactions found for wallet {wallet_id}, skipping transaction get test");
     }
 
     Ok(())

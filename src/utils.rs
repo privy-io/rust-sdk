@@ -507,8 +507,7 @@ mod tests {
     #[tokio::test]
     #[traced_test]
     async fn test_sign_canonical_request() {
-        let ctx = AuthorizationContext::new();
-        ctx.push(PrivateKey(TEST_PRIVATE_KEY_PEM.to_string()));
+        let ctx = AuthorizationContext::new().push(PrivateKey(TEST_PRIVATE_KEY_PEM.to_string()));
 
         let body = serde_json::json!({"test": "data"});
 
@@ -535,14 +534,14 @@ mod tests {
     #[tokio::test]
     #[traced_test]
     async fn test_sign_canonical_request_multiple_keys() {
-        let ctx = AuthorizationContext::new();
-        ctx.push(PrivateKey(TEST_PRIVATE_KEY_PEM.to_string()));
-
         // Add another key
         use p256::elliptic_curve::SecretKey;
         let key_bytes = [2u8; 32];
         let second_key = SecretKey::<p256::NistP256>::from_bytes(&key_bytes.into()).unwrap();
-        ctx.push(second_key);
+
+        let ctx = AuthorizationContext::new()
+            .push(PrivateKey(TEST_PRIVATE_KEY_PEM.to_string()))
+            .push(second_key);
 
         let body = serde_json::json!({"test": "data"});
 
@@ -575,8 +574,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_sign_canonical_request_deterministic() {
-        let ctx = AuthorizationContext::new();
-        ctx.push(PrivateKey(TEST_PRIVATE_KEY_PEM.to_string()));
+        let ctx = AuthorizationContext::new().push(PrivateKey(TEST_PRIVATE_KEY_PEM.to_string()));
 
         let body = serde_json::json!({"test": "data"});
 
