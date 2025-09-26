@@ -108,7 +108,9 @@ async fn test_wallets_raw_sign_with_auth_context() -> Result<()> {
 
     let raw_sign_body = privy_rs::generated::types::RawSign {
         params: RawSignParams {
-            hash: Some("0xdeadbeef".to_string()),
+            hash: Some(
+                "0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef".to_string(),
+            ),
         },
     };
 
@@ -179,6 +181,7 @@ async fn test_wallets_update_with_auth_context() -> Result<()> {
 }
 
 #[tokio::test]
+#[traced_test]
 async fn test_wallets_export() -> Result<()> {
     let client = get_test_client()?;
     let user = ensure_test_user(&client).await?;
@@ -252,12 +255,8 @@ async fn test_wallets_balance_get() -> Result<()> {
 
     // new wallet, must be 0
     match balance.balances.as_slice() {
-        [
-            GetWalletBalanceResponseBalancesItem {
-                raw_value_decimals, ..
-            },
-        ] => {
-            assert_eq!(*raw_value_decimals, 0.0);
+        [GetWalletBalanceResponseBalancesItem { raw_value, .. }] => {
+            assert_eq!(*raw_value, "0");
         }
         resp => panic!("Unexpected balance response {resp:?}"),
     }
