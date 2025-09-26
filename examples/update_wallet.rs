@@ -11,7 +11,6 @@
 //! - `PRIVY_APP_ID`: Your Privy app ID
 //! - `PRIVY_APP_SECRET`: Your Privy app secret
 //! - `PRIVY_WALLET_ID`: The wallet ID to update
-//! - `PRIVY_PRIVATE_KEY_PATH`: Path to the private key file for authorization
 //!
 //! ## Usage
 //! ```bash

@@ -114,6 +114,7 @@ impl PrivyClient {
         crate::utils::Utils(self.app_id.clone())
     }
 
+    /// Returns the app id for the client
     pub fn app_id(&self) -> &str {
         &self.app_id
     }

@@ -85,15 +85,11 @@ impl JwtExchange {
             } => {
                 tracing::debug!("Received encrypted authorization key, starting HPKE decryption");
 
-                let key = hpke_manager
-                    .decrypt(
-                        &encrypted_authorization_key.encapsulated_key,
-                        &encrypted_authorization_key.ciphertext,
-                    )
-                    .map_err(|e| {
-                        tracing::error!("HPKE decryption failed: {:?}", e);
-                        KeyError::HpkeDecryption(format!("{e:?}"))
-                    })?;
+                let key = hpke_manager.decrypt(
+                    &encrypted_authorization_key.encapsulated_key,
+                    &encrypted_authorization_key.ciphertext,
+                )?;
+
                 let expiry = SystemTime::UNIX_EPOCH + Duration::from_secs_f64(expires_at);
                 (key, expiry)
             }
@@ -102,6 +98,13 @@ impl JwtExchange {
                 unimplemented!()
             }
         };
+
+        // NOTE: ugly hack ahead
+        //
+        // privy's caches are a little slow sometimes which means we need to insert an
+        // artificial delay to increase the likelihood of the cache being populated.
+        // good news is that retries will not need a new key so retries will be fast.
+        tokio::time::sleep(Duration::from_millis(1000)).await;
 
         {
             let mut cache = self.0.lock().expect("lock poisoned");

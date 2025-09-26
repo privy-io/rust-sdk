@@ -34,12 +34,11 @@ async fn test_transactions_get() -> Result<()> {
         // Test the transactions.get() endpoint
         let result = client.transactions().get(transaction_id).await?;
 
-        println!("Retrieved transaction: {:?}", result);
+        println!("Retrieved transaction: {result:?}");
         assert_eq!(result.into_inner().id, *transaction_id);
     } else {
         println!(
-            "No transactions found for wallet {}, skipping transaction get test",
-            wallet_id
+            "No transactions found for wallet {wallet_id}, skipping transaction get test"
         );
     }
 

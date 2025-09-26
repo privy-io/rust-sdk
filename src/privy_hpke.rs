@@ -88,7 +88,7 @@ impl PrivyHpke {
     /// Creates a new ephemeral HPKE manager with a cryptographically secure P-256 keypair.
     #[must_use]
     pub fn new() -> Self {
-        let mut rng = rand::rng();
+        let mut rng = rand::thread_rng();
         let (private_key, public_key) = DhP256HkdfSha256::gen_keypair(&mut rng);
         Self {
             private_key,
@@ -102,7 +102,7 @@ impl PrivyHpke {
     /// This should only be used for testing purposes.
     #[cfg(test)]
     pub(crate) fn new_with_seed(seed: u64) -> Self {
-        use rand::SeedableRng;
+        use hpke::rand_core::SeedableRng;
         let mut rng = rand_chacha::ChaCha8Rng::seed_from_u64(seed);
         let (private_key, public_key) = DhP256HkdfSha256::gen_keypair(&mut rng);
         Self {
@@ -237,17 +237,10 @@ impl PrivyHpke {
             &self.private_key,
             &encapped_key,
             &[],
-        )
-        .map_err(|e| {
-            tracing::error!("HPKE setup failed: {:?}", e);
-            KeyError::HpkeDecryption(format!("HPKE setup failed: {e:?}"))
-        })?;
+        )?;
 
         // Decrypt the authorization key using the ciphertext
-        let decrypted_key_bytes = context.open(&ciphertext_bytes, &[]).map_err(|e| {
-            tracing::error!("HPKE decryption failed: {:?}", e);
-            KeyError::HpkeDecryption(format!("HPKE decryption failed: {e:?}"))
-        })?;
+        let decrypted_key_bytes = context.open(&ciphertext_bytes, &[])?;
 
         // Parse the decrypted bytes as a UTF-8 base64 DER string, then parse as a private key
         let key_b64 = String::from_utf8(decrypted_key_bytes)
