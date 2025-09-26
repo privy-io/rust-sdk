@@ -59,7 +59,7 @@ use crate::KeyError;
 /// let encrypted_authorization_key = get_encrypted_authorization_key().await;
 ///
 /// // 4. Decrypt the authorization key
-/// let auth_key = hpke.decrypt(
+/// let auth_key = hpke.decrypt_p256(
 ///     &encrypted_authorization_key.encapsulated_key,
 ///     &encrypted_authorization_key.ciphertext,
 /// )?;
@@ -227,7 +227,7 @@ impl PrivyHpke {
     /// # async fn example(encrypted_authorization_key: WithEncryptionEncryptedAuthorizationKey) -> Result<(), Box<dyn std::error::Error>> {
     /// let hpke = PrivyHpke::new();
     ///
-    /// let auth_key = hpke.decrypt(
+    /// let auth_key = hpke.decrypt_p256(
     ///     &encrypted_authorization_key.encapsulated_key,
     ///     &encrypted_authorization_key.ciphertext
     /// )?;

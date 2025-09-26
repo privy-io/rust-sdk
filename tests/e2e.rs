@@ -82,7 +82,6 @@ async fn test_wallets_e2e_quorum_workflow() -> Result<()> {
     ));
 
     tracing::info!("Testing transaction signing with only one key (should fail)");
-    let quorum_message = "Hello, quorum test!";
 
     let single_key_result = client.wallets().export(&wallet.id, &single_key_ctx).await;
 

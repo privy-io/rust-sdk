@@ -76,12 +76,10 @@ impl AuthorizationContext {
     /// # use std::time::Duration;
     /// # use std::sync::Arc;
     /// # async fn foo() {
-    /// let context = AuthorizationContext::new();
     /// let privy = PrivyClient::new("app_id".to_string(), "app_secret".to_string()).unwrap();
     /// let jwt = JwtUser(privy, "test".to_string());
     /// let key = PrivateKey("test".to_string());
-    /// context.push(jwt);
-    /// context.push(key);
+    /// let context = AuthorizationContext::new().push(jwt).push(key);
     /// # }
     /// ```
     pub fn push<T: IntoSignature + 'static + Send + Sync>(self, key: T) -> Self {
@@ -104,10 +102,9 @@ impl AuthorizationContext {
     /// # use std::sync::Arc;
     /// # use futures::stream::StreamExt;
     /// # async fn foo() {
-    /// let context = AuthorizationContext::new();
     /// let privy = PrivyClient::new("app_id".to_string(), "app_secret".to_string()).unwrap();
     /// let jwt = JwtUser(privy, "test".to_string());
-    /// context.push(jwt);
+    /// let context = AuthorizationContext::new().push(jwt);
     /// let key = context.sign(&[0, 1, 2, 3]).collect::<Vec<_>>().await;
     /// assert_eq!(key.len(), 1);
     /// # }
@@ -125,10 +122,9 @@ impl AuthorizationContext {
     /// # use std::sync::Arc;
     /// # use futures::stream::TryStreamExt;
     /// # async fn foo() {
-    /// let mut context = AuthorizationContext::new();
     /// let privy = PrivyClient::new("app_id".to_string(), "app_secret".to_string()).unwrap();
     /// let jwt = JwtUser(privy, "test".to_string());
-    /// context.push(jwt);
+    /// let context = AuthorizationContext::new().push(jwt);
     /// let key = context.sign(&[0, 1, 2, 3]).try_collect::<Vec<_>>().await;
     /// assert!(key.map(|v| v.len() == 1).unwrap_or(false));
     /// # }
@@ -169,12 +165,10 @@ impl AuthorizationContext {
     /// # use std::time::Duration;
     /// # use std::sync::Arc;
     /// # async fn foo() {
-    /// let mut context = AuthorizationContext::new();
     /// let privy = PrivyClient::new("app_id".to_string(), "app_secret".to_string()).unwrap();
     /// let jwt = JwtUser(privy, "test".to_string());
     /// let key = SecretKey::<p256::NistP256>::from_sec1_pem(&"test".to_string()).unwrap();
-    /// context.push(jwt);
-    /// context.push(key);
+    /// let context = AuthorizationContext::new().push(jwt).push(key);
     /// let errors = context.validate().await;
     /// assert!(errors.is_empty());
     /// # }
