@@ -7,8 +7,31 @@ use std::{
 
 use anyhow::Result;
 use jsonwebtoken::{Algorithm, EncodingKey, Header};
-use privy_rs::{PrivyClient, client::PrivyClientOptions, generated::types::*};
+use privy_rs::{
+    PrivyApiError, PrivyClient, PrivySignedApiError, client::PrivyClientOptions,
+    generated::types::*,
+};
 use serde::Serialize;
+
+// testing helper for the macro to handle both normal and signed errors
+pub(crate) trait IntoApi: Sized {
+    fn into_api(self) -> Result<PrivyApiError, Self>;
+}
+
+impl IntoApi for PrivySignedApiError {
+    fn into_api(self) -> Result<PrivyApiError, Self> {
+        match self {
+            PrivySignedApiError::Api(e) => Ok(e),
+            PrivySignedApiError::SignatureGeneration(_) => Err(self),
+        }
+    }
+}
+
+impl IntoApi for PrivyApiError {
+    fn into_api(self) -> Result<PrivyApiError, Self> {
+        Ok(self)
+    }
+}
 
 #[macro_export]
 macro_rules! debug_response {
@@ -18,7 +41,8 @@ macro_rules! debug_response {
             let result = $future_expr.await;
 
             // Use the full path for robustness within the macro
-            use progenitor_client::Error as ProgenitorError;
+            use privy_rs::PrivyApiError;
+            use $crate::common::IntoApi;
 
             match result {
                 // On success, pass the value through wrapped in Ok.
@@ -26,9 +50,10 @@ macro_rules! debug_response {
 
                 // On failure, inspect the error.
                 Err(err) => {
+                    let err = err.into_api();
                     match err {
                         // This is the specific error we want to debug and panic on.
-                        ProgenitorError::UnexpectedResponse(resp) => {
+                        Ok(PrivyApiError::UnexpectedResponse(resp)) => {
                             let body = resp
                                 .text()
                                 .await
@@ -38,9 +63,10 @@ macro_rules! debug_response {
                             println!("-----------------------------\n");
                             panic!("Panicking due to unexpected API response.");
                         }
+                        Ok(other_err) => Err(other_err.into()),
                         // For any other error, pass it through wrapped in Err.
                         // This allows the `?` operator to work correctly.
-                        other_err => Err(other_err),
+                        Err(other_err) => Err(other_err),
                     }
                 }
             }
@@ -129,7 +155,7 @@ pub async fn get_test_wallet_id_by_type(
 pub async fn ensure_test_user(client: &PrivyClient) -> Result<User> {
     // we don't need a whole uuid, just the last 12 chars
     let test_user_id = uuid::Uuid::new_v4().to_string().split_off(12);
-    let test_user_id = format!("rust-sdk-{}@privy.io", test_user_id);
+    let test_user_id = format!("rust-sdk-{test_user_id}@privy.io");
 
     let user = client
         .users()

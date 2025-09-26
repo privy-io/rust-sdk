@@ -361,9 +361,7 @@ impl IntoSignature for Key {
         let signing_key = SigningKey::from(self.clone());
 
         // Use deterministic prehash signing to ensure consistent signatures
-        let signature: Signature = signing_key
-            .sign_prehash(&hashed)
-            .map_err(|_| SigningError::Unknown)?;
+        let signature: Signature = signing_key.sign_prehash(&hashed)?;
 
         tracing::debug!("ECDSA signature generated using deterministic RFC 6979");
 
@@ -593,15 +591,27 @@ mod tests {
     async fn test_fn_signer_wrapper() {
         use crate::SigningError;
 
+        #[derive(Debug)]
+        struct DummyError;
+        impl std::error::Error for DummyError {}
+        impl std::fmt::Display for DummyError {
+            fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+                write!(f, "dummy error")
+            }
+        }
+
         // Test that FnSigner struct exists and can be constructed
         let _signer = FnSigner(|_message: &[u8]| async move {
             // Mock function - return error for simplicity
-            let result: Result<Signature, SigningError> = Err(SigningError::Unknown);
+            let result: Result<Signature, SigningError> =
+                Err(SigningError::Other(Box::new(DummyError)));
             result
         });
 
-        // Just test that the wrapper can be created
-        assert!(true, "FnSigner wrapper can be constructed");
+        assert!(matches!(
+            _signer.sign(&[0]).await,
+            Err(SigningError::Other(_))
+        ));
     }
 
     #[tokio::test]
@@ -722,15 +732,25 @@ mod tests {
     #[tokio::test]
     async fn test_signing_error_propagation() {
         struct FailingKey;
+
+        #[derive(Debug)]
+        struct DummyError;
+        impl std::error::Error for DummyError {}
+        impl std::fmt::Display for DummyError {
+            fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+                write!(f, "dummy error")
+            }
+        }
+
         impl IntoKey for FailingKey {
             async fn get_key(&self) -> Result<SecretKey<p256::NistP256>, KeyError> {
-                Err(KeyError::Unknown)
+                Err(KeyError::Other(Box::new(DummyError)))
             }
         }
 
         let failing_key = FailingKey;
         let result = failing_key.sign(b"test").await;
-        assert!(matches!(result, Err(SigningError::Key(KeyError::Unknown))));
+        assert!(matches!(result, Err(SigningError::Key(KeyError::Other(_)))));
     }
 
     #[tokio::test]
@@ -750,7 +770,7 @@ mod tests {
         );
 
         // Test debug output
-        let debug_str = format!("{:?}", ctx1);
+        let debug_str = format!("{ctx1:?}");
         assert!(
             debug_str.contains("AuthorizationContext"),
             "Debug output should contain struct name"

@@ -17,7 +17,7 @@ async fn test_users_list() -> Result<()> {
 
     let result = client.users().list(None, Some(1.0)).await?;
 
-    println!("Users list response: {:?}", result);
+    println!("Users list response: {result:?}");
 
     Ok(())
 }
@@ -38,7 +38,7 @@ async fn test_users_create() -> Result<()> {
 
     let result = debug_response!(client.users().create(&create_body)).await?;
 
-    println!("Created user: {:?}", result);
+    println!("Created user: {result:?}");
     assert!(result.into_inner().linked_accounts.iter().any(|a| match a {
         UserLinkedAccountsItem::Email(e) => e.address == unique_email,
         _ => false,
@@ -54,7 +54,7 @@ async fn test_users_get() -> Result<()> {
     let user = common::ensure_test_user(&client).await?;
 
     let result = client.users().get(&user.id).await?;
-    println!("Retrieved user: {:?}", result);
+    println!("Retrieved user: {result:?}");
     assert_eq!(result.into_inner().id, user.id);
 
     Ok(())
@@ -81,7 +81,7 @@ async fn test_users_delete() -> Result<()> {
     // Now delete the user
     let result = client.users().delete(&user_id).await?;
 
-    println!("Deleted user response: {:?}", result);
+    println!("Deleted user response: {result:?}");
 
     Ok(())
 }
@@ -113,12 +113,11 @@ async fn test_users_set_custom_metadata() -> Result<()> {
         .await;
     assert!(
         result.is_ok(),
-        "Failed to set custom metadata: {:?}",
-        result
+        "Failed to set custom metadata: {result:?}"
     );
 
     let metadata_response = result.unwrap();
-    println!("Set custom metadata response: {:?}", metadata_response);
+    println!("Set custom metadata response: {metadata_response:?}");
 
     Ok(())
 }
@@ -145,12 +144,11 @@ async fn test_users_pregenerate_wallets() -> Result<()> {
     .await;
     assert!(
         result.is_ok(),
-        "Failed to pregenerate wallets: {:?}",
-        result
+        "Failed to pregenerate wallets: {result:?}"
     );
 
     let pregenerate_response = result.unwrap();
-    println!("Pregenerate wallets response: {:?}", pregenerate_response);
+    println!("Pregenerate wallets response: {pregenerate_response:?}");
 
     Ok(())
 }
@@ -172,7 +170,7 @@ async fn test_users_search() -> Result<()> {
 
     let result = debug_response!(client.users().search(&search_body)).await?;
 
-    println!("Search users response: {:?}", result);
+    println!("Search users response: {result:?}");
 
     Ok(())
 }

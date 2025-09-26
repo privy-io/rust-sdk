@@ -314,7 +314,7 @@ fn generate_resource_code(
     let client_ident = syn::Ident::new(&client_name, proc_macro2::Span::call_site());
 
     // Generate the struct
-    let struct_msg = format!("Client for {} operations", resource_name);
+    let struct_msg = format!("Client for {resource_name} operations");
     let struct_def = quote! {
         #[doc = #struct_msg]
         #[derive(Clone, Debug)]
@@ -364,7 +364,7 @@ fn generate_resource_code(
         let sub_path = if parent_path.is_empty() {
             resource_name.clone()
         } else {
-            format!("{}.{}", parent_path, resource_name)
+            format!("{parent_path}.{resource_name}")
         };
         let sub_code =
             generate_resource_code(subresource, generated_methods, &sub_path, openapi_spec);
@@ -462,7 +462,7 @@ fn generate_subresource_accessor(
     );
     let client_ident = syn::Ident::new(&client_name, proc_macro2::Span::call_site());
 
-    let msg = format!("Access the {} subclient", subresource_name);
+    let msg = format!("Access the {subresource_name} subclient");
     quote! {
         #[doc = #msg]
         pub fn #method_name(&self) -> #client_ident {
