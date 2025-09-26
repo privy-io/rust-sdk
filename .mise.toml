@@ -40,10 +40,16 @@ run = [
 [tasks.gen-openapi]
 description = "Generate the Rust code for the Privy API"
 depends = ["pull-openapi"]
-run = [
-  "cargo-progenitor progenitor --input openapi.json --name privy-openapi -o crates/privy-openapi --version 0.1.0 --no-rustfmt true --license-name \"MIT OR Apache-2.0\"",
-  "cargo +nightly fmt"
-]
+run = """
+#!/usr/bin/env bash
+
+# get current crate version
+VERSION=$(grep -m 1 "^version" Cargo.toml | cut -d '"' -f 2)
+cargo-progenitor progenitor --input openapi.json --name privy-openapi -o crates/privy-openapi --version $VERSION --no-rustfmt true --license-name "MIT OR Apache-2.0"
+# insert description using sed
+sed -i '2i description="Privy OpenAPI Bindings"' crates/privy-openapi/Cargo.toml
+cargo +nightly fmt
+""""
 
 [tasks.gen-p256-key]
 description = "Generate P-256 key pair for Privy wallet owner"

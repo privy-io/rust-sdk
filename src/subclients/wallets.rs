@@ -1,3 +1,4 @@
+use super::{Error, ResponseValue, types};
 use crate::{
     AuthorizationContext, PrivyApiError, PrivyExportError, PrivyHpke, PrivySignedApiError,
     ethereum::EthereumService,
@@ -11,8 +12,6 @@ use crate::{
     solana::SolanaService,
     subclients::WalletsClient,
 };
-
-use super::{Error, ResponseValue, types};
 
 impl WalletsClient {
     /// Make a wallet rpc call
@@ -139,8 +138,6 @@ impl WalletsClient {
     /// Import a wallet into the Privy app
     ///
     /// # Errors
-    ///
-    ///
     pub async fn import(
         &self,
         address: String,

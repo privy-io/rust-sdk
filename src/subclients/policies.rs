@@ -1,10 +1,9 @@
+use super::ResponseValue;
 use crate::{
     AuthorizationContext, PrivySignedApiError, generate_authorization_signatures,
     generated::types::{Policy, UpdatePolicyBody, UpdatePolicyPolicyId},
     subclients::PoliciesClient,
 };
-
-use super::ResponseValue;
 
 impl PoliciesClient {
     /// Update a policy

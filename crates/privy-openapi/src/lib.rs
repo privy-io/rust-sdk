@@ -34280,7 +34280,6 @@ pub mod types {
     #[doc = "    \"id\","]
     #[doc = "    \"imported\","]
     #[doc = "    \"latest_verified_at\","]
-    #[doc = "    \"public_key\","]
     #[doc = "    \"recovery_method\","]
     #[doc = "    \"type\","]
     #[doc = "    \"verified_at\","]
@@ -34386,7 +34385,8 @@ pub mod types {
         pub id: ::std::option::Option<::std::string::String>,
         pub imported: bool,
         pub latest_verified_at: ::std::option::Option<f64>,
-        pub public_key: ::std::string::String,
+        #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
+        pub public_key: ::std::option::Option<::std::string::String>,
         pub recovery_method: LinkedAccountSolanaEmbeddedWalletRecoveryMethod,
         #[serde(rename = "type")]
         pub type_: LinkedAccountSolanaEmbeddedWalletType,

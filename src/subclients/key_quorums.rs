@@ -1,9 +1,8 @@
+use super::ResponseValue;
 use crate::{
     AuthorizationContext, PrivySignedApiError, generate_authorization_signatures,
     subclients::KeyQuorumsClient,
 };
-
-use super::ResponseValue;
 
 impl KeyQuorumsClient {
     /// Update a key quorum
