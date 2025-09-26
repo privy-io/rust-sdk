@@ -1,5 +1,8 @@
 # privy-rs
 
+[![privy-rs on crates.io](https://img.shields.io/crates/v/privy-rs.svg)](https://crates.io/crates/privy-rs)
+[![privy-rs on docs.rs](https://docs.rs/privy-rs/badge.svg)](https://docs.rs/privy-rs)
+
 A Rust library for interacting with the Privy API, providing secure embedded wallet signing capabilities for Solana transactions. This library enables seamless integration with Privy's wallet infrastructure for transaction signing operations.
 
 ## Installation
@@ -8,7 +11,7 @@ Add this to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-privy-rs = "0.1.0"
+privy-rs = "0.1.0-alpha"
 ```
 
 ## Usage
