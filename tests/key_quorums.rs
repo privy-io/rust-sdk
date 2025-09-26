@@ -23,7 +23,7 @@ async fn test_key_quorums_create() -> Result<()> {
         .duration_since(SystemTime::UNIX_EPOCH)?
         .as_secs();
     let display_name =
-        CreateKeyQuorumBodyDisplayName::try_from(format!("Test KQ {}", timestamp).as_str())?;
+        CreateKeyQuorumBodyDisplayName::try_from(format!("Test KQ {timestamp}").as_str())?;
 
     let create_body = CreateKeyQuorumBody {
         authorization_threshold: Some(1.0),
@@ -34,7 +34,7 @@ async fn test_key_quorums_create() -> Result<()> {
 
     let result = client.key_quorums().create(&create_body).await?;
 
-    println!("Created key quorum: {:?}", result);
+    println!("Created key quorum: {result:?}");
 
     let key_quorum = result.into_inner();
     assert_eq!(key_quorum.authorization_threshold, Some(1.0));
@@ -55,7 +55,7 @@ async fn test_key_quorums_get() -> Result<()> {
         .duration_since(SystemTime::UNIX_EPOCH)?
         .as_secs();
     let display_name =
-        CreateKeyQuorumBodyDisplayName::try_from(format!("Test Get KQ {}", timestamp).as_str())?;
+        CreateKeyQuorumBodyDisplayName::try_from(format!("Test Get KQ {timestamp}").as_str())?;
 
     let create_body = CreateKeyQuorumBody {
         authorization_threshold: Some(1.0),
@@ -70,7 +70,7 @@ async fn test_key_quorums_get() -> Result<()> {
     // Now test getting the key quorum
     let result = client.key_quorums().get(&key_quorum_id).await?;
 
-    println!("Retrieved key quorum: {:?}", result);
+    println!("Retrieved key quorum: {result:?}");
 
     let key_quorum = result.into_inner();
     assert_eq!(key_quorum.id, key_quorum_id);
@@ -102,7 +102,7 @@ async fn test_key_quorums_update_with_auth_context() -> Result<()> {
         .duration_since(SystemTime::UNIX_EPOCH)?
         .as_secs();
     let display_name =
-        CreateKeyQuorumBodyDisplayName::try_from(format!("Test Update KQ {}", timestamp).as_str())?;
+        CreateKeyQuorumBodyDisplayName::try_from(format!("Test Update KQ {timestamp}").as_str())?;
 
     let create_body = CreateKeyQuorumBody {
         authorization_threshold: Some(1.0),
@@ -120,7 +120,7 @@ async fn test_key_quorums_update_with_auth_context() -> Result<()> {
 
     // Update the key quorum
     let updated_display_name = UpdateKeyQuorumBodyDisplayName::try_from(
-        format!("Updated Test KQ {}", timestamp).as_str(),
+        format!("Updated Test KQ {timestamp}").as_str(),
     )?;
 
     let update_body = UpdateKeyQuorumBody {
@@ -139,7 +139,7 @@ async fn test_key_quorums_update_with_auth_context() -> Result<()> {
     )
     .await?;
 
-    println!("Updated key quorum: {:?}", result);
+    println!("Updated key quorum: {result:?}");
 
     let key_quorum = result.into_inner();
 
@@ -175,7 +175,7 @@ async fn test_key_quorums_delete() -> Result<()> {
         .duration_since(SystemTime::UNIX_EPOCH)?
         .as_secs();
     let display_name =
-        CreateKeyQuorumBodyDisplayName::try_from(format!("Test Delete KQ {}", timestamp).as_str())?;
+        CreateKeyQuorumBodyDisplayName::try_from(format!("Test Delete KQ {timestamp}").as_str())?;
 
     let create_body = CreateKeyQuorumBody {
         authorization_threshold: Some(1.0),
@@ -194,7 +194,7 @@ async fn test_key_quorums_delete() -> Result<()> {
     // Delete the key quorum
     let result = debug_response!(client.key_quorums().delete(&key_quorum_id, &ctx)).await?;
 
-    println!("Deleted key quorum: {:?}", result);
+    println!("Deleted key quorum: {result:?}");
 
     // Verify deletion by trying to get the key quorum (should fail)
     let get_result = client.key_quorums().get(&key_quorum_id).await;

@@ -21,6 +21,7 @@
 use anyhow::Result;
 use privy_rs::{
     AuthorizationContext, IntoKey, JwtUser, PrivateKey, PrivyApiError, PrivyClient,
+    PrivySignedApiError,
     generated::types::{OwnerInput, UpdateWalletBody},
 };
 use tracing_subscriber::EnvFilter;
@@ -74,14 +75,16 @@ async fn main() -> Result<()> {
         )
         .await
     {
-        Ok(wallet) => Ok(wallet),
-        Err(PrivyApiError::UnexpectedResponse(r)) => {
+        Ok(wallet) => wallet,
+        Err(PrivySignedApiError::Api(PrivyApiError::UnexpectedResponse(r))) => {
             let text = r.text().await.unwrap_or_default();
             tracing::warn!("unexpected response: {:?}", text);
-            Err(PrivyApiError::Custom("unexpected response".into()))
+            anyhow::bail!("unexpected response")
         }
-        Err(e) => Err(e),
-    }?;
+        Err(e) => {
+            anyhow::bail!("unexpected error: {:?}", e)
+        }
+    };
 
     tracing::info!("got updated wallet: {:?}", wallet);
 

@@ -33,7 +33,7 @@ async fn test_policies_create() -> Result<()> {
 
     let result = debug_response!(client.policies().create(None, &policy_body)).await?;
 
-    println!("Created policy: {:?}", result);
+    println!("Created policy: {result:?}");
     assert!(result.into_inner().id.len() == 24);
 
     Ok(())
@@ -48,10 +48,10 @@ async fn test_policies_get() -> Result<()> {
         .policies()
         .get(&GetPolicyPolicyId::try_from(&*policy.id).unwrap())
         .await;
-    assert!(result.is_ok(), "Failed to get policy: {:?}", result);
+    assert!(result.is_ok(), "Failed to get policy: {result:?}");
 
     let policy_response = result.unwrap();
-    println!("Retrieved policy: {:?}", policy_response);
+    println!("Retrieved policy: {policy_response:?}");
     assert_eq!(policy_response.into_inner().id, policy.id);
 
     Ok(())
@@ -81,10 +81,10 @@ async fn test_policies_get_rule() {
     let rule_id = GetPolicyRuleRuleId::try_from(&*policy.rules.first().unwrap().id).unwrap();
 
     let result = client.policies().get_rule(&policy_id, &rule_id).await;
-    assert!(result.is_ok(), "Failed to get policy rule: {:?}", result);
+    assert!(result.is_ok(), "Failed to get policy rule: {result:?}");
 
     let rule_response = result.unwrap();
-    println!("Retrieved policy rule: {:?}", rule_response);
+    println!("Retrieved policy rule: {rule_response:?}");
 }
 
 #[tokio::test]
@@ -135,12 +135,11 @@ async fn test_policies_update_with_auth_context() {
 
     assert!(
         result.is_ok(),
-        "Failed to update policy with auth context: {:?}",
-        result
+        "Failed to update policy with auth context: {result:?}"
     );
 
     let policy_response = result.unwrap();
-    println!("Updated policy: {:?}", policy_response);
+    println!("Updated policy: {policy_response:?}");
 }
 
 #[tokio::test]
@@ -187,10 +186,10 @@ async fn test_policies_delete() {
             &ctx,
         )
         .await;
-    assert!(result.is_ok(), "Failed to delete policy: {:?}", result);
+    assert!(result.is_ok(), "Failed to delete policy: {result:?}");
 
     let delete_response = result.unwrap();
-    println!("Deleted policy response: {:?}", delete_response);
+    println!("Deleted policy response: {delete_response:?}");
 }
 
 #[tokio::test]
@@ -221,15 +220,15 @@ async fn test_policies_create_rule() {
     let result = client
         .policies()
         .create_rule(
-            &CreatePolicyRulePolicyId::from_str(&*policy.id).unwrap(),
+            &CreatePolicyRulePolicyId::from_str(&policy.id).unwrap(),
             &ctx,
             &rule,
         )
         .await;
-    assert!(result.is_ok(), "Failed to create policy rule: {:?}", result);
+    assert!(result.is_ok(), "Failed to create policy rule: {result:?}");
 
     let rule_response = result.unwrap();
-    println!("Created policy rule: {:?}", rule_response);
+    println!("Created policy rule: {rule_response:?}");
 }
 
 #[tokio::test]
@@ -269,10 +268,10 @@ async fn test_policies_update_rule() {
             &rule,
         )
         .await;
-    assert!(result.is_ok(), "Failed to update policy rule: {:?}", result);
+    assert!(result.is_ok(), "Failed to update policy rule: {result:?}");
 
     let rule_response = result.unwrap();
-    println!("Updated policy rule: {:?}", rule_response);
+    println!("Updated policy rule: {rule_response:?}");
 }
 
 #[tokio::test]
@@ -305,8 +304,8 @@ async fn test_policies_delete_rule() {
         .delete_rule(&policy_id, &rule_id, &ctx)
         .await;
 
-    assert!(result.is_ok(), "Failed to delete policy rule: {:?}", result);
+    assert!(result.is_ok(), "Failed to delete policy rule: {result:?}");
 
     let delete_response = result.unwrap();
-    println!("Deleted policy rule response: {:?}", delete_response);
+    println!("Deleted policy rule response: {delete_response:?}");
 }

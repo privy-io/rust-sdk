@@ -10,11 +10,13 @@ use crate::{JwtUser, KeyError, PrivyHpke, generated::types::AuthenticateBody};
 
 const EXPIRY_BUFFER: Duration = Duration::from_secs(60);
 
+type JwtCache = lru::LruCache<String, (SystemTime, SecretKey<NistP256>)>;
+
 /// This needs interior mutability so that we don't have to lock the cache for the
 /// entire duration of the network request. Otherwise, in a multi-threaded context,
 /// you would only be able to sign a single signature at a time.
 #[derive(Debug, Clone)]
-pub struct JwtExchange(Arc<Mutex<lru::LruCache<String, (SystemTime, SecretKey<NistP256>)>>>);
+pub struct JwtExchange(Arc<Mutex<JwtCache>>);
 
 impl JwtExchange {
     pub fn new(capacity: NonZeroUsize) -> Self {
@@ -51,10 +53,7 @@ impl JwtExchange {
 
         // Get the HPKE manager and format the public key for the API request
         let hpke_manager = PrivyHpke::new();
-        let public_key_b64 = hpke_manager.public_key().map_err(|e| {
-            tracing::error!("Failed to format HPKE public key: {:?}", e);
-            KeyError::Unknown
-        })?;
+        let public_key_b64 = hpke_manager.public_key()?;
 
         tracing::debug!(
             "Generated HPKE public key for authentication request {}",
@@ -71,13 +70,9 @@ impl JwtExchange {
         // Send the authentication request
         let auth = match client.wallets().authenticate_with_jwt(&body).await {
             Ok(r) => r.into_inner(),
-            Err(crate::generated::Error::UnexpectedResponse(response)) => {
-                tracing::error!("Unexpected API response: {:?}", response.text().await);
-                return Err(KeyError::Unknown);
-            }
             Err(e) => {
-                tracing::error!("API request failed: {:?}", e);
-                return Err(KeyError::Unknown);
+                tracing::error!("failed to fetch authorization key: {:?}", e);
+                return Err(KeyError::Other(Box::new(e)));
             }
         };
 

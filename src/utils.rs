@@ -2,7 +2,7 @@ use base64::{Engine, engine::general_purpose::STANDARD};
 use futures::TryStreamExt;
 use serde::Serialize;
 
-use crate::AuthorizationContext;
+use crate::{AuthorizationContext, SignatureGenerationError};
 
 /// A convenience wrapper used as a namespace for utility functions
 pub struct Utils(pub(crate) String);
@@ -12,9 +12,12 @@ pub struct RequestSigner(String);
 pub struct RequestFormatter(String);
 
 impl Utils {
+    /// Returns a new [`RequestSigner`] instance
     pub fn signer(&self) -> RequestSigner {
         RequestSigner(self.0.clone())
     }
+
+    /// Returns a new [`RequestFormatter`] instance
     pub fn formatter(&self) -> RequestFormatter {
         RequestFormatter(self.0.clone())
     }
@@ -40,7 +43,7 @@ impl RequestSigner {
         url: String,
         body: S,
         idempotency_key: Option<String>,
-    ) -> Result<String, serde_json::Error> {
+    ) -> Result<String, SignatureGenerationError> {
         generate_authorization_signatures(ctx, &self.0, method, url, body, idempotency_key).await
     }
 }
@@ -74,6 +77,22 @@ pub fn format_request_for_authorization_signature<S: Serialize>(
         .canonicalize()
 }
 
+/// Generates an authorization signature for a given request
+///
+/// # Arguments
+/// * `ctx` - The [`AuthorizationContext`] to use for signing
+/// * `app_id` - The application ID to use for signing
+/// * `method` - The HTTP method to use for the request
+/// * `url` - The URL to use for the request
+/// * `body` - The body of the request
+/// * `idempotency_key` - The idempotency key to use for the request
+///
+/// # Returns
+/// A `Result` containing the generated signature or an error if the signature could not be generated
+///
+/// # Errors
+/// This function will return an error if the signature could not be generated, whether
+/// it be due to a serialization error or base64 encoding error.
 pub async fn generate_authorization_signatures<S: Serialize>(
     ctx: &AuthorizationContext,
     app_id: &str,
@@ -81,7 +100,7 @@ pub async fn generate_authorization_signatures<S: Serialize>(
     url: String,
     body: S,
     idempotency_key: Option<String>,
-) -> Result<String, serde_json::Error> {
+) -> Result<String, SignatureGenerationError> {
     let canonical =
         format_request_for_authorization_signature(app_id, method, url, body, idempotency_key)?;
 
@@ -94,11 +113,7 @@ pub async fn generate_authorization_signatures<S: Serialize>(
             STANDARD.encode(&der_bytes)
         })
         .try_collect::<Vec<_>>()
-        .await
-        .map_err(|e| {
-            tracing::error!("failed to sign request: {}", e);
-            todo!()
-        })?
+        .await?
         .join(","))
 }
 
@@ -173,6 +188,8 @@ impl<S: Serialize> WalletApiRequestSignatureInput<S> {
 
 #[cfg(test)]
 mod tests {
+    use std::f64;
+
     use serde_json::json;
     use test_case::test_case;
     use tracing_test::traced_test;
@@ -200,7 +217,7 @@ mod tests {
 
         // Build the canonical request data for signing using the serialized body
         let canonical_data = format_request_for_authorization_signature(
-            "cmf418pa801bxl40b5rcgjvd9".into(),
+            "cmf418pa801bxl40b5rcgjvd9",
             Method::PATCH,
             "https://api.privy.io/v1/wallets/o5zuf7fbygwze9l9gaxyc0bm".into(),
             update_wallet_body.clone(),
@@ -395,7 +412,7 @@ mod tests {
                     "boolean_true": true,
                     "boolean_false": false,
                     "number_int": 42,
-                    "number_float": 3.14159,
+                    "number_float": f64::consts::PI,
                     "string_empty": "",
                     "string_with_quotes": "He said \"Hello\"",
                     "string_with_newlines": "line1\nline2\r\nline3",
@@ -510,7 +527,7 @@ mod tests {
         let signature = result.unwrap();
         assert!(!signature.is_empty(), "Signature should not be empty");
         assert!(
-            signature.contains(',') == false || signature.split(',').count() == 1,
+            !signature.contains(',') || signature.split(',').count() == 1,
             "Should have one signature for one key"
         );
     }

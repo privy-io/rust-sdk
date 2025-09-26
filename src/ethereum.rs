@@ -5,7 +5,7 @@
 //! are designed to work with Privy's embedded wallet infrastructure.
 
 use crate::{
-    AuthorizationContext,
+    AuthorizationContext, PrivySignedApiError,
     generated::{
         Error, ResponseValue,
         types::{
@@ -65,14 +65,14 @@ pub struct EthereumService {
 }
 
 impl EthereumService {
-    /// Creates a new EthereumService instance.
+    /// Creates a new [`EthereumService`] instance.
     ///
     /// This is typically called internally by `WalletsClient::ethereum()`.
     pub(crate) fn new(wallets_client: crate::subclients::WalletsClient) -> Self {
         Self { wallets_client }
     }
 
-    /// Signs a UTF-8 encoded message for an Ethereum wallet using the personal_sign method.
+    /// Signs a UTF-8 encoded message for an Ethereum wallet using the `personal_sign` method.
     ///
     /// This method signs arbitrary UTF-8 text messages using Ethereum's personal message
     /// signing standard. The message will be prefixed with the Ethereum signed message
@@ -128,7 +128,7 @@ impl EthereumService {
         message: &str,
         authorization_context: &AuthorizationContext,
         idempotency_key: Option<&str>,
-    ) -> Result<ResponseValue<WalletRpcResponse>, Error<()>> {
+    ) -> Result<ResponseValue<WalletRpcResponse>, PrivySignedApiError> {
         let rpc_body = WalletRpcBody::EthereumPersonalSignRpcInput(EthereumPersonalSignRpcInput {
             address: None,
             chain_type: None,
@@ -144,7 +144,7 @@ impl EthereumService {
             .await
     }
 
-    /// Signs a raw byte array message for an Ethereum wallet using the personal_sign method.
+    /// Signs a raw byte array message for an Ethereum wallet using the `personal_sign` method.
     ///
     /// This method signs raw binary data by first encoding it as a hex string (with 0x prefix)
     /// and then using Ethereum's personal message signing standard.
@@ -187,7 +187,7 @@ impl EthereumService {
         message: &[u8],
         authorization_context: &AuthorizationContext,
         idempotency_key: Option<&str>,
-    ) -> Result<ResponseValue<WalletRpcResponse>, Error<()>> {
+    ) -> Result<ResponseValue<WalletRpcResponse>, PrivySignedApiError> {
         let hex_message = format!("0x{}", hex::encode(message));
 
         let rpc_body = WalletRpcBody::EthereumPersonalSignRpcInput(EthereumPersonalSignRpcInput {
@@ -255,7 +255,7 @@ impl EthereumService {
         hash: &str,
         authorization_context: &AuthorizationContext,
         idempotency_key: Option<&str>,
-    ) -> Result<ResponseValue<WalletRpcResponse>, Error<()>> {
+    ) -> Result<ResponseValue<WalletRpcResponse>, PrivySignedApiError> {
         let rpc_body =
             WalletRpcBody::EthereumSecp256k1SignRpcInput(EthereumSecp256k1SignRpcInput {
                 address: None,
@@ -320,7 +320,7 @@ impl EthereumService {
         params: EthereumSign7702AuthorizationRpcInputParams,
         authorization_context: &AuthorizationContext,
         idempotency_key: Option<&str>,
-    ) -> Result<ResponseValue<WalletRpcResponse>, Error<()>> {
+    ) -> Result<ResponseValue<WalletRpcResponse>, PrivySignedApiError> {
         let rpc_body = WalletRpcBody::EthereumSign7702AuthorizationRpcInput(
             EthereumSign7702AuthorizationRpcInput {
                 address: None,
@@ -392,7 +392,7 @@ impl EthereumService {
         typed_data: EthereumSignTypedDataRpcInputParamsTypedData,
         authorization_context: &AuthorizationContext,
         idempotency_key: Option<&str>,
-    ) -> Result<ResponseValue<WalletRpcResponse>, Error<()>> {
+    ) -> Result<ResponseValue<WalletRpcResponse>, PrivySignedApiError> {
         let rpc_body =
             WalletRpcBody::EthereumSignTypedDataRpcInput(EthereumSignTypedDataRpcInput {
                 address: None,
@@ -462,7 +462,7 @@ impl EthereumService {
         transaction: EthereumSignTransactionRpcInputParamsTransaction,
         authorization_context: &AuthorizationContext,
         idempotency_key: Option<&str>,
-    ) -> Result<ResponseValue<WalletRpcResponse>, Error<()>> {
+    ) -> Result<ResponseValue<WalletRpcResponse>, PrivySignedApiError> {
         let rpc_body =
             WalletRpcBody::EthereumSignTransactionRpcInput(EthereumSignTransactionRpcInput {
                 address: None,
@@ -547,7 +547,7 @@ impl EthereumService {
         transaction: EthereumSendTransactionRpcInputParamsTransaction,
         authorization_context: &AuthorizationContext,
         idempotency_key: Option<&str>,
-    ) -> Result<ResponseValue<WalletRpcResponse>, Error<()>> {
+    ) -> Result<ResponseValue<WalletRpcResponse>, PrivySignedApiError> {
         let rpc_body =
             WalletRpcBody::EthereumSendTransactionRpcInput(EthereumSendTransactionRpcInput {
                 address: None,

@@ -18,11 +18,8 @@
 
 use anyhow::Result;
 use privy_rs::{
-    AuthorizationContext, JwtUser, PrivateKey, PrivyClient,
-    generated::{
-        Error,
-        types::{RawSign, RawSignParams},
-    },
+    AuthorizationContext, JwtUser, PrivateKey, PrivyApiError, PrivyClient, PrivySignedApiError,
+    generated::types::{RawSign, RawSignParams},
 };
 use tracing_subscriber::EnvFilter;
 
@@ -72,7 +69,7 @@ async fn main() -> Result<()> {
         .await
     {
         Ok(r) => r,
-        Err(Error::UnexpectedResponse(resp)) => {
+        Err(PrivySignedApiError::Api(PrivyApiError::UnexpectedResponse(resp))) => {
             tracing::error!("Unexpected response: {:?}", resp.text().await);
             return Err(anyhow::anyhow!("Unexpected response"));
         }

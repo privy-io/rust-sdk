@@ -1,3 +1,9 @@
+//! privy_hpke
+//!
+//! This module provides a helper that manages the ephemeral key decryption process for
+//! Privy's secure information exchange protocol. For more information please see the
+//! [`PrivyHpke`] struct documentation.
+
 use base64::Engine;
 use hpke::{
     Deserializable, Kem, OpModeR, Serializable, aead::ChaCha20Poly1305, kdf::HkdfSha256,

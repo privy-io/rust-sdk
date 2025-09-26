@@ -2,7 +2,7 @@
 
 #![deny(clippy::unwrap_used)]
 // #![warn(clippy::pedantic)]
-// #![warn(missing_docs)]
+#![warn(missing_docs)]
 
 use base64::{Engine, engine::general_purpose::STANDARD};
 
@@ -11,6 +11,7 @@ pub mod ethereum;
 pub mod privy_hpke;
 pub mod solana;
 
+/// Generated types from privy's openapi spec
 pub mod generated {
     pub use privy_openapi::*;
 }

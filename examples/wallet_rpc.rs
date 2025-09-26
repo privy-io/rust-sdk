@@ -19,7 +19,7 @@
 use anyhow::Result;
 use base64::{Engine, engine::general_purpose::STANDARD};
 use privy_rs::{
-    AuthorizationContext, JwtUser, PrivateKey, PrivyClient,
+    AuthorizationContext, JwtUser, PrivateKey, PrivyClient, PrivySignedApiError,
     generated::types::{
         SolanaSignMessageRpcInput, SolanaSignMessageRpcInputMethod,
         SolanaSignMessageRpcInputParams, SolanaSignMessageRpcInputParamsEncoding, WalletRpcBody,
@@ -78,7 +78,7 @@ async fn main() -> Result<()> {
         .await
     {
         Ok(r) => r,
-        Err(Error::UnexpectedResponse(resp)) => {
+        Err(PrivySignedApiError::Api(Error::UnexpectedResponse(resp))) => {
             tracing::error!("Unexpected response: {:?}", resp.text().await);
             return Err(anyhow::anyhow!("Unexpected response"));
         }

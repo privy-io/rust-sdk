@@ -8,7 +8,7 @@
 use std::str::FromStr;
 
 use crate::{
-    AuthorizationContext,
+    AuthorizationContext, PrivySignedApiError,
     generated::{
         Error, ResponseValue,
         types::{
@@ -133,7 +133,7 @@ impl SolanaService {
         message: &str,
         authorization_context: &AuthorizationContext,
         idempotency_key: Option<&str>,
-    ) -> Result<ResponseValue<WalletRpcResponse>, Error<()>> {
+    ) -> Result<ResponseValue<WalletRpcResponse>, PrivySignedApiError> {
         let rpc_body = WalletRpcBody::SolanaSignMessageRpcInput(SolanaSignMessageRpcInput {
             address: None,
             chain_type: None,
@@ -203,7 +203,7 @@ impl SolanaService {
         transaction: &str,
         authorization_context: &AuthorizationContext,
         idempotency_key: Option<&str>,
-    ) -> Result<ResponseValue<WalletRpcResponse>, Error<()>> {
+    ) -> Result<ResponseValue<WalletRpcResponse>, PrivySignedApiError> {
         let rpc_body =
             WalletRpcBody::SolanaSignTransactionRpcInput(SolanaSignTransactionRpcInput {
                 address: None,
@@ -290,7 +290,7 @@ impl SolanaService {
         transaction: &str,
         authorization_context: &AuthorizationContext,
         idempotency_key: Option<&str>,
-    ) -> Result<ResponseValue<WalletRpcResponse>, Error<()>> {
+    ) -> Result<ResponseValue<WalletRpcResponse>, PrivySignedApiError> {
         let caip2_parsed = SolanaSignAndSendTransactionRpcInputCaip2::from_str(caip2)
             .map_err(|_| Error::InvalidRequest("Invalid CAIP-2 format".to_string()))?;
 
