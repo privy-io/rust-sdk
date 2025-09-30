@@ -28,21 +28,15 @@ async fn main() -> Result<()> {
         )
         .init();
 
-    // Get credentials from environment
-    let app_id = std::env::var("PRIVY_APP_ID").expect("PRIVY_APP_ID environment variable not set");
-    let app_secret =
-        std::env::var("PRIVY_APP_SECRET").expect("PRIVY_APP_SECRET environment variable not set");
+    // Get search term from environment and initialize client
     let search_term =
         std::env::var("PRIVY_SEARCH_TERM").unwrap_or_else(|_| "alex@arlyon.dev".to_string());
+    let client = PrivyClient::new_from_env()?;
 
     tracing::info!(
-        "initializing privy with app_id: {}, app_secret: {}, search_term: {}",
-        app_id,
-        app_secret,
+        "initialized privy client from environment, search_term: {}",
         search_term
     );
-
-    let client = PrivyClient::new(app_id, app_secret)?;
 
     // Search for users by email address or other criteria
     let search_result = client

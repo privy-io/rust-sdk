@@ -11,6 +11,10 @@ pub enum PrivyCreateError {
     InvalidHeaderValue(#[from] reqwest::header::InvalidHeaderValue),
     #[error("Unable to create client: {0}")]
     Client(#[from] reqwest::Error),
+    #[error("Invalid app id")]
+    InvalidAppId,
+    #[error("Invalid app secret")]
+    InvalidAppSecret,
 }
 
 /// The primary error type for the Privy SDK.
