@@ -297,7 +297,7 @@ async fn test_wallets_solana_sign_message() -> Result<()> {
 
     // Verify the response is specifically a SolanaSignMessageRpcResponse
     match result.into_inner() {
-        WalletRpcResponse::SolanaSignMessageRpcResponse(_) => {},
+        WalletRpcResponse::SolanaSignMessageRpcResponse(_) => {}
         _ => panic!("Expected SolanaSignMessageRpcResponse"),
     }
 
@@ -334,7 +334,7 @@ async fn test_wallets_solana_sign_transaction() -> Result<()> {
 
     // Verify the response is specifically a SolanaSignTransactionRpcResponse
     match result.into_inner() {
-        WalletRpcResponse::SolanaSignTransactionRpcResponse(_) => {},
+        WalletRpcResponse::SolanaSignTransactionRpcResponse(_) => {}
         _ => panic!("Expected SolanaSignTransactionRpcResponse"),
     }
 
@@ -406,7 +406,7 @@ async fn test_wallets_solana_sign_and_send_transaction() -> Result<()> {
 
     // Verify the response is specifically a SolanaSignAndSendTransactionRpcResponse
     match result.into_inner() {
-        WalletRpcResponse::SolanaSignAndSendTransactionRpcResponse(_) => {},
+        WalletRpcResponse::SolanaSignAndSendTransactionRpcResponse(_) => {}
         _ => panic!("Expected SolanaSignAndSendTransactionRpcResponse"),
     }
 
@@ -444,7 +444,7 @@ async fn test_wallets_ethereum_sign_message() -> Result<()> {
 
     // Verify the response is specifically an EthereumPersonalSignRpcResponse
     match result.into_inner() {
-        WalletRpcResponse::EthereumPersonalSignRpcResponse(_) => {},
+        WalletRpcResponse::EthereumPersonalSignRpcResponse(_) => {}
         _ => panic!("Expected EthereumPersonalSignRpcResponse"),
     }
 
@@ -560,7 +560,7 @@ async fn test_wallets_ethereum_sign_typed_data() -> Result<()> {
 
     // Verify the response is specifically an EthereumSignTypedDataRpcResponse
     match result.into_inner() {
-        WalletRpcResponse::EthereumSignTypedDataRpcResponse(_) => {},
+        WalletRpcResponse::EthereumSignTypedDataRpcResponse(_) => {}
         _ => panic!("Expected EthereumSignTypedDataRpcResponse"),
     }
 
@@ -594,7 +594,7 @@ async fn test_wallets_ethereum_sign_secp256k1() -> Result<()> {
 
     // Verify the response is specifically an EthereumSecp256k1SignRpcResponse
     match result.into_inner() {
-        WalletRpcResponse::EthereumSecp256k1SignRpcResponse(_) => {},
+        WalletRpcResponse::EthereumSecp256k1SignRpcResponse(_) => {}
         _ => panic!("Expected EthereumSecp256k1SignRpcResponse"),
     }
 
@@ -632,7 +632,7 @@ async fn test_wallets_ethereum_sign_7702_authorization() -> Result<()> {
 
     // Verify the response is specifically an EthereumSign7702AuthorizationRpcResponse
     match result.into_inner() {
-        WalletRpcResponse::EthereumSign7702AuthorizationRpcResponse(_) => {},
+        WalletRpcResponse::EthereumSign7702AuthorizationRpcResponse(_) => {}
         _ => panic!("Expected EthereumSign7702AuthorizationRpcResponse"),
     }
 
@@ -671,7 +671,7 @@ async fn test_wallets_ethereum_sign_transaction() -> Result<()> {
 
     // Verify the response is specifically an EthereumSignTransactionRpcResponse
     match result.into_inner() {
-        WalletRpcResponse::EthereumSignTransactionRpcResponse(_) => {},
+        WalletRpcResponse::EthereumSignTransactionRpcResponse(_) => {}
         _ => panic!("Expected EthereumSignTransactionRpcResponse"),
     }
 
@@ -737,7 +737,7 @@ async fn test_wallets_ethereum_send_transaction() -> Result<()> {
 
     // Verify the response is specifically an EthereumSendTransactionRpcResponse
     match result.into_inner() {
-        WalletRpcResponse::EthereumSendTransactionRpcResponse(_) => {},
+        WalletRpcResponse::EthereumSendTransactionRpcResponse(_) => {}
         _ => panic!("Expected EthereumSendTransactionRpcResponse"),
     }
 

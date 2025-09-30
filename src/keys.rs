@@ -29,16 +29,10 @@ const SIGNATURE_RESOLUTION_CONCURRENCY: usize = 10;
 /// This struct is thread-safe, and can be cloned. It synchronizes access to the
 /// underlying store internally.
 #[derive(Clone)]
-pub struct AuthorizationContext(
-    // this is a mutex so that users can keep multiple copies and push new
-    // keys at any time, potentially in different threads. we do not use
-    // an async mutex, since we do not hold the lock across await boundaries
-    //
-    // we wrap the IntoSignatureBoxed in an Arc so that we can clone the
-    // inner vector before signing so we don't need to hold the lock
-    Arc<Mutex<Vec<Arc<dyn IntoSignatureBoxed + Send + Sync>>>>,
-    usize,
-);
+pub struct AuthorizationContext {
+    signers: Arc<Mutex<Vec<Arc<dyn IntoSignatureBoxed + Send + Sync>>>>,
+    resolution_concurrency: usize,
+}
 
 impl std::fmt::Debug for AuthorizationContext {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -56,7 +50,10 @@ impl AuthorizationContext {
     /// Create a new `AuthorizationContext` with the default concurrency.
     #[must_use]
     pub fn new() -> Self {
-        Self(Default::default(), SIGNATURE_RESOLUTION_CONCURRENCY)
+        Self {
+            signers: Default::default(),
+            resolution_concurrency: SIGNATURE_RESOLUTION_CONCURRENCY,
+        }
     }
 
     /// Push a new credential source into the context. This supports
@@ -83,7 +80,10 @@ impl AuthorizationContext {
     /// # }
     /// ```
     pub fn push<T: IntoSignature + 'static + Send + Sync>(self, key: T) -> Self {
-        self.0.lock().expect("lock poisoned").push(Arc::new(key));
+        self.signers
+            .lock()
+            .expect("lock poisoned")
+            .push(Arc::new(key));
         self
     }
 
@@ -135,7 +135,7 @@ impl AuthorizationContext {
     ) -> impl Stream<Item = Result<Signature, SigningError>> + 'a {
         // we clone the inner vector before signing so we don't need to hold the lock.
         // cloning this vector will also clone the inner items, which are reference counted
-        let keys = self.0.lock().expect("lock poisoned").clone();
+        let keys = self.signers.lock().expect("lock poisoned").clone();
 
         futures::stream::iter(keys)
             .map(move |key| {
@@ -149,7 +149,7 @@ impl AuthorizationContext {
             })
             // await multiple `sign_boxed` futures concurrently,
             // returning them in order of completion
-            .buffer_unordered(self.1)
+            .buffer_unordered(self.resolution_concurrency)
     }
 
     /// Exercise the signing mechanism to validate that all keys

@@ -5,21 +5,31 @@ use serde::Serialize;
 use crate::{AuthorizationContext, SignatureGenerationError};
 
 /// A convenience wrapper used as a namespace for utility functions
-pub struct Utils(pub(crate) String);
+pub struct Utils {
+    pub(crate) app_id: String,
+}
 /// A convenience wrapper used as a namespace for utility functions
-pub struct RequestSigner(String);
+pub struct RequestSigner {
+    app_id: String,
+}
 /// A convenience wrapper used as a namespace for utility functions
-pub struct RequestFormatter(String);
+pub struct RequestFormatter {
+    app_id: String,
+}
 
 impl Utils {
     /// Returns a new [`RequestSigner`] instance
     pub fn signer(&self) -> RequestSigner {
-        RequestSigner(self.0.clone())
+        RequestSigner {
+            app_id: self.app_id.clone(),
+        }
     }
 
     /// Returns a new [`RequestFormatter`] instance
     pub fn formatter(&self) -> RequestFormatter {
-        RequestFormatter(self.0.clone())
+        RequestFormatter {
+            app_id: self.app_id.clone(),
+        }
     }
 }
 
@@ -31,7 +41,7 @@ impl RequestFormatter {
         body: S,
         idempotency_key: Option<String>,
     ) -> Result<String, serde_json::Error> {
-        format_request_for_authorization_signature(&self.0, method, url, body, idempotency_key)
+        format_request_for_authorization_signature(&self.app_id, method, url, body, idempotency_key)
     }
 }
 
@@ -44,7 +54,8 @@ impl RequestSigner {
         body: S,
         idempotency_key: Option<String>,
     ) -> Result<String, SignatureGenerationError> {
-        generate_authorization_signatures(ctx, &self.0, method, url, body, idempotency_key).await
+        generate_authorization_signatures(ctx, &self.app_id, method, url, body, idempotency_key)
+            .await
     }
 }
 
