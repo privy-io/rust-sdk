@@ -29,20 +29,12 @@ async fn main() -> Result<()> {
         )
         .init();
 
-    // Get credentials from environment
-    let app_id = std::env::var("PRIVY_APP_ID").expect("PRIVY_APP_ID environment variable not set");
-    let app_secret =
-        std::env::var("PRIVY_APP_SECRET").expect("PRIVY_APP_SECRET environment variable not set");
+    // Get JWT from environment and initialize client
     let user_jwt =
         std::env::var("PRIVY_USER_JWT").expect("PRIVY_USER_JWT environment variable not set");
+    let client = PrivyClient::new_from_env()?;
 
-    tracing::info!(
-        "initializing privy with app_id: {}, app_secret: {}",
-        app_id,
-        app_secret,
-    );
-
-    let client = PrivyClient::new(app_id, app_secret)?;
+    tracing::info!("initialized privy client from environment");
 
     let jwt_auth = client
         .wallets()

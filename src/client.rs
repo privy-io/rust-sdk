@@ -8,6 +8,11 @@ use reqwest::header::{CONTENT_TYPE, HeaderValue};
 
 use crate::{PrivyCreateError, generated::Client, get_auth_header, jwt_exchange::JwtExchange};
 
+const DEFAULT_BASE_URL: &str = "https://api.privy.io";
+const APP_ID_ENV_VAR: &str = "PRIVY_APP_ID";
+const APP_SECRET_ENV_VAR: &str = "PRIVY_APP_SECRET";
+const BASE_URL_ENV_VAR: &str = "PRIVY_BASE_URL";
+
 /// Privy client for interacting with the Privy API.
 ///
 /// This provides access to global operations like user and wallet management.
@@ -42,7 +47,7 @@ impl Default for PrivyClientOptions {
     fn default() -> Self {
         Self {
             cache_size: NonZeroUsize::new(1000).expect("non-zero"),
-            base_url: String::from("https://api.privy.io"),
+            base_url: String::from(DEFAULT_BASE_URL),
         }
     }
 }
@@ -66,6 +71,27 @@ impl PrivyClient {
     /// valid headers, or that the underlying http client could not be created.
     pub fn new(app_id: String, app_secret: String) -> Result<Self, PrivyCreateError> {
         Self::new_with_options(app_id, app_secret, PrivyClientOptions::default())
+    }
+
+    /// Create a new `PrivyClient` from environment variables
+    ///
+    /// # Errors
+    /// This can fail for three reasons, either the `app_id` or `app_secret` are not
+    /// valid headers, or that the underlying http client could not be created, or
+    /// that the environment variables are not set.
+    pub fn new_from_env() -> Result<Self, PrivyCreateError> {
+        let app_id = std::env::var(APP_ID_ENV_VAR).map_err(|_| PrivyCreateError::InvalidAppId)?;
+        let app_secret =
+            std::env::var(APP_SECRET_ENV_VAR).map_err(|_| PrivyCreateError::InvalidAppSecret)?;
+        Self::new_with_options(
+            app_id,
+            app_secret,
+            PrivyClientOptions {
+                base_url: std::env::var(BASE_URL_ENV_VAR)
+                    .unwrap_or_else(|_| DEFAULT_BASE_URL.to_string()),
+                ..PrivyClientOptions::default()
+            },
+        )
     }
 
     /// Create a new `PrivyClient` with a custom url

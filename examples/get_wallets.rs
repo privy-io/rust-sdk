@@ -29,24 +29,18 @@ async fn main() -> Result<()> {
         )
         .init();
 
-    // Get credentials from environment
-    let app_id = std::env::var("PRIVY_APP_ID").expect("PRIVY_APP_ID environment variable not set");
-    let app_secret =
-        std::env::var("PRIVY_APP_SECRET").expect("PRIVY_APP_SECRET environment variable not set");
+    // Get additional environment variables and initialize client
     let wallet_id =
         std::env::var("PRIVY_WALLET_ID").expect("PRIVY_WALLET_ID environment variable not set");
     let public_key =
         std::env::var("PRIVY_PUBLIC_KEY").expect("PRIVY_PUBLIC_KEY environment variable not set");
+    let client = PrivyClient::new_from_env()?;
 
     tracing::info!(
-        "initializing privy with app_id: {}, app_secret: {}, wallet_id: {}, public_key: {}",
-        app_id,
-        app_secret,
+        "initialized privy client from environment, wallet_id: {}, public_key: {}",
         wallet_id,
         public_key
     );
-
-    let client = PrivyClient::new(app_id, app_secret)?;
 
     let wallets = client.wallets().list(None, None, Some(5.0), None).await?;
 

@@ -28,21 +28,15 @@ async fn main() -> Result<()> {
         )
         .init();
 
-    // Get credentials from environment
-    let app_id = std::env::var("PRIVY_APP_ID").expect("PRIVY_APP_ID environment variable not set");
-    let app_secret =
-        std::env::var("PRIVY_APP_SECRET").expect("PRIVY_APP_SECRET environment variable not set");
+    // Get transaction ID from environment and initialize client
     let transaction_id = std::env::var("PRIVY_TRANSACTION_ID")
         .expect("PRIVY_TRANSACTION_ID environment variable not set");
+    let client = PrivyClient::new_from_env()?;
 
     tracing::info!(
-        "initializing privy with app_id: {}, app_secret: {}, transaction_id: {}",
-        app_id,
-        app_secret,
+        "initialized privy client from environment, transaction_id: {}",
         transaction_id
     );
-
-    let client = PrivyClient::new(app_id, app_secret)?;
 
     let transaction = client.transactions().get(&transaction_id).await?;
 
