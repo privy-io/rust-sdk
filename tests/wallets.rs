@@ -293,6 +293,12 @@ async fn test_wallets_solana_sign_message() -> Result<()> {
 
     println!("Solana message signed successfully: {result:?}");
 
+    // Verify the response is specifically a SolanaSignMessageRpcResponse
+    match result.into_inner() {
+        WalletRpcResponse::SolanaSignMessageRpcResponse(_) => {},
+        _ => panic!("Expected SolanaSignMessageRpcResponse"),
+    }
+
     Ok(())
 }
 
@@ -323,6 +329,12 @@ async fn test_wallets_solana_sign_transaction() -> Result<()> {
     .await?;
 
     println!("Solana transaction signed successfully: {result:?}");
+
+    // Verify the response is specifically a SolanaSignTransactionRpcResponse
+    match result.into_inner() {
+        WalletRpcResponse::SolanaSignTransactionRpcResponse(_) => {},
+        _ => panic!("Expected SolanaSignTransactionRpcResponse"),
+    }
 
     Ok(())
 }
@@ -390,6 +402,12 @@ async fn test_wallets_solana_sign_and_send_transaction() -> Result<()> {
 
     println!("Solana transaction signed and sent successfully: {result:?}");
 
+    // Verify the response is specifically a SolanaSignAndSendTransactionRpcResponse
+    match result.into_inner() {
+        WalletRpcResponse::SolanaSignAndSendTransactionRpcResponse(_) => {},
+        _ => panic!("Expected SolanaSignAndSendTransactionRpcResponse"),
+    }
+
     Ok(())
 }
 
@@ -421,6 +439,12 @@ async fn test_wallets_ethereum_sign_message() -> Result<()> {
 
     // Just verify we got a valid response
     println!("Ethereum message signed via RPC: {result:?}");
+
+    // Verify the response is specifically an EthereumPersonalSignRpcResponse
+    match result.into_inner() {
+        WalletRpcResponse::EthereumPersonalSignRpcResponse(_) => {},
+        _ => panic!("Expected EthereumPersonalSignRpcResponse"),
+    }
 
     Ok(())
 }
@@ -532,6 +556,12 @@ async fn test_wallets_ethereum_sign_typed_data() -> Result<()> {
     // Just verify we got a valid response
     println!("Ethereum typed data signed via RPC: {result:?}");
 
+    // Verify the response is specifically an EthereumSignTypedDataRpcResponse
+    match result.into_inner() {
+        WalletRpcResponse::EthereumSignTypedDataRpcResponse(_) => {},
+        _ => panic!("Expected EthereumSignTypedDataRpcResponse"),
+    }
+
     Ok(())
 }
 
@@ -559,6 +589,12 @@ async fn test_wallets_ethereum_sign_secp256k1() -> Result<()> {
 
     // Just verify we got a valid response
     println!("Ethereum secp256k1 signature via RPC: {result:?}");
+
+    // Verify the response is specifically an EthereumSecp256k1SignRpcResponse
+    match result.into_inner() {
+        WalletRpcResponse::EthereumSecp256k1SignRpcResponse(_) => {},
+        _ => panic!("Expected EthereumSecp256k1SignRpcResponse"),
+    }
 
     Ok(())
 }
@@ -592,6 +628,12 @@ async fn test_wallets_ethereum_sign_7702_authorization() -> Result<()> {
     // Just verify we got a valid response
     println!("Ethereum 7702 authorization signed via RPC: {result:?}");
 
+    // Verify the response is specifically an EthereumSign7702AuthorizationRpcResponse
+    match result.into_inner() {
+        WalletRpcResponse::EthereumSign7702AuthorizationRpcResponse(_) => {},
+        _ => panic!("Expected EthereumSign7702AuthorizationRpcResponse"),
+    }
+
     Ok(())
 }
 
@@ -624,6 +666,12 @@ async fn test_wallets_ethereum_sign_transaction() -> Result<()> {
 
     // Just verify we got a valid response
     println!("Ethereum transaction signed via RPC: {result:?}");
+
+    // Verify the response is specifically an EthereumSignTransactionRpcResponse
+    match result.into_inner() {
+        WalletRpcResponse::EthereumSignTransactionRpcResponse(_) => {},
+        _ => panic!("Expected EthereumSignTransactionRpcResponse"),
+    }
 
     Ok(())
 }
@@ -684,6 +732,12 @@ async fn test_wallets_ethereum_send_transaction() -> Result<()> {
 
     // Just verify we got a valid response
     println!("Ethereum transaction sent via RPC: {result:?}");
+
+    // Verify the response is specifically an EthereumSendTransactionRpcResponse
+    match result.into_inner() {
+        WalletRpcResponse::EthereumSendTransactionRpcResponse(_) => {},
+        _ => panic!("Expected EthereumSendTransactionRpcResponse"),
+    }
 
     Ok(())
 }
