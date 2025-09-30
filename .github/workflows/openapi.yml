@@ -13,12 +13,11 @@ jobs:
       - uses: jdx/mise-action@v2
         with:
           install: false
+          experimental: true
 
-      - name: Install rust
+      - name: Install toolchains
         run: |
-          VERSION=$(./scripts/rust-version.sh)
-          mise install rust@$VERSION
-          rustup component add clippy
+          mise install rust
           mise install
 
       - name: Run Codegen

@@ -2,12 +2,15 @@
 jq = "latest"
 # note: rust-toolchain.toml is an 'idiomatic version file' for rust and mise does
 #       pick it up automatically, but it is currently behind a experimental flag
-rust = { version = "{{ exec(command='./scripts/rust-version.sh') }}", profile = "default" }
+rust = "{{ exec(command='./scripts/rust-version.sh') }}"
 cargo-binstall = "latest"
 "cargo:bacon" = "latest"
 
 # this can be removed when progenitor pulls in the latest version of typify
 "cargo:https://github.com/arlyon/progenitor" = {version = "branch:privy", crate = "cargo-progenitor"}
+
+[hooks]
+postinstall = "rustup component add clippy"
 
 [env]
 _.file = ['.env', '.env.local']
