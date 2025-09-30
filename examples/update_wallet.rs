@@ -81,7 +81,7 @@ async fn main() -> Result<()> {
             anyhow::bail!("unexpected response")
         }
         Err(e) => {
-            anyhow::bail!("unexpected error: {:?}", e)
+            anyhow::bail!("unexpected error: {e:?}")
         }
     };
 

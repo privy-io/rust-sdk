@@ -10,8 +10,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install toolchains
-        uses: jdx/mise-action@v2
+      - uses: jdx/mise-action@v2
+        with:
+          install: false
+
+      - name: Install rust
+        run: |
+          VERSION=$(./scripts/rust-version.sh)
+          mise install rust@$VERSION
+          rustup component add clippy
+          mise install
 
       - name: Run Codegen
         run: mise gen-openapi

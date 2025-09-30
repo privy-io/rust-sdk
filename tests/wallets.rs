@@ -1,3 +1,5 @@
+#![allow(unnameable_test_items)] // flaky test annotation is causing a lint issue
+
 use std::str::FromStr;
 
 use anyhow::Result;

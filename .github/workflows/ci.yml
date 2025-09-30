@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [ main, arlyon/next ]
+    branches: [main, arlyon/next]
   pull_request:
-    branches: [ main, arlyon/next ]
+    branches: [main, arlyon/next]
 
 env:
   CARGO_TERM_COLOR: always
@@ -22,8 +22,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install toolchains
-        uses: jdx/mise-action@v2
+      - uses: jdx/mise-action@v2
+        with:
+          install: false
+
+      - name: Install rust
+        run: |
+          VERSION=$(./scripts/rust-version.sh)
+          mise install rust@$VERSION
+          rustup component add clippy
+          mise install
 
       - name: Cache cargo registry
         uses: actions/cache@v3
