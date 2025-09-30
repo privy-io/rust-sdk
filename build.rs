@@ -1,14 +1,15 @@
 //! # Subclient Code Generation
 //!
 //! This build script generates specialized client structs (subclients) for Privy API resources
-//! based on configuration from `stainless.yml` and the OpenAPI specification.
+//! based on configuration from `allowlist.yml` and the OpenAPI specification. The allowlist
+//! is modeled after stainless and should be drop-in compatible.
 //!
 //! ## Generation Process
 //!
 //! 1. **Base Code Generation**: Uses progenitor to generate the core `Client` from `openapi.json`
 //!    and writes it to `$OUT_DIR/codegen.rs`.
 //!
-//! 2. **Configuration Parsing**: Reads `stainless.yml` to extract resource structure, including:
+//! 2. **Configuration Parsing**: Reads `allowlist.yml` to extract resource structure, including:
 //!    - Resource names (e.g., "wallets", "apps")
 //!    - Method mappings (e.g., "list" -> "get /v1/wallets")
 //!    - Nested subresources (e.g., "wallets.rpc")
@@ -38,7 +39,7 @@ use quote::quote;
 use serde_yaml::Value;
 use syn::{File, Item, ItemImpl, Signature};
 
-/// Configuration for a subclient resource from stainless.yml
+/// Configuration for a subclient resource from allowlist.yml
 #[derive(Debug, Clone)]
 struct ResourceConfig {
     name: String,
@@ -66,7 +67,7 @@ struct GeneratedMethod {
 
 fn main() {
     println!("cargo:rerun-if-changed=openapi.json");
-    println!("cargo:rerun-if-changed=stainless.yml");
+    println!("cargo:rerun-if-changed=allowlist.yml");
 
     // Step 1: Generate the base progenitor code
     let openapi_spec = load_openapi_spec();
@@ -80,7 +81,7 @@ fn main() {
     out_file.push("codegen.rs");
     std::fs::write(&out_file, &content).unwrap();
 
-    // Step 2: Parse the stainless.yml configuration
+    // Step 2: Parse the allowlist.yml configuration
     let resource_configs = parse_stainless_config();
 
     // Step 3: Parse the generated code to extract method signatures
@@ -102,9 +103,9 @@ fn load_openapi_spec() -> openapiv3::OpenAPI {
     serde_json::from_reader(file).unwrap()
 }
 
-/// Parse the stainless.yml file to extract resource configuration
+/// Parse the allowlist.yml file to extract resource configuration
 fn parse_stainless_config() -> Vec<ResourceConfig> {
-    let content = fs::read_to_string("stainless.yml").unwrap();
+    let content = fs::read_to_string("allowlist.yml").unwrap();
     let yaml: Value = serde_yaml::from_str(&content).unwrap();
 
     let mut resources = Vec::new();

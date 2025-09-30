@@ -129,11 +129,11 @@ We use `cargo-progenitor` to generate the base client and subclients. This tool 
 The `build.rs` script is responsible for generating the typed subclients that provide a convenient, resource-oriented interface. The process works as follows:
 
 1.  **Base Client Generation:** The script parses code with `progenitor` and gets an AST.
-2.  **Configuration Parsing:** It reads `stainless.yml` to understand the desired structure of the final client. This YAML file defines resources (like `wallets`, `users`), maps method names to API endpoints, and defines nested subclients (e.g., `wallets().rpc()`).
-3.  **Subclient Generation:** The script then parses the AST from progenitor, pulls the function signatures, and stamps out delegatory methods that forward the call onto the raw method on the base client, following the `stainless.yml` configuration, to generate specialized **subclients** (e.g., `WalletsClient`, `UsersClient`). These subclients wrap the base `Client` and provide a more ergonomic API surface consistent with the other SDKs.
+2.  **Configuration Parsing:** It reads `allowlist.yml` to understand the desired structure of the final client. This YAML file defines resources (like `wallets`, `users`), maps method names to API endpoints, and defines nested subclients (e.g., `wallets().rpc()`).
+3.  **Subclient Generation:** The script then parses the AST from progenitor, pulls the function signatures, and stamps out delegatory methods that forward the call onto the raw method on the base client, following the `allowlist.yml` configuration, to generate specialized **subclients** (e.g., `WalletsClient`, `UsersClient`). These subclients wrap the base `Client` and provide a more ergonomic API surface consistent with the other SDKs.
 4.  **Main Client Extension:** Finally, it adds accessor methods to the main `PrivyClient` (e.g., `privy_client.wallets()`) that return instances of the generated subclients.
 
-If you make changes to either `openapi.json` or `stainless.yml`, `cargo` will automatically re-run this build script to regenerate the clients.
+If you make changes to either `openapi.json` or `allowlist.yml`, `cargo` will automatically re-run this build script to regenerate the clients.
 
 > Note: while we technically run progenitor _twice_, the build.rs file never
 actually writes those files anywhere. It is only used to pull out the AST
