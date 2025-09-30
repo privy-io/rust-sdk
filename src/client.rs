@@ -144,4 +144,9 @@ impl PrivyClient {
     pub fn app_id(&self) -> &str {
         &self.app_id
     }
+
+    /// Returns the base url for the client
+    pub fn base_url(&self) -> &str {
+        &self.base_url
+    }
 }
