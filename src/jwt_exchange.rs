@@ -16,11 +16,15 @@ type JwtCache = lru::LruCache<String, (SystemTime, SecretKey<NistP256>)>;
 /// entire duration of the network request. Otherwise, in a multi-threaded context,
 /// you would only be able to sign a single signature at a time.
 #[derive(Debug, Clone)]
-pub struct JwtExchange(Arc<Mutex<JwtCache>>);
+pub struct JwtExchange {
+    cache: Arc<Mutex<JwtCache>>,
+}
 
 impl JwtExchange {
     pub fn new(capacity: NonZeroUsize) -> Self {
-        JwtExchange(Arc::new(Mutex::new(lru::LruCache::new(capacity))))
+        JwtExchange {
+            cache: Arc::new(Mutex::new(lru::LruCache::new(capacity))),
+        }
     }
 
     pub async fn exchange_jwt_for_authorization_key(
@@ -31,7 +35,7 @@ impl JwtExchange {
         let jwt = &jwt_user.1;
 
         {
-            let mut cache = self.0.lock().expect("lock poisoned");
+            let mut cache = self.cache.lock().expect("lock poisoned");
             let expired = if let Some((expiry, key)) = cache.get(jwt) {
                 let buffer = *expiry - EXPIRY_BUFFER;
                 if buffer > SystemTime::now() {
@@ -107,7 +111,7 @@ impl JwtExchange {
         tokio::time::sleep(Duration::from_millis(1000)).await;
 
         {
-            let mut cache = self.0.lock().expect("lock poisoned");
+            let mut cache = self.cache.lock().expect("lock poisoned");
             cache.push(jwt.clone(), (expiry, key.clone()));
         }
 
