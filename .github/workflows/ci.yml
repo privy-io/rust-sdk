@@ -25,13 +25,12 @@ jobs:
       - uses: jdx/mise-action@v2
         with:
           install: false
+          experimental: true
 
-      - name: Install rust
+      - name: Install toolchains
         run: |
           VERSION=$(./scripts/rust-version.sh)
-          mise install rust@$VERSION
-          rustup component add clippy
-          mise install
+          mise install rust jq
 
       - name: Cache cargo registry
         uses: actions/cache@v3
@@ -50,9 +49,6 @@ jobs:
         with:
           path: target
           key: ${{ runner.os }}-cargo-build-target-${{ hashFiles('**/Cargo.lock') }}
-
-      - name: Fetch openapi
-        run: mise pull-openapi
 
       - name: Run tests
         run: cargo test --verbose
