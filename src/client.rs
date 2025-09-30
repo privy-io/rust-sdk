@@ -91,8 +91,6 @@ impl PrivyClient {
         headers.insert(CONTENT_TYPE, HeaderValue::from_static("application/json"));
         headers.insert("privy-client", HeaderValue::from_static(client_version));
 
-        tracing::info!("Privy client headers: {:?}", headers);
-
         let client_with_custom_defaults = reqwest::ClientBuilder::new()
             .connect_timeout(Duration::from_secs(15))
             .timeout(Duration::from_secs(15))
