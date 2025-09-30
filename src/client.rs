@@ -11,6 +11,7 @@ use crate::{PrivyCreateError, generated::Client, get_auth_header, jwt_exchange::
 const DEFAULT_BASE_URL: &str = "https://api.privy.io";
 const APP_ID_ENV_VAR: &str = "PRIVY_APP_ID";
 const APP_SECRET_ENV_VAR: &str = "PRIVY_APP_SECRET";
+const BASE_URL_ENV_VAR: &str = "PRIVY_BASE_URL";
 
 /// Privy client for interacting with the Privy API.
 ///
@@ -82,7 +83,15 @@ impl PrivyClient {
         let app_id = std::env::var(APP_ID_ENV_VAR).map_err(|_| PrivyCreateError::InvalidAppId)?;
         let app_secret =
             std::env::var(APP_SECRET_ENV_VAR).map_err(|_| PrivyCreateError::InvalidAppSecret)?;
-        Self::new(app_id, app_secret)
+        Self::new_with_options(
+            app_id,
+            app_secret,
+            PrivyClientOptions {
+                base_url: std::env::var(BASE_URL_ENV_VAR)
+                    .unwrap_or_else(|_| DEFAULT_BASE_URL.to_string()),
+                ..PrivyClientOptions::default()
+            },
+        )
     }
 
     /// Create a new `PrivyClient` with a custom url
