@@ -35,7 +35,7 @@ impl WalletsClient {
             crate::Method::POST,
             format!("{}/v1/wallets/{}/rpc", self.base_url, wallet_id),
             body,
-            None,
+            privy_idempotency_key.map(|k| k.to_owned()),
         )
         .await?;
 
@@ -64,7 +64,7 @@ impl WalletsClient {
             crate::Method::POST,
             format!("{}/v1/wallets/{}/raw_sign", self.base_url, wallet_id),
             body,
-            None,
+            privy_idempotency_key.map(|k| k.to_owned()),
         )
         .await?;
 
