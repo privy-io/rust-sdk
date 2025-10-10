@@ -380,14 +380,140 @@ mod tests {
     }
 
     #[test]
-    #[ignore]
-    fn test_hpke_decrypt_success() {}
+    fn test_hpke_decrypt_success() {
+        use hpke::{OpModeS, Serializable};
+        use p256::pkcs8::EncodePrivateKey;
+
+        // Create receiver HPKE instance (this will decrypt)
+        let receiver = PrivyHpke::new_with_seed(42);
+
+        // Create a sender to encrypt data for the receiver
+        let mut rng = rand::thread_rng();
+        let (encapped_key, mut sender_ctx) =
+            hpke::setup_sender::<ChaCha20Poly1305, HkdfSha256, DhP256HkdfSha256, _>(
+                &OpModeS::Base,
+                &receiver.public_key,
+                &[],
+                &mut rng,
+            )
+            .expect("Failed to setup sender");
+
+        // Create a test P-256 key to encrypt (this simulates what Privy would do)
+        let test_key = SecretKey::<p256::NistP256>::random(&mut rng);
+        let test_key_pkcs8_der = test_key
+            .to_pkcs8_der()
+            .expect("Failed to encode test key as PKCS#8 DER");
+
+        // Encode as base64 (this is what Privy returns)
+        let test_key_b64 =
+            base64::engine::general_purpose::STANDARD.encode(test_key_pkcs8_der.as_bytes());
+
+        // Encrypt the base64-encoded key
+        let ciphertext_bytes = sender_ctx
+            .seal(test_key_b64.as_bytes(), &[])
+            .expect("Failed to encrypt");
+
+        // Encode encapsulated key and ciphertext as base64 (API format)
+        let encapped_key_b64 =
+            base64::engine::general_purpose::STANDARD.encode(encapped_key.to_bytes());
+        let ciphertext_b64 = base64::engine::general_purpose::STANDARD.encode(&ciphertext_bytes);
+
+        // Test decrypt_raw
+        let decrypted_raw = receiver
+            .decrypt_raw(&encapped_key_b64, &ciphertext_b64)
+            .expect("Failed to decrypt raw");
+        assert_eq!(
+            decrypted_raw,
+            test_key_b64.as_bytes(),
+            "Decrypted raw bytes should match original"
+        );
+
+        // Test decrypt_p256 (need to create a new receiver since decrypt consumes self)
+        let receiver2 = PrivyHpke::new_with_seed(42);
+        let decrypted_key = receiver2
+            .decrypt_p256(&encapped_key_b64, &ciphertext_b64)
+            .expect("Failed to decrypt as P256 key");
+
+        // Verify the decrypted key matches the original
+        assert_eq!(
+            decrypted_key.to_bytes(),
+            test_key.to_bytes(),
+            "Decrypted key should match original key"
+        );
+    }
 
     #[test]
-    #[ignore]
-    fn test_hpke_decrypt_invalid_ciphertext() {}
+    fn test_hpke_decrypt_invalid_ciphertext() {
+        let receiver = PrivyHpke::new_with_seed(100);
+
+        // Create valid encapsulated key
+        use hpke::{OpModeS, Serializable};
+        let mut rng = rand::thread_rng();
+        let (encapped_key, _) = hpke::setup_sender::<
+            ChaCha20Poly1305,
+            HkdfSha256,
+            DhP256HkdfSha256,
+            _,
+        >(&OpModeS::Base, &receiver.public_key, &[], &mut rng)
+        .expect("Failed to setup sender");
+
+        let encapped_key_b64 =
+            base64::engine::general_purpose::STANDARD.encode(encapped_key.to_bytes());
+
+        // Create invalid ciphertext (random bytes that won't decrypt properly)
+        let invalid_ciphertext = vec![0x99; 64];
+        let invalid_ciphertext_b64 =
+            base64::engine::general_purpose::STANDARD.encode(&invalid_ciphertext);
+
+        // Attempt to decrypt - should fail
+        let result = receiver.decrypt_raw(&encapped_key_b64, &invalid_ciphertext_b64);
+
+        assert!(
+            result.is_err(),
+            "Decryption with invalid ciphertext should fail"
+        );
+
+        // Verify it's the right kind of error
+        match result {
+            Err(KeyError::HpkeDecryption(_)) => {
+                // Expected error type
+            }
+            Err(other) => panic!("Expected HpkeDecryption error, got: {other:?}"),
+            Ok(_) => panic!("Expected error but got success"),
+        }
+    }
 
     #[test]
-    #[ignore]
-    fn test_hpke_decrypt_invalid_encapsulated_key() {}
+    fn test_hpke_decrypt_invalid_encapsulated_key() {
+        let receiver = PrivyHpke::new_with_seed(200);
+
+        // Create invalid encapsulated key (wrong length)
+        let invalid_encapped_key = vec![0x04; 32]; // Too short for a P-256 point
+        let invalid_encapped_key_b64 =
+            base64::engine::general_purpose::STANDARD.encode(&invalid_encapped_key);
+
+        // Create some ciphertext (doesn't matter what it is since encapped key is invalid)
+        let ciphertext = vec![0x00; 64];
+        let ciphertext_b64 = base64::engine::general_purpose::STANDARD.encode(&ciphertext);
+
+        // Attempt to decrypt - should fail during encapsulated key deserialization
+        let result = receiver.decrypt_raw(&invalid_encapped_key_b64, &ciphertext_b64);
+
+        assert!(
+            result.is_err(),
+            "Decryption with invalid encapsulated key should fail"
+        );
+
+        // Verify it's an InvalidFormat error (happens during deserialization)
+        match result {
+            Err(KeyError::InvalidFormat(msg)) => {
+                assert!(
+                    msg.contains("encapsulated key"),
+                    "Error message should mention encapsulated key"
+                );
+            }
+            Err(other) => panic!("Expected InvalidFormat error, got: {other:?}"),
+            Ok(_) => panic!("Expected error but got success"),
+        }
+    }
 }
