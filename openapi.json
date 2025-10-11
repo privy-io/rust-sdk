@@ -5043,7 +5043,8 @@
               "confirmed",
               "execution_reverted",
               "failed",
-              "replaced"
+              "replaced",
+              "finalized"
             ]
           },
           "created_at": {
@@ -5910,6 +5911,7 @@
                     "usdc",
                     "eth",
                     "pol",
+                    "usdt",
                     "sol"
                   ]
                 },
@@ -5921,6 +5923,7 @@
                       "usdc",
                       "eth",
                       "pol",
+                      "usdt",
                       "sol"
                     ]
                   },
@@ -6015,6 +6018,7 @@
                               "usdc",
                               "eth",
                               "pol",
+                              "usdt",
                               "sol"
                             ]
                           },
@@ -6127,6 +6131,7 @@
                     "usdc",
                     "eth",
                     "pol",
+                    "usdt",
                     "sol"
                   ]
                 },
@@ -6138,6 +6143,7 @@
                       "usdc",
                       "eth",
                       "pol",
+                      "usdt",
                       "sol"
                     ]
                   },
@@ -6177,7 +6183,8 @@
                               "confirmed",
                               "execution_reverted",
                               "failed",
-                              "replaced"
+                              "replaced",
+                              "finalized"
                             ]
                           },
                           "created_at": {
@@ -6230,6 +6237,7 @@
                                       "usdc",
                                       "eth",
                                       "pol",
+                                      "usdt",
                                       "sol"
                                     ]
                                   },
@@ -6301,6 +6309,7 @@
                                       "usdc",
                                       "eth",
                                       "pol",
+                                      "usdt",
                                       "sol"
                                     ]
                                   },
@@ -8004,28 +8013,35 @@
                 "type": "object",
                 "properties": {
                   "type": {
-                    "type": "string",
-                    "enum": [
-                      "email",
-                      "wallet",
-                      "smart_wallet",
-                      "farcaster",
-                      "passkey",
-                      "phone",
-                      "google_oauth",
-                      "discord_oauth",
-                      "twitter_oauth",
-                      "github_oauth",
-                      "linkedin_oauth",
-                      "apple_oauth",
-                      "spotify_oauth",
-                      "instagram_oauth",
-                      "tiktok_oauth",
-                      "line_oauth",
-                      "custom_auth",
-                      "telegram",
-                      "cross_app",
-                      "guest"
+                    "oneOf": [
+                      {
+                        "type": "string",
+                        "enum": [
+                          "email",
+                          "wallet",
+                          "smart_wallet",
+                          "farcaster",
+                          "passkey",
+                          "phone",
+                          "google_oauth",
+                          "discord_oauth",
+                          "twitter_oauth",
+                          "github_oauth",
+                          "linkedin_oauth",
+                          "apple_oauth",
+                          "spotify_oauth",
+                          "instagram_oauth",
+                          "tiktok_oauth",
+                          "line_oauth",
+                          "custom_auth",
+                          "telegram",
+                          "cross_app",
+                          "guest"
+                        ]
+                      },
+                      {
+                        "type": "string"
+                      }
                     ]
                   },
                   "handle": {
