@@ -397,35 +397,10 @@ mod tests {
     use tracing_test::traced_test;
 
     use super::*;
-    use crate::{
-        AuthorizationContext, FnKey, FnSigner, KeyError, PrivyClient, client::PrivyClientOptions,
-    };
+    use crate::{AuthorizationContext, FnKey, FnSigner, KeyError};
 
     // generated using `mise gen-p256-key`
     const TEST_PRIVATE_KEY_PEM: &str = include_str!("../tests/test_private_key.pem");
-
-    fn get_test_client() -> Result<PrivyClient, Box<dyn std::error::Error>> {
-        let app_id = std::env::var("STAGING_APP_ID").unwrap_or_else(|_| "test_app_id".to_string());
-        let app_secret =
-            std::env::var("STAGING_APP_SECRET").unwrap_or_else(|_| "test_app_secret".to_string());
-        let url =
-            std::env::var("STAGING_URL").unwrap_or_else(|_| "https://api.privy.io".to_string());
-
-        Ok(PrivyClient::new_with_options(
-            app_id,
-            app_secret,
-            PrivyClientOptions {
-                base_url: url,
-                ..Default::default()
-            },
-        )?)
-    }
-
-    fn get_test_jwt() -> String {
-        std::env::var("STAGING_JWT").unwrap_or_else(|_| {
-            "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhbGV4QGFybHlvbi5kZXYiLCJpYXQiOjEwMDAwMDAwMDAwMH0.IpNgavH95CFZPjkzQW4eyxMIfJ-O_5cIaDyu_6KRXffykjYDRwxTgFJuYq0F6d8wSXf4de-vzfBRWSKMISM3rJdlhximYINGJB14mJFCD87VMLFbTpHIXcv7hc1AAYMPGhOsRkYfYXuvVopKszMvhupmQYJ1npSvKWNeBniIyOHYv4xebZD8L0RVlPvuEKTXTu-CDfs2rMwvD9g_wiBznS3uMF3v_KPaY6x0sx9zeCSxAH9zvhMMtct_Ad9kuoUncGpRzNhEk6JlVccN2Leb1JzbldxSywyS2AApD05u-GFAgFDN3P39V3qgRTGDuuUfUvKQ9S4rbu5El9Qq1CJTeA".to_string()
-        })
-    }
 
     // PrivateKey tests
     #[tokio::test]
@@ -670,29 +645,6 @@ mod tests {
             public_key2.to_string(),
             "Public key derivation should be consistent"
         );
-    }
-
-    // Integration tests that require actual API access
-    #[tokio::test]
-    #[ignore] // Only run when STAGING_* env vars are set
-    async fn test_jwt_user_integration() {
-        let client = get_test_client().unwrap();
-        let jwt = get_test_jwt();
-        let jwt_user = JwtUser(client, jwt);
-
-        // Test both key retrieval and signing in one test
-        let key_result = jwt_user.get_key().await;
-        if key_result.is_err() {
-            println!("JWT integration test skipped - staging environment may not be configured");
-            return;
-        }
-
-        let sign_result = jwt_user.sign(b"test message").await;
-        if sign_result.is_err() {
-            println!(
-                "JWT signing integration test skipped - staging environment may not be configured"
-            );
-        }
     }
 
     // Legacy compatibility test
