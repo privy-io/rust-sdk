@@ -2234,6 +2234,44 @@
         ],
         "title": "Line"
       },
+      "LinkedAccountTwitchOauth": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "twitch_oauth"
+            ]
+          },
+          "subject": {
+            "type": "string"
+          },
+          "username": {
+            "type": "string",
+            "nullable": true
+          },
+          "verified_at": {
+            "type": "number"
+          },
+          "first_verified_at": {
+            "type": "number",
+            "nullable": true
+          },
+          "latest_verified_at": {
+            "type": "number",
+            "nullable": true
+          }
+        },
+        "required": [
+          "type",
+          "subject",
+          "username",
+          "verified_at",
+          "first_verified_at",
+          "latest_verified_at"
+        ],
+        "title": "Twitch"
+      },
       "LinkedAccountTwitterOauth": {
         "type": "object",
         "properties": {
@@ -3047,6 +3085,9 @@
                   "$ref": "#/components/schemas/LinkedAccountLineOauth"
                 },
                 {
+                  "$ref": "#/components/schemas/LinkedAccountTwitchOauth"
+                },
+                {
                   "$ref": "#/components/schemas/LinkedAccountTwitterOauth"
                 },
                 {
@@ -3577,6 +3618,30 @@
         ],
         "title": "LINE"
       },
+      "LinkedAccountTwitchInput": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "twitch_oauth"
+            ]
+          },
+          "subject": {
+            "type": "string",
+            "pattern": "^\\d+$"
+          },
+          "username": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9_]{4,25}$"
+          }
+        },
+        "required": [
+          "type",
+          "subject"
+        ],
+        "title": "Twitch"
+      },
       "LinkedAccountAppleInput": {
         "type": "object",
         "properties": {
@@ -3768,6 +3833,9 @@
             "$ref": "#/components/schemas/LinkedAccountLineInput"
           },
           {
+            "$ref": "#/components/schemas/LinkedAccountTwitchInput"
+          },
+          {
             "$ref": "#/components/schemas/LinkedAccountAppleInput"
           },
           {
@@ -3797,6 +3865,7 @@
             "instagram_oauth": "#/components/schemas/LinkedAccountInstagramInput",
             "tiktok_oauth": "#/components/schemas/LinkedAccountTiktokInput",
             "line_oauth": "#/components/schemas/LinkedAccountLineInput",
+            "twitch_oauth": "#/components/schemas/LinkedAccountTwitchInput",
             "apple_oauth": "#/components/schemas/LinkedAccountAppleInput",
             "linkedin_oauth": "#/components/schemas/LinkedAccountLinkedInInput",
             "farcaster": "#/components/schemas/LinkedAccountFarcasterInput",
@@ -8033,6 +8102,7 @@
                           "instagram_oauth",
                           "tiktok_oauth",
                           "line_oauth",
+                          "twitch_oauth",
                           "custom_auth",
                           "telegram",
                           "cross_app",
