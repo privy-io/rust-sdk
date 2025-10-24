@@ -564,4 +564,47 @@ impl EthereumService {
             .rpc(wallet_id, authorization_context, idempotency_key, &rpc_body)
             .await
     }
+
+    /// Create an Alloy-compatible signer for this wallet
+    ///
+    /// This returns a `PrivyAlloyWallet` that implements Alloy's signer traits,
+    /// allowing it to be used with any Alloy-compatible library.
+    ///
+    /// # Feature Flag
+    /// Requires the `alloy` feature to be enabled.
+    ///
+    /// # Example
+    /// ```no_run
+    /// use privy_rs::{PrivyClient, AuthorizationContext, PrivateKey};
+    /// use alloy_signer::SignerSync;
+    ///
+    /// # async fn example() -> Result<(), Box<dyn std::error::Error>> {
+    /// let client = PrivyClient::new_from_env()?;
+    /// let private_key = std::fs::read_to_string("private_key.pem")?;
+    /// let ctx = AuthorizationContext::new().push(PrivateKey(private_key));
+    ///
+    /// let signer = client.wallets().ethereum().signer("wallet_id", &ctx).await?;
+    /// # Ok(())
+    /// # }
+    /// ```
+    #[cfg(feature = "alloy")]
+    pub async fn signer(
+        &self,
+        wallet_id: &str,
+        authorization_context: &AuthorizationContext,
+    ) -> Result<crate::alloy::PrivyAlloyWallet, crate::PrivyApiError> {
+        let wallet_response = self.wallets_client.get(wallet_id).await?;
+        let wallet = wallet_response.into_inner();
+
+        let address = wallet.address.parse().map_err(|e| {
+            crate::PrivyApiError::InvalidRequest(format!("Failed to parse wallet address: {}", e))
+        })?;
+
+        Ok(crate::alloy::PrivyAlloyWallet::new(
+            wallet_id.to_string(),
+            address,
+            self.wallets_client.clone(),
+            authorization_context.clone(),
+        ))
+    }
 }
