@@ -95,6 +95,47 @@ let signature = solana_service
     .await?;
 ```
 
+### Alloy Integration
+
+Privy wallets can be used with the Alloy ecosystem by enabling the `alloy` feature:
+
+```toml
+[dependencies]
+privy-rs = { version = "0.1.0-alpha", features = ["alloy"] }
+```
+
+Then use Privy wallets as Alloy signers:
+
+```rust
+use privy_rs::{PrivyClient, AuthorizationContext, PrivateKey};
+use alloy_signer::SignerSync;
+use alloy_consensus::TxLegacy;
+use alloy_network::TxSignerSync;
+use alloy_primitives::{address, bytes, U256};
+
+let client = PrivyClient::new_from_env()?;
+let private_key = std::fs::read_to_string("private_key.pem")?;
+let ctx = AuthorizationContext::new().push(PrivateKey(private_key));
+
+// Create Alloy signer
+let signer = client.wallets().ethereum().signer("wallet_id", &ctx).await?;
+
+// Sign transactions with Alloy
+let mut tx = TxLegacy {
+    to: address!("d8dA6BF26964aF9D7eEd9e03E53415D37aA96045").into(),
+    value: U256::from(1_000_000_000),
+    gas_limit: 21_000,
+    nonce: 0,
+    gas_price: 20_000_000_000_u128,
+    input: bytes!(),
+    chain_id: Some(1),
+};
+
+let signature = signer.sign_transaction_sync(&mut tx)?;
+```
+
+See the [alloy_integration example](examples/alloy_integration.rs) for more details.
+
 ## License
 
 This project is dual-licensed under MIT and Apache-2.0.

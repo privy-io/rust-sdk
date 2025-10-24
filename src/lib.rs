@@ -18,6 +18,9 @@ pub mod generated {
 
 pub mod subclients;
 
+#[cfg(feature = "alloy")]
+pub mod alloy;
+
 pub(crate) mod errors;
 pub(crate) mod import;
 pub(crate) mod jwt_exchange;
@@ -32,6 +35,9 @@ pub use utils::{
     Method, Utils, WalletApiRequestSignatureInput, format_request_for_authorization_signature,
     generate_authorization_signatures,
 };
+
+#[cfg(feature = "alloy")]
+pub use alloy::PrivyAlloyWallet;
 
 pub(crate) fn get_auth_header(app_id: &str, app_secret: &str) -> String {
     let credentials = format!("{app_id}:{app_secret}");
