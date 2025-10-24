@@ -9,6 +9,16 @@ license = "MIT OR Apache-2.0"
 [workspace]
 members = [".", "crates/privy-openapi"]
 
+[features]
+default = []
+alloy = [
+    "dep:alloy-signer",
+    "dep:alloy-primitives",
+    "dep:alloy-consensus",
+    "dep:alloy-network",
+    "dep:async-trait",
+]
+
 [dependencies]
 # dependencies from progenitor
 reqwest = { version = "0.12", features = ["json"] }
@@ -36,6 +46,13 @@ tracing = "0.1.41"
 futures = "0.3.31"
 lru = "0.16.1"
 
+# alloy
+alloy-signer = { version = "1.0", optional = true }
+alloy-primitives = { version = "1.0", optional = true }
+alloy-consensus = { version = "1.0", optional = true }
+alloy-network = { version = "1.0", optional = true }
+async-trait = { version = "0.1", optional = true }
+
 [dev-dependencies]
 jsonwebtoken = "9.3.1"
 tracing-test = { version = "0.2.5", features = ["no-env-filter"] }
@@ -61,6 +78,13 @@ mark-flaky-tests = { version = "1.0.2", features = ["tokio"] }
 secp256k1 = { version = "0.30", features = ["global-context", "rand"] }
 sha3 = "0.10.8"
 httpmock = "0.8"
+
+# alloy (for examples and tests)
+alloy-signer = "1.0"
+alloy-primitives = "1.0"
+alloy-consensus = "1.0"
+alloy-network = "1.0"
+async-trait = "0.1"
 
 [[example]]
 doc-scrape-examples = true
