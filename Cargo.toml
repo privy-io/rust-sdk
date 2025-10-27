@@ -79,17 +79,16 @@ secp256k1 = { version = "0.30", features = ["global-context", "rand"] }
 sha3 = "0.10.8"
 httpmock = "0.8"
 
-# alloy (for examples and tests)
-alloy-signer = "1.0"
-alloy-primitives = "1.0"
-alloy-consensus = "1.0"
-alloy-network = "1.0"
-async-trait = "0.1"
 
 [[example]]
 doc-scrape-examples = true
 name = "get_wallets"
 path = "examples/get_wallets.rs"
+
+[[example]]
+name = "alloy_integration"
+path = "examples/alloy_integration.rs"
+required-features = ["alloy"]
 
 [build-dependencies]
 prettyplease = "0.2.37"

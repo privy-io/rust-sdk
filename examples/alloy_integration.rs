@@ -12,8 +12,6 @@
 //! cargo run --example alloy_integration --features alloy
 //! ```
 
-#![cfg(feature = "alloy")]
-
 use anyhow::Result;
 use privy_rs::{AuthorizationContext, PrivateKey, PrivyClient};
 
