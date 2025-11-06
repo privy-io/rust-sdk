@@ -5,6 +5,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [0.1.0-alpha.4](https://github.com/privy-io/rust-sdk/compare/privy-rs-v0.1.0-alpha.3...privy-rs-v0.1.0-alpha.4) - 2025-11-06
+
+### Fixed
+
+- fix renames
+
+### Other
+
+- add patches and run gen-openapi
+- move to patch-based approach for openapi spec
+- Merge pull request #56 from privy-io/arlyon/missing-tests
+- add ignored hpke tests
+- add privy client header test
+
 ## [0.1.0-alpha.3](https://github.com/privy-io/rust-sdk/compare/privy-rs-v0.1.0-alpha.2...privy-rs-v0.1.0-alpha.3) - 2025-10-02
 
 ### Fixed
