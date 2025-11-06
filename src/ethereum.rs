@@ -583,12 +583,12 @@ impl EthereumService {
     /// let private_key = std::fs::read_to_string("private_key.pem")?;
     /// let ctx = AuthorizationContext::new().push(PrivateKey(private_key));
     ///
-    /// let signer = client.wallets().ethereum().signer("wallet_id", &ctx).await?;
+    /// let signer = client.wallets().ethereum().alloy("wallet_id", &ctx).await?;
     /// # Ok(())
     /// # }
     /// ```
     #[cfg(feature = "alloy")]
-    pub async fn signer(
+    pub async fn alloy(
         &self,
         wallet_id: &str,
         authorization_context: &AuthorizationContext,
@@ -597,7 +597,7 @@ impl EthereumService {
         let wallet = wallet_response.into_inner();
 
         let address = wallet.address.parse().map_err(|e| {
-            crate::PrivyApiError::InvalidRequest(format!("Failed to parse wallet address: {}", e))
+            crate::PrivyApiError::InvalidRequest(format!("Failed to parse wallet address: {e}"))
         })?;
 
         Ok(crate::alloy::PrivyAlloyWallet::new(
