@@ -3,9 +3,9 @@ use std::{collections::HashMap, time::SystemTime};
 use anyhow::Result;
 use privy_rs::generated::types::{
     CreateUserBody, CreateUserWalletBody, CreateUserWalletBodyWalletsItem,
-    CreateUserWalletBodyWalletsItemChainType, CustomMetadataValue, LinkedAccountEmailInput,
-    LinkedAccountEmailInputType, LinkedAccountInput, SearchUsersBody, UpdateUserCustomMetadataBody,
-    UserLinkedAccountsItem,
+    CreateUserWalletBodyWalletsItemChainType, CustomMetadataValue, LinkedAccount,
+    LinkedAccountEmailInput, LinkedAccountEmailInputType, LinkedAccountInput, SearchUsersBody,
+    UpdateUserCustomMetadataBody,
 };
 use tracing_test::traced_test;
 
@@ -40,7 +40,7 @@ async fn test_users_create() -> Result<()> {
 
     println!("Created user: {result:?}");
     assert!(result.into_inner().linked_accounts.iter().any(|a| match a {
-        UserLinkedAccountsItem::Email(e) => e.address == unique_email,
+        LinkedAccount::Email(e) => e.address == unique_email,
         _ => false,
     }));
 

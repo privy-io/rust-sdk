@@ -21,7 +21,8 @@ async fn test_transactions_get() -> Result<()> {
         &WalletTransactionsAsset::String(WalletTransactionsAssetString::Sol),
         WalletTransactionsChain::Base,
         None,      // No cursor for first page
-        Some(1.0), // Limit to 1 transaction to get one ID
+        Some(1.0), // Limit to 1 transaction to get one ID,
+        None,
     ))
     .await?;
 

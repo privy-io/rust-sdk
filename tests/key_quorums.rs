@@ -4,8 +4,8 @@ use anyhow::Result;
 use privy_rs::{
     AuthorizationContext, JwtUser,
     generated::types::{
-        CreateKeyQuorumBody, CreateKeyQuorumBodyDisplayName, UpdateKeyQuorumBody,
-        UpdateKeyQuorumBodyDisplayName, UserLinkedAccountsItem,
+        CreateKeyQuorumBody, CreateKeyQuorumBodyDisplayName, LinkedAccount, UpdateKeyQuorumBody,
+        UpdateKeyQuorumBodyDisplayName,
     },
 };
 
@@ -90,7 +90,7 @@ async fn test_key_quorums_update_with_auth_context() -> Result<()> {
         .linked_accounts
         .iter()
         .find_map(|la| match la {
-            UserLinkedAccountsItem::CustomJwt(cj) => Some(&cj.custom_user_id),
+            LinkedAccount::CustomJwt(cj) => Some(&cj.custom_user_id),
             _ => None,
         })
         .unwrap();
@@ -162,7 +162,7 @@ async fn test_key_quorums_delete() -> Result<()> {
         .linked_accounts
         .iter()
         .find_map(|la| match la {
-            UserLinkedAccountsItem::CustomJwt(cj) => Some(&cj.custom_user_id),
+            LinkedAccount::CustomJwt(cj) => Some(&cj.custom_user_id),
             _ => None,
         })
         .unwrap();

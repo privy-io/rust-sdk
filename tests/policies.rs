@@ -77,8 +77,8 @@ async fn test_policies_get_rule() {
         }
     ]).await.unwrap();
 
-    let policy_id = GetPolicyRulePolicyId::try_from(&*policy.id).unwrap();
-    let rule_id = GetPolicyRuleRuleId::try_from(&*policy.rules.first().unwrap().id).unwrap();
+    let policy_id = GetRulePolicyId::try_from(&*policy.id).unwrap();
+    let rule_id = GetRuleRuleId::try_from(&*policy.rules.first().unwrap().id).unwrap();
 
     let result = client.policies().get_rule(&policy_id, &rule_id).await;
     assert!(result.is_ok(), "Failed to get policy rule: {result:?}");
@@ -215,7 +215,7 @@ async fn test_policies_create_rule() {
     let result = client
         .policies()
         .create_rule(
-            &CreatePolicyRulePolicyId::from_str(&policy.id).unwrap(),
+            &CreateRulePolicyId::from_str(&policy.id).unwrap(),
             &ctx,
             &rule,
         )
@@ -256,8 +256,8 @@ async fn test_policies_update_rule() {
     let result = client
         .policies()
         .update_rule(
-            &UpdatePolicyRulePolicyId::try_from(&*policy.id).unwrap(),
-            &UpdatePolicyRuleRuleId::try_from(&*policy.rules.first().unwrap().id).unwrap(),
+            &UpdateRulePolicyId::try_from(&*policy.id).unwrap(),
+            &UpdateRuleRuleId::try_from(&*policy.rules.first().unwrap().id).unwrap(),
             &ctx,
             &rule,
         )
@@ -288,8 +288,8 @@ async fn test_policies_delete_rule() {
     let private_key = include_str!("./test_private_key.pem");
     let ctx = AuthorizationContext::new().push(PrivateKey(private_key.into()));
 
-    let policy_id = DeletePolicyRulePolicyId::try_from(&*policy.id).unwrap();
-    let rule_id = DeletePolicyRuleRuleId::try_from(&*policy.rules.first().unwrap().id).unwrap();
+    let policy_id = DeleteRulePolicyId::try_from(&*policy.id).unwrap();
+    let rule_id = DeleteRuleRuleId::try_from(&*policy.rules.first().unwrap().id).unwrap();
 
     let result = client
         .policies()

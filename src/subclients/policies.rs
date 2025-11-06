@@ -67,7 +67,7 @@ impl PoliciesClient {
     /// or the Privy API returning an error.
     pub async fn create_rule<'a>(
         &'a self,
-        policy_id: &'a crate::generated::types::CreatePolicyRulePolicyId,
+        policy_id: &'a crate::generated::types::CreateRulePolicyId,
         ctx: &'a AuthorizationContext,
         body: &'a crate::generated::types::PolicyRuleRequestBody,
     ) -> Result<ResponseValue<crate::generated::types::PolicyRuleResponse>, PrivySignedApiError>
@@ -94,11 +94,11 @@ impl PoliciesClient {
     /// or the Privy API returning an error.
     pub async fn update_rule<'a>(
         &'a self,
-        policy_id: &'a crate::generated::types::UpdatePolicyRulePolicyId,
-        rule_id: &'a crate::generated::types::UpdatePolicyRuleRuleId,
+        policy_id: &'a crate::generated::types::UpdateRulePolicyId,
+        rule_id: &'a crate::generated::types::UpdateRuleRuleId,
         ctx: &'a AuthorizationContext,
         body: &'a crate::generated::types::PolicyRuleRequestBody,
-    ) -> Result<ResponseValue<crate::generated::types::UpdatePolicyRuleResponse>, PrivySignedApiError>
+    ) -> Result<ResponseValue<crate::generated::types::UpdateRuleResponse>, PrivySignedApiError>
     {
         let sig = generate_authorization_signatures(
             ctx,
@@ -129,10 +129,10 @@ impl PoliciesClient {
     /// or the Privy API returning an error.
     pub async fn delete_rule<'a>(
         &'a self,
-        policy_id: &'a crate::generated::types::DeletePolicyRulePolicyId,
-        rule_id: &'a crate::generated::types::DeletePolicyRuleRuleId,
+        policy_id: &'a crate::generated::types::DeleteRulePolicyId,
+        rule_id: &'a crate::generated::types::DeleteRuleRuleId,
         ctx: &'a AuthorizationContext,
-    ) -> Result<ResponseValue<crate::generated::types::DeletePolicyRuleResponse>, PrivySignedApiError>
+    ) -> Result<ResponseValue<crate::generated::types::DeleteRuleResponse>, PrivySignedApiError>
     {
         let sig = generate_authorization_signatures(
             ctx,

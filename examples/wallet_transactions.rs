@@ -52,7 +52,8 @@ async fn main() -> Result<()> {
             &WalletTransactionsAsset::String(WalletTransactionsAssetString::Sol),
             WalletTransactionsChain::Base,
             None,       // No cursor for first page
-            Some(10.0), // Limit to 10 transactions
+            Some(10.0), // Limit to 10 transactions,
+            None,
         )
         .await?;
 

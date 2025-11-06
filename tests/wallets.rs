@@ -75,7 +75,7 @@ async fn test_wallets_authenticate_with_jwt() -> Result<()> {
         .linked_accounts
         .iter()
         .find_map(|la| match la {
-            UserLinkedAccountsItem::CustomJwt(jwt) => Some(jwt.custom_user_id.to_owned()),
+            LinkedAccount::CustomJwt(jwt) => Some(jwt.custom_user_id.to_owned()),
             _ => None,
         })
         .unwrap();
@@ -109,10 +109,8 @@ async fn test_wallets_raw_sign_with_auth_context() -> Result<()> {
     let wallet_id = get_test_wallet_id_by_type(&client, WalletChainType::Tron, None).await?;
 
     let raw_sign_body = privy_rs::generated::types::RawSign {
-        params: RawSignParams {
-            hash: Some(
-                "0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef".to_string(),
-            ),
+        params: RawSignParams::Variant0 {
+            hash: "0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef".to_string(),
         },
     };
 
@@ -194,7 +192,7 @@ async fn test_wallets_export() -> Result<()> {
         .linked_accounts
         .iter()
         .find_map(|u| match u {
-            UserLinkedAccountsItem::CustomJwt(jwt) => Some(&jwt.custom_user_id),
+            LinkedAccount::CustomJwt(jwt) => Some(&jwt.custom_user_id),
             _ => None,
         })
         .unwrap();
@@ -223,7 +221,8 @@ async fn test_wallets_transactions_get() -> Result<()> {
         &asset,
         chain,
         None,
-        Some(10.0)
+        Some(10.0),
+        None
     ))
     .await?;
 
