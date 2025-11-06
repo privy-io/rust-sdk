@@ -49,6 +49,11 @@ curl -s https://api.privy.io/v1/openapi.json \
   | jq -f scripts/schema-patches/05-remove-deprecated.jq \
   | jq -f scripts/schema-patches/06-remove-additional-properties.jq \
   | jq -f scripts/schema-patches/07-anyof-to-oneof.jq \
+  | jq -f scripts/schema-patches/08-coinbase-onramp-assets.jq \
+  | jq -f scripts/schema-patches/09-deduplicate-enums.jq \
+  | jq -f scripts/schema-patches/10-kraken-multipart.jq \
+  | jq -f scripts/schema-patches/11-deduplicate-properties.jq \
+  | jq -f scripts/schema-patches/12-remove-custom-oauth.jq \
   > openapi.json
 """
 

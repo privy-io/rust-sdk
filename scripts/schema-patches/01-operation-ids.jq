@@ -149,5 +149,11 @@
   },
   "/v1/users/{user_id}/accounts/unlink": {
     "post": { "operationId": "unlinkUserLinkedAccount" }
+  },
+  "/v1/custodial_wallets": {
+    "post": { "operationId": "getCustodialWallets" }
+  },
+  "/v1/kraken_embed/assets/{asset_id}": {
+    "get": { "operationId": "getKrakenEmbedAssets" }
   }
 }
