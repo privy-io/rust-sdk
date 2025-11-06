@@ -42,7 +42,7 @@ async fn test_sign_hash_sync() {
     let signer = client
         .wallets()
         .ethereum()
-        .signer(&wallet_id, &ctx)
+        .alloy(&wallet_id, &ctx)
         .await
         .expect("Failed to create signer");
 
@@ -70,7 +70,7 @@ async fn test_sign_hash_async() {
     let signer = client
         .wallets()
         .ethereum()
-        .signer(&wallet_id, &ctx)
+        .alloy(&wallet_id, &ctx)
         .await
         .expect("Failed to create signer");
 
@@ -98,7 +98,7 @@ async fn test_sign_transaction() {
     let signer = client
         .wallets()
         .ethereum()
-        .signer(&wallet_id, &ctx)
+        .alloy(&wallet_id, &ctx)
         .await
         .expect("Failed to create signer");
 
@@ -137,7 +137,7 @@ async fn test_sign_message() {
     let signer = client
         .wallets()
         .ethereum()
-        .signer(&wallet_id, &ctx)
+        .alloy(&wallet_id, &ctx)
         .await
         .expect("Failed to create signer");
 
@@ -168,7 +168,7 @@ async fn test_chain_id() {
     let signer = client
         .wallets()
         .ethereum()
-        .signer(&wallet_id, &ctx)
+        .alloy(&wallet_id, &ctx)
         .await
         .expect("Failed to create signer");
 
@@ -199,7 +199,7 @@ async fn test_wallet_address() {
     let signer = client
         .wallets()
         .ethereum()
-        .signer(&wallet_id, &ctx)
+        .alloy(&wallet_id, &ctx)
         .await
         .expect("Failed to create signer");
 

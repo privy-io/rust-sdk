@@ -77,7 +77,7 @@ impl SignerSync for PrivyAlloyWallet {
             tokio::runtime::Builder::new_current_thread()
                 .enable_all()
                 .build()
-                .map_err(|e| alloy_signer::Error::other(format!("Failed to build runtime: {}", e)))?
+                .map_err(|e| alloy_signer::Error::other(format!("Failed to build runtime: {e}")))?
                 .block_on(self.sign_hash(hash))
         }
     }
@@ -129,9 +129,9 @@ impl Signer for PrivyAlloyWallet {
                             .text()
                             .await
                             .unwrap_or_else(|_| "<body read error>".into());
-                        format!("Privy API unexpected response: {} — {}", status, body)
+                        format!("Privy API unexpected response: {status} — {body}")
                     }
-                    other => format!("Privy API error: {}", other),
+                    other => format!("Privy API error: {other}"),
                 };
                 return Err(alloy_signer::Error::other(msg));
             }
@@ -152,7 +152,7 @@ impl Signer for PrivyAlloyWallet {
 
         sig_hex
             .parse::<Signature>()
-            .map_err(|e| alloy_signer::Error::other(format!("Failed to parse signature: {}", e)))
+            .map_err(|e| alloy_signer::Error::other(format!("Failed to parse signature: {e}")))
     }
 
     fn address(&self) -> Address {

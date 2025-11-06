@@ -31,7 +31,7 @@ async fn main() -> Result<()> {
     let ctx = AuthorizationContext::new().push(PrivateKey(private_key));
 
     println!("Creating Alloy signer");
-    let signer = client.wallets().ethereum().signer(&wallet_id, &ctx).await?;
+    let signer = client.wallets().ethereum().alloy(&wallet_id, &ctx).await?;
 
     println!("Address: {:?}", TxSignerSync::address(&signer));
     println!("Chain ID: {:?}\n", signer.chain_id_sync());
@@ -49,7 +49,7 @@ async fn main() -> Result<()> {
 
     println!("Signing transaction...");
     let signature = signer.sign_transaction_sync(&mut tx)?;
-    println!("Signature: {:?}\n", signature);
+    println!("Signature: {signature:?}\n");
 
     Ok(())
 }
