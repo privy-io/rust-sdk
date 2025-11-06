@@ -30,7 +30,7 @@ jobs:
           commit-message: Generate latest changes from OpenApi spec
           title: Generate latest changes from OpenApi spec
           body: |
-            This is an automated PR that tries to build the latest changes generated from the [Stripe OpenApi spec](https://github.com/stripe/openapi).
+            This is an automated PR that tries to build the latest changes generated from the [Privy OpenApi spec](https://api.privy.io/v1/openapi.json).
           branch: openapi
           branch-suffix: timestamp
           reviewers: arlyon
