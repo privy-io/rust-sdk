@@ -56,8 +56,8 @@ async fn main() -> Result<()> {
             &ctx,
             None, // No idempotency key
             &RawSign {
-                params: RawSignParams {
-                    hash: Some("0xdeadbeef".to_string()),
+                params: RawSignParams::Variant0 {
+                    hash: "0xdeadbeef".to_string(),
                 },
             },
         )

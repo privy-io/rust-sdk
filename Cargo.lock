@@ -2144,6 +2144,7 @@ name = "privy-openapi"
 version = "0.1.0-alpha.0"
 dependencies = [
  "bytes",
+ "chrono",
  "futures-core",
  "progenitor-client",
  "regress",

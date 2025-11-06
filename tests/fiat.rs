@@ -35,6 +35,7 @@ async fn test_fiat_get_status() -> Result<()> {
 
     let body = UserFiatStatusesBody {
         provider: UserFiatStatusesBodyProvider::Bridge,
+        tx_hash: None,
     };
 
     let result = client.fiat().get_status(&user.id, &body).await;
