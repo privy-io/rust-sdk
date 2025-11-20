@@ -92,7 +92,7 @@ async fn test_policies_update_with_auth_context() {
     let client = common::get_test_client().unwrap();
 
     let private_key = include_str!("./test_private_key.pem");
-    let key = PrivateKey(private_key.into());
+    let key = PrivateKey::new(private_key.into());
     let pubkey = key.get_key().await.unwrap().public_key();
 
     let policy = common::ensure_test_policy_with_user(
@@ -146,7 +146,7 @@ async fn test_policies_delete() {
     let client = common::get_test_client().unwrap();
 
     let private_key = include_str!("./test_private_key.pem");
-    let ctx = AuthorizationContext::new().push(PrivateKey(private_key.into()));
+    let ctx = AuthorizationContext::new().push(PrivateKey::new(private_key.into()));
 
     // First create a policy to delete
     let unique_name = format!("delete-policy-{}", chrono::Utc::now().timestamp());
@@ -195,7 +195,7 @@ async fn test_policies_create_rule() {
     let policy = common::ensure_test_policy(&client, vec![]).await.unwrap();
 
     let private_key = include_str!("./test_private_key.pem");
-    let ctx = AuthorizationContext::new().push(PrivateKey(private_key.into()));
+    let ctx = AuthorizationContext::new().push(PrivateKey::new(private_key.into()));
 
     let unique_rule_name = format!("test-rule-{}", chrono::Utc::now().timestamp());
     let rule = PolicyRuleRequestBody {
@@ -251,7 +251,7 @@ async fn test_policies_update_rule() {
     rule.action = PolicyAction::Allow;
 
     let private_key = include_str!("./test_private_key.pem");
-    let ctx = AuthorizationContext::new().push(PrivateKey(private_key.into()));
+    let ctx = AuthorizationContext::new().push(PrivateKey::new(private_key.into()));
 
     let result = client
         .policies()
@@ -286,7 +286,7 @@ async fn test_policies_delete_rule() {
     }]).await.unwrap();
 
     let private_key = include_str!("./test_private_key.pem");
-    let ctx = AuthorizationContext::new().push(PrivateKey(private_key.into()));
+    let ctx = AuthorizationContext::new().push(PrivateKey::new(private_key.into()));
 
     let policy_id = DeleteRulePolicyId::try_from(&*policy.id).unwrap();
     let rule_id = DeleteRuleRuleId::try_from(&*policy.rules.first().unwrap().id).unwrap();

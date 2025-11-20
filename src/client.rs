@@ -61,7 +61,7 @@ impl PrivyClient {
     /// # async fn foo() -> Result<(), PrivyCreateError> {
     /// # let my_key = include_str!("../tests/test_private_key.pem").to_string();
     /// let ctx = AuthorizationContext::new();
-    /// ctx.push(PrivateKey(my_key));
+    /// ctx.push(PrivateKey::new(my_key));
     /// # Ok(())
     /// # }
     /// ```

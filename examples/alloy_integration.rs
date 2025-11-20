@@ -28,7 +28,7 @@ async fn main() -> Result<()> {
     let private_key = std::fs::read_to_string("private_key.pem")?;
 
     let client = PrivyClient::new_from_env()?;
-    let ctx = AuthorizationContext::new().push(PrivateKey(private_key));
+    let ctx = AuthorizationContext::new().push(PrivateKey::new(private_key));
 
     println!("Creating Alloy signer");
     let signer = client.wallets().ethereum().alloy(&wallet_id, &ctx).await?;

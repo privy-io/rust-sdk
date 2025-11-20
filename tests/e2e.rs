@@ -72,7 +72,7 @@ async fn test_wallets_e2e_quorum_workflow() -> Result<()> {
         .await?;
 
     // Step 4: Test signing with only one key (should fail)
-    let single_key_ctx = AuthorizationContext::new().push(PrivateKey(
+    let single_key_ctx = AuthorizationContext::new().push(PrivateKey::new(
         key1.to_sec1_pem(der::pem::LineEnding::LF)
             .unwrap()
             .as_str()
@@ -97,13 +97,13 @@ async fn test_wallets_e2e_quorum_workflow() -> Result<()> {
     tracing::info!("Testing transaction signing with three keys (should succeed)");
     let three_key_ctx = {
         single_key_ctx
-            .push(PrivateKey(
+            .push(PrivateKey::new(
                 key2.to_sec1_pem(der::pem::LineEnding::LF)
                     .unwrap()
                     .as_str()
                     .to_owned(),
             ))
-            .push(PrivateKey(
+            .push(PrivateKey::new(
                 key3.to_sec1_pem(der::pem::LineEnding::LF)
                     .unwrap()
                     .as_str()
@@ -190,7 +190,7 @@ async fn test_rpc_e2e_quorum_workflow() -> Result<()> {
         .await?;
 
     // Step 4: Test signing with only one key (should fail)
-    let single_key_ctx = AuthorizationContext::new().push(PrivateKey(
+    let single_key_ctx = AuthorizationContext::new().push(PrivateKey::new(
         key1.to_sec1_pem(der::pem::LineEnding::LF)
             .unwrap()
             .as_str()
@@ -224,13 +224,13 @@ async fn test_rpc_e2e_quorum_workflow() -> Result<()> {
     tracing::info!("Testing transaction signing with three keys (should succeed)");
     let three_key_ctx = {
         single_key_ctx
-            .push(PrivateKey(
+            .push(PrivateKey::new(
                 key2.to_sec1_pem(der::pem::LineEnding::LF)
                     .unwrap()
                     .as_str()
                     .to_owned(),
             ))
-            .push(PrivateKey(
+            .push(PrivateKey::new(
                 key3.to_sec1_pem(der::pem::LineEnding::LF)
                     .unwrap()
                     .as_str()

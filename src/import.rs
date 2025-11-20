@@ -65,7 +65,7 @@ impl WalletImport {
         let private_key_hex = private_key_hex
             .strip_prefix("0x")
             .unwrap_or(private_key_hex);
-        let private_key_bytes = hex::decode(private_key_hex)?;
+        let private_key_bytes = zeroize::Zeroizing::new(hex::decode(private_key_hex)?);
 
         // Setup HPKE sender context
         let mut rng = rand::thread_rng();

@@ -139,7 +139,7 @@ async fn test_wallets_update_with_auth_context() -> Result<()> {
     let private_key = include_str!("./test_private_key.pem");
 
     // Get a public key for the update (use existing or generate one)
-    let private_key = PrivateKey(private_key.to_string());
+    let private_key = PrivateKey::new(private_key.to_string());
     let public_key = private_key.get_key().await?.public_key();
 
     let update_body = UpdateWalletBody {

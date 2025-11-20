@@ -220,7 +220,7 @@ mod tests {
     #[tokio::test]
     async fn test_build_canonical_request() {
         let private_key = include_str!("../tests/test_private_key.pem");
-        let key = PrivateKey(private_key.to_string());
+        let key = PrivateKey::new(private_key.to_string());
         let public_key = key.get_key().await.unwrap().public_key();
 
         // Create the request body that will be sent using the generated privy-api type
@@ -521,7 +521,8 @@ mod tests {
     #[tokio::test]
     #[traced_test]
     async fn test_sign_canonical_request() {
-        let ctx = AuthorizationContext::new().push(PrivateKey(TEST_PRIVATE_KEY_PEM.to_string()));
+        let ctx =
+            AuthorizationContext::new().push(PrivateKey::new(TEST_PRIVATE_KEY_PEM.to_string()));
 
         let body = serde_json::json!({"test": "data"});
 
@@ -554,7 +555,7 @@ mod tests {
         let second_key = SecretKey::<p256::NistP256>::from_bytes(&key_bytes.into()).unwrap();
 
         let ctx = AuthorizationContext::new()
-            .push(PrivateKey(TEST_PRIVATE_KEY_PEM.to_string()))
+            .push(PrivateKey::new(TEST_PRIVATE_KEY_PEM.to_string()))
             .push(second_key);
 
         let body = serde_json::json!({"test": "data"});
@@ -588,7 +589,8 @@ mod tests {
 
     #[tokio::test]
     async fn test_sign_canonical_request_deterministic() {
-        let ctx = AuthorizationContext::new().push(PrivateKey(TEST_PRIVATE_KEY_PEM.to_string()));
+        let ctx =
+            AuthorizationContext::new().push(PrivateKey::new(TEST_PRIVATE_KEY_PEM.to_string()));
 
         let body = serde_json::json!({"test": "data"});
 

@@ -75,7 +75,7 @@ impl AuthorizationContext {
     /// # async fn foo() {
     /// let privy = PrivyClient::new("app_id".to_string(), "app_secret".to_string()).unwrap();
     /// let jwt = JwtUser(privy, "test".to_string());
-    /// let key = PrivateKey("test".to_string());
+    /// let key = PrivateKey::new("test".to_string());
     /// let context = AuthorizationContext::new().push(jwt).push(key);
     /// # }
     /// ```
@@ -227,7 +227,7 @@ pub trait IntoSignature {
     ///
     /// # async fn example() -> Result<(), Box<dyn std::error::Error>> {
     /// # let my_key = include_str!("../tests/test_private_key.pem").to_string();
-    /// let key_source = PrivateKey(my_key);
+    /// let key_source = PrivateKey::new(my_key);
     /// let message = b"canonical request data";
     /// let signature = key_source.sign(message).await?;
     ///
@@ -374,13 +374,21 @@ impl IntoSignature for Signature {
 ///
 /// # Errors
 /// This provider can fail if the key is not in the expected format.
-pub struct PrivateKey(pub String);
+pub struct PrivateKey(zeroize::Zeroizing<String>);
+
+impl PrivateKey {
+    /// Create a new `PrivateKey` from a PEM-encoded private key.
+    pub fn new(key: String) -> Self {
+        Self(zeroize::Zeroizing::new(key))
+    }
+}
 
 impl IntoKey for PrivateKey {
     async fn get_key(&self) -> Result<Key, KeyError> {
-        SecretKey::<p256::NistP256>::from_sec1_pem(&self.0).map_err(|e| {
+        // Using .as_str() ensures we borrow the zeroizing string rather than cloning it
+        SecretKey::<p256::NistP256>::from_sec1_pem(self.0.as_str()).map_err(|e| {
             tracing::error!("Failed to parse SEC1 PEM: {:?}", e);
-            KeyError::InvalidFormat(self.0.clone())
+            KeyError::InvalidFormat("provided PEM string is malformed".to_string())
         })
     }
 }
@@ -405,14 +413,14 @@ mod tests {
     // PrivateKey tests
     #[tokio::test]
     async fn test_private_key_creation() {
-        let key = PrivateKey(TEST_PRIVATE_KEY_PEM.to_string());
+        let key = PrivateKey::new(TEST_PRIVATE_KEY_PEM.to_string());
         let result = key.get_key().await;
         assert!(result.is_ok(), "Should successfully parse valid PEM key");
     }
 
     #[tokio::test]
     async fn test_private_key_invalid_format() {
-        let key = PrivateKey("invalid_pem_data".to_string());
+        let key = PrivateKey::new("invalid_pem_data".to_string());
         let result = key.get_key().await;
         assert!(result.is_err(), "Should fail with invalid PEM data");
 
@@ -425,7 +433,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_private_key_signing() {
-        let key = PrivateKey(TEST_PRIVATE_KEY_PEM.to_string());
+        let key = PrivateKey::new(TEST_PRIVATE_KEY_PEM.to_string());
         let test_key = key.get_key().await.unwrap();
 
         let message1 = b"test message for signing";
@@ -454,7 +462,7 @@ mod tests {
     #[test_case(b"special chars: \x00\xff\n\r\t" ; "special characters")]
     #[tokio::test]
     async fn test_signing_various_messages(message: &[u8]) {
-        let key = PrivateKey(TEST_PRIVATE_KEY_PEM.to_string());
+        let key = PrivateKey::new(TEST_PRIVATE_KEY_PEM.to_string());
         let test_key = key.get_key().await.unwrap();
 
         let signature = test_key.sign(message).await;
@@ -468,7 +476,7 @@ mod tests {
     #[tokio::test]
     async fn test_signature_into_signature() {
         // Create a known signature
-        let key = PrivateKey(TEST_PRIVATE_KEY_PEM.to_string());
+        let key = PrivateKey::new(TEST_PRIVATE_KEY_PEM.to_string());
         let test_key = key.get_key().await.unwrap();
         let original_signature = test_key.sign(b"test").await.unwrap();
 
@@ -495,7 +503,7 @@ mod tests {
     #[tokio::test]
     #[traced_test]
     async fn test_authorization_context_single_key() {
-        let key = PrivateKey(TEST_PRIVATE_KEY_PEM.to_string());
+        let key = PrivateKey::new(TEST_PRIVATE_KEY_PEM.to_string());
         let ctx = AuthorizationContext::new().push(key);
 
         let signatures: Vec<_> = ctx.sign(b"test").try_collect().await.unwrap();
@@ -515,7 +523,7 @@ mod tests {
 
         // Add multiple keys
         let ctx = AuthorizationContext::new()
-            .push(PrivateKey(TEST_PRIVATE_KEY_PEM.to_string()))
+            .push(PrivateKey::new(TEST_PRIVATE_KEY_PEM.to_string()))
             .push(second_key);
 
         let signatures: Vec<_> = ctx.sign(b"test").try_collect().await.unwrap();
@@ -536,7 +544,8 @@ mod tests {
     #[traced_test]
     async fn test_authorization_context_validation() {
         // Test successful validation
-        let ctx = AuthorizationContext::new().push(PrivateKey(TEST_PRIVATE_KEY_PEM.to_string()));
+        let ctx =
+            AuthorizationContext::new().push(PrivateKey::new(TEST_PRIVATE_KEY_PEM.to_string()));
         let errors = ctx.validate().await;
         assert!(
             errors.is_empty(),
@@ -544,7 +553,8 @@ mod tests {
         );
 
         // Test validation failure
-        let ctx2 = AuthorizationContext::new().push(PrivateKey("invalid_key_data".to_string()));
+        let ctx2 =
+            AuthorizationContext::new().push(PrivateKey::new("invalid_key_data".to_string()));
         let errors2 = ctx2.validate().await;
         assert!(
             !errors2.is_empty(),
@@ -582,8 +592,11 @@ mod tests {
 
     #[tokio::test]
     async fn test_fn_key_wrapper() {
-        let key_fn =
-            FnKey(|| async { PrivateKey(TEST_PRIVATE_KEY_PEM.to_string()).get_key().await });
+        let key_fn = FnKey(|| async {
+            PrivateKey::new(TEST_PRIVATE_KEY_PEM.to_string())
+                .get_key()
+                .await
+        });
 
         let key1 = key_fn.get_key().await.unwrap();
         let key2 = key_fn.get_key().await.unwrap();
@@ -628,7 +641,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_key_public_key_derivation() {
-        let private_key = PrivateKey(TEST_PRIVATE_KEY_PEM.to_string());
+        let private_key = PrivateKey::new(TEST_PRIVATE_KEY_PEM.to_string());
         let key = private_key.get_key().await.unwrap();
         let public_key = key.public_key();
 
@@ -653,7 +666,7 @@ mod tests {
     async fn test_authorization_context_mixed_sources() {
         // Add path-based key and pre-computed signature
         let ctx = AuthorizationContext::new()
-            .push(PrivateKey(
+            .push(PrivateKey::new(
                 include_str!("../tests/test_private_key.pem").to_string(),
             ))
             .push(Signature::from_bytes(GenericArray::from_slice(&STANDARD.decode("J7GLk/CIqvCNCOSJ8sUZb0rCsqWF9l1H1VgYfsAd1ew2uBJHE5hoY+kV7CSzdKkgOhtdvzj22gXA7gcn5gSqvQ==").unwrap())).expect("right size"));
@@ -697,7 +710,8 @@ mod tests {
 
     #[tokio::test]
     async fn test_authorization_context_clone_and_debug() {
-        let ctx1 = AuthorizationContext::new().push(PrivateKey(TEST_PRIVATE_KEY_PEM.to_string()));
+        let ctx1 =
+            AuthorizationContext::new().push(PrivateKey::new(TEST_PRIVATE_KEY_PEM.to_string()));
 
         // Test clone functionality
         let ctx2 = ctx1.clone();

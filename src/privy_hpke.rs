@@ -166,8 +166,10 @@ impl PrivyHpke {
     ) -> Result<SecretKey<p256::NistP256>, KeyError> {
         let decrypted_key_bytes = self.decrypt_raw(encapsulated_key, ciphertext)?;
         // Parse the decrypted bytes as a UTF-8 base64 DER string, then parse as a private key
-        let key_b64 = String::from_utf8(decrypted_key_bytes)
-            .map_err(|_| KeyError::InvalidFormat("decrypted key is not valid UTF-8".to_string()))?;
+        let key_b64 =
+            zeroize::Zeroizing::new(String::from_utf8(decrypted_key_bytes.to_vec()).map_err(
+                |_| KeyError::InvalidFormat("decrypted key is not valid UTF-8".to_string()),
+            )?);
 
         #[cfg(all(feature = "unsafe_debug", debug_assertions))]
         {
@@ -180,11 +182,13 @@ impl PrivyHpke {
         }
 
         // Decode the base64 to get DER bytes
-        let der_bytes = base64::engine::general_purpose::STANDARD
-            .decode(&key_b64)
-            .map_err(|_| {
-                KeyError::InvalidFormat("decrypted key is not valid base64".to_string())
-            })?;
+        let der_bytes = zeroize::Zeroizing::new(
+            base64::engine::general_purpose::STANDARD
+                .decode(key_b64.as_str())
+                .map_err(|_| {
+                    KeyError::InvalidFormat("decrypted key is not valid base64".to_string())
+                })?,
+        );
 
         // Parse as PKCS#8 DER format (which is what the output format appears to be)
         SecretKey::<p256::NistP256>::from_pkcs8_der(&der_bytes).map_err(|e| {
@@ -248,7 +252,7 @@ impl PrivyHpke {
         self,
         encapsulated_key: &str,
         ciphertext: &str,
-    ) -> Result<Vec<u8>, KeyError> {
+    ) -> Result<zeroize::Zeroizing<Vec<u8>>, KeyError> {
         let encapped_key_bytes = base64::engine::general_purpose::STANDARD
             .decode(encapsulated_key)
             .map_err(|_| KeyError::InvalidFormat("base64 encapsulated key".to_string()))?;
@@ -277,7 +281,9 @@ impl PrivyHpke {
         )?;
 
         // Decrypt the authorization key using the ciphertext
-        Ok(context.open(&ciphertext_bytes, &[])?)
+        Ok(zeroize::Zeroizing::new(
+            context.open(&ciphertext_bytes, &[])?,
+        ))
     }
 }
 
@@ -431,7 +437,7 @@ mod tests {
             .decrypt_raw(&encapped_key_b64, &ciphertext_b64)
             .expect("Failed to decrypt raw");
         assert_eq!(
-            decrypted_raw,
+            &*decrypted_raw,
             test_key_b64.as_bytes(),
             "Decrypted raw bytes should match original"
         );
