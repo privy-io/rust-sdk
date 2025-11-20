@@ -169,7 +169,15 @@ impl PrivyHpke {
         let key_b64 = String::from_utf8(decrypted_key_bytes)
             .map_err(|_| KeyError::InvalidFormat("decrypted key is not valid UTF-8".to_string()))?;
 
-        tracing::debug!("Decrypted authorization key (base64 DER): {}", key_b64);
+        #[cfg(all(feature = "unsafe_debug", debug_assertions))]
+        {
+            // Safe truncation that won't panic on short strings or UTF-8 boundaries
+            let truncated_key: String = key_b64.chars().take(6).collect();
+            tracing::debug!(
+                "Decrypted authorization key (base64 DER): {}",
+                truncated_key
+            );
+        }
 
         // Decode the base64 to get DER bytes
         let der_bytes = base64::engine::general_purpose::STANDARD

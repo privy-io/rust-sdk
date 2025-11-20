@@ -115,7 +115,10 @@ pub async fn generate_authorization_signatures<S: Serialize>(
     let canonical =
         format_request_for_authorization_signature(app_id, method, url, body, idempotency_key)?;
 
-    tracing::debug!("canonical request data: {}", canonical);
+    #[cfg(all(feature = "unsafe_debug", debug_assertions))]
+    {
+        tracing::debug!("canonical request data: {}", canonical);
+    }
 
     Ok(ctx
         .sign(canonical.as_bytes())
