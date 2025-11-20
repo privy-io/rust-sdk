@@ -53,7 +53,10 @@ impl JwtExchange {
             }
         }
 
-        tracing::debug!("Starting HPKE JWT exchange for user JWT: {}", jwt);
+        #[cfg(all(feature = "unsafe_debug", debug_assertions))]
+        {
+            tracing::debug!("Starting HPKE JWT exchange for user JWT: {}", jwt);
+        }
 
         // Get the HPKE manager and format the public key for the API request
         let hpke_manager = PrivyHpke::new();

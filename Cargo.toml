@@ -18,6 +18,8 @@ alloy = [
     "dep:alloy-network",
     "dep:async-trait",
 ]
+# enables potentially unsafe logging in debug mode for easier debugging
+unsafe_debug = []
 
 [dependencies]
 # dependencies from progenitor
