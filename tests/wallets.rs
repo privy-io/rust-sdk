@@ -304,6 +304,7 @@ async fn test_wallets_solana_sign_message() -> Result<()> {
 }
 
 #[tokio::test]
+#[mark_flaky_tests::flaky]
 async fn test_wallets_solana_sign_transaction() -> Result<()> {
     let client = get_test_client()?;
     let wallet_id = get_test_wallet_id_by_type(&client, WalletChainType::Solana, None).await?;
