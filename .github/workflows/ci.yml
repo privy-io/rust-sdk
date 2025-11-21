@@ -2,18 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [main, arlyon/next]
+    branches: [main]
   pull_request:
-    branches: [main, arlyon/next]
-
-env:
-  CARGO_TERM_COLOR: always
-  PRIVY_TEST_APP_ID: ${{ secrets.PRIVY_TEST_APP_ID }}
-  PRIVY_TEST_APP_SECRET: ${{ secrets.PRIVY_TEST_APP_SECRET }}
-  PRIVY_TEST_JWT_PRIVATE_KEY: ${{ secrets.PRIVY_TEST_JWT_PRIVATE_KEY }}
-  PRIVY_TEST_URL: ${{ secrets.PRIVY_TEST_URL }}
-  # staging authorization flow is very flaky. we'll remove this eventually
-  MARK_FLAKY_TESTS_RETRIES: 20
+    branches: [main]
 
 jobs:
   test:
@@ -51,7 +42,13 @@ jobs:
           key: ${{ runner.os }}-cargo-build-target-${{ hashFiles('**/Cargo.lock') }}
 
       - name: Run tests
-        run: cargo test --verbose
+        run: cargo test --lib
+
+      - name: Run examples
+        run: cargo test --examples
+
+      - name: Run doc tests
+        run: cargo test --doc
 
       - name: Run clippy
         run: cargo clippy --all-targets --all-features -- -D warnings
