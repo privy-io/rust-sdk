@@ -111,7 +111,7 @@ impl WalletsClient {
         &'a self,
         wallet_id: &'a str,
         ctx: &'a AuthorizationContext,
-    ) -> Result<Vec<u8>, PrivyExportError> {
+    ) -> Result<zeroize::Zeroizing<Vec<u8>>, PrivyExportError> {
         let privy_hpke = PrivyHpke::new();
         let body = WalletExportRequestBody {
             encryption_type: HpkeEncryption::Hpke,

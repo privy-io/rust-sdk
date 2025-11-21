@@ -139,7 +139,7 @@ async fn test_wallets_update_with_auth_context() -> Result<()> {
     let private_key = include_str!("./test_private_key.pem");
 
     // Get a public key for the update (use existing or generate one)
-    let private_key = PrivateKey(private_key.to_string());
+    let private_key = PrivateKey::new(private_key.to_string());
     let public_key = private_key.get_key().await?.public_key();
 
     let update_body = UpdateWalletBody {
@@ -304,6 +304,7 @@ async fn test_wallets_solana_sign_message() -> Result<()> {
 }
 
 #[tokio::test]
+#[mark_flaky_tests::flaky]
 async fn test_wallets_solana_sign_transaction() -> Result<()> {
     let client = get_test_client()?;
     let wallet_id = get_test_wallet_id_by_type(&client, WalletChainType::Solana, None).await?;

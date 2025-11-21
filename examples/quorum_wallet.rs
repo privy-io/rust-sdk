@@ -112,7 +112,7 @@ async fn main() -> Result<()> {
     // Step 4: Test signing with only one key (should fail)
     tracing::info!("Testing wallet export with only one key (should fail due to quorum threshold)");
 
-    let single_key_ctx = AuthorizationContext::new().push(PrivateKey(
+    let single_key_ctx = AuthorizationContext::new().push(PrivateKey::new(
         key1.to_sec1_pem(der::pem::LineEnding::LF)
             .unwrap()
             .as_str()
@@ -139,7 +139,7 @@ async fn main() -> Result<()> {
     // Step 5: Test signing with two keys (should succeed)
     tracing::info!("Testing wallet export with two keys (should succeed)");
 
-    let two_key_ctx = single_key_ctx.push(PrivateKey(
+    let two_key_ctx = single_key_ctx.push(PrivateKey::new(
         key2.to_sec1_pem(der::pem::LineEnding::LF)
             .unwrap()
             .as_str()

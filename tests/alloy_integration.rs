@@ -37,7 +37,7 @@ async fn test_sign_hash_sync() {
     };
 
     let client = PrivyClient::new_from_env().expect("Failed to create client");
-    let ctx = AuthorizationContext::new().push(PrivateKey(private_key));
+    let ctx = AuthorizationContext::new().push(PrivateKey::new(private_key));
 
     let signer = client
         .wallets()
@@ -65,7 +65,7 @@ async fn test_sign_hash_async() {
     };
 
     let client = PrivyClient::new_from_env().expect("Failed to create client");
-    let ctx = AuthorizationContext::new().push(PrivateKey(private_key));
+    let ctx = AuthorizationContext::new().push(PrivateKey::new(private_key));
 
     let signer = client
         .wallets()
@@ -93,7 +93,7 @@ async fn test_sign_transaction() {
     };
 
     let client = PrivyClient::new_from_env().expect("Failed to create client");
-    let ctx = AuthorizationContext::new().push(PrivateKey(private_key));
+    let ctx = AuthorizationContext::new().push(PrivateKey::new(private_key));
 
     let signer = client
         .wallets()
@@ -132,7 +132,7 @@ async fn test_sign_message() {
     };
 
     let client = PrivyClient::new_from_env().expect("Failed to create client");
-    let ctx = AuthorizationContext::new().push(PrivateKey(private_key));
+    let ctx = AuthorizationContext::new().push(PrivateKey::new(private_key));
 
     let signer = client
         .wallets()
@@ -163,7 +163,7 @@ async fn test_chain_id() {
     };
 
     let client = PrivyClient::new_from_env().expect("Failed to create client");
-    let ctx = AuthorizationContext::new().push(PrivateKey(private_key));
+    let ctx = AuthorizationContext::new().push(PrivateKey::new(private_key));
 
     let signer = client
         .wallets()
@@ -194,7 +194,7 @@ async fn test_wallet_address() {
     };
 
     let client = PrivyClient::new_from_env().expect("Failed to create client");
-    let ctx = AuthorizationContext::new().push(PrivateKey(private_key));
+    let ctx = AuthorizationContext::new().push(PrivateKey::new(private_key));
 
     let signer = client
         .wallets()

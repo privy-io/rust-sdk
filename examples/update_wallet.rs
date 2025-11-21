@@ -44,7 +44,7 @@ async fn main() -> Result<()> {
 
     let file = std::fs::read_to_string("private_key.pem")?;
 
-    let key = PrivateKey(file);
+    let key = PrivateKey::new(file);
     let public_key = key.get_key().await?.public_key();
 
     let client = PrivyClient::new_from_env()?;
