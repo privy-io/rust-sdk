@@ -63,6 +63,8 @@ depends = ["pull-openapi"]
 run = """
 #!/usr/bin/env bash
 
+set -e
+
 # get current crate version
 VERSION=$(grep -m 1 "^version" crates/privy-openapi/Cargo.toml | cut -d '"' -f 2)
 cargo-progenitor progenitor --input openapi.json --name privy-openapi -o crates/privy-openapi --version $VERSION --license-name "MIT OR Apache-2.0"
