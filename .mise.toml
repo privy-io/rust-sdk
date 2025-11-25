@@ -7,7 +7,7 @@ cargo-binstall = "latest"
 "cargo:bacon" = "latest"
 
 # once progenitor releases a new version, we can depend on that
-"cargo:https://github.com/oxidecomputer/progenitor" = {version = "branch:update-typify", crate = "cargo-progenitor"}
+"cargo:https://github.com/oxidecomputer/progenitor" = {version = "branch:main", crate = "cargo-progenitor"}
 
 [hooks]
 postinstall = "rustup component add clippy"
