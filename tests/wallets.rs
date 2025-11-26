@@ -109,7 +109,7 @@ async fn test_wallets_raw_sign_with_auth_context() -> Result<()> {
     let wallet_id = get_test_wallet_id_by_type(&client, WalletChainType::Tron, None).await?;
 
     let raw_sign_body = privy_rs::generated::types::RawSign {
-        params: RawSignParams::Variant0 {
+        params: RawSignParams::Hash {
             hash: "0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef".to_string(),
         },
     };
