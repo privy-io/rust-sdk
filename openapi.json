@@ -86,7 +86,27 @@
           "tron"
         ],
         "description": "The wallet chain types that support curve-based signing.",
-        "title": "CurveSigningChainType"
+        "title": "CurveSigningChainType",
+        "x-stainless-model": "wallets.curve_signing_chain_type"
+      },
+      "ExtendedChainType": {
+        "type": "string",
+        "enum": [
+          "aptos",
+          "bitcoin-segwit",
+          "cosmos",
+          "movement",
+          "near",
+          "spark",
+          "starknet",
+          "stellar",
+          "sui",
+          "ton",
+          "tron"
+        ],
+        "description": "The wallet chain types that are not first class chains.",
+        "title": "ExtendedChainType",
+        "x-stainless-model": "wallets.extended_chain_type"
       },
       "FirstClassChainType": {
         "type": "string",
@@ -95,7 +115,8 @@
           "solana"
         ],
         "description": "The wallet chain types that offer first class support.",
-        "title": "FirstClassChainType"
+        "title": "FirstClassChainType",
+        "x-stainless-model": "wallets.first_class_chain_type"
       },
       "WalletChainType": {
         "type": "string",
@@ -115,7 +136,8 @@
           "tron"
         ],
         "description": "The wallet chain types.",
-        "title": "WalletChainType"
+        "title": "WalletChainType",
+        "x-stainless-model": "wallets.wallet_chain_type"
       },
       "OwnerInput": {
         "description": "The owner of the resource. If you provide this, do not specify an owner_id as it will be generated automatically. When updating a wallet, you can set the owner to null to remove the owner.",
@@ -198,6 +220,600 @@
             "$ref": "#/components/schemas/CustomOAuthProviderID"
           }
         ]
+      },
+      "AnalyticsEventInput": {
+        "type": "object",
+        "properties": {
+          "event_name": {
+            "type": "string",
+            "maxLength": 64,
+            "pattern": "^[a-z0-9_-]+$"
+          },
+          "client_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "payload": {
+            "type": "object",
+            "additionalProperties": {
+              "nullable": true
+            }
+          }
+        },
+        "required": [
+          "event_name"
+        ],
+        "description": "The input for capturing an analytics event.",
+        "title": "AnalyticsEventInput",
+        "x-stainless-model": "analytics.analytics_event_input"
+      },
+      "WalletCustodian": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "description": "Information about the custodian managing this wallet.",
+        "title": "WalletCustodian",
+        "x-stainless-model": "wallets.wallet_custodian"
+      },
+      "AppResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "logo_url": {
+            "type": "string",
+            "nullable": true
+          },
+          "icon_url": {
+            "type": "string",
+            "nullable": true
+          },
+          "terms_and_conditions_url": {
+            "type": "string",
+            "nullable": true
+          },
+          "privacy_policy_url": {
+            "type": "string",
+            "nullable": true
+          },
+          "require_users_accept_terms": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "theme": {
+            "type": "string"
+          },
+          "accent_color": {
+            "type": "string",
+            "nullable": true
+          },
+          "show_wallet_login_first": {
+            "type": "boolean"
+          },
+          "allowed_domains": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "allowed_native_app_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "allowed_native_app_url_schemes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "wallet_auth": {
+            "type": "boolean"
+          },
+          "email_auth": {
+            "type": "boolean"
+          },
+          "sms_auth": {
+            "type": "boolean"
+          },
+          "google_oauth": {
+            "type": "boolean"
+          },
+          "twitter_oauth": {
+            "type": "boolean"
+          },
+          "discord_oauth": {
+            "type": "boolean"
+          },
+          "github_oauth": {
+            "type": "boolean"
+          },
+          "spotify_oauth": {
+            "type": "boolean"
+          },
+          "instagram_oauth": {
+            "type": "boolean"
+          },
+          "tiktok_oauth": {
+            "type": "boolean"
+          },
+          "line_oauth": {
+            "type": "boolean"
+          },
+          "twitch_oauth": {
+            "type": "boolean"
+          },
+          "linkedin_oauth": {
+            "type": "boolean"
+          },
+          "apple_oauth": {
+            "type": "boolean"
+          },
+          "custom_oauth_providers": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "provider": {
+                  "$ref": "#/components/schemas/CustomOAuthProviderID"
+                },
+                "provider_display_name": {
+                  "type": "string"
+                },
+                "provider_icon_url": {
+                  "type": "string"
+                },
+                "enabled": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "provider",
+                "provider_display_name",
+                "provider_icon_url",
+                "enabled"
+              ]
+            }
+          },
+          "farcaster_auth": {
+            "type": "boolean"
+          },
+          "passkey_auth": {
+            "type": "boolean"
+          },
+          "passkeys_for_signup_enabled": {
+            "type": "boolean"
+          },
+          "telegram_auth": {
+            "type": "boolean"
+          },
+          "guest_auth": {
+            "type": "boolean"
+          },
+          "solana_wallet_auth": {
+            "type": "boolean"
+          },
+          "custom_jwt_auth": {
+            "type": "boolean"
+          },
+          "disable_plus_emails": {
+            "type": "boolean"
+          },
+          "allowlist_enabled": {
+            "type": "boolean"
+          },
+          "allowlist_config": {
+            "type": "object",
+            "properties": {
+              "error_title": {
+                "type": "string",
+                "nullable": true
+              },
+              "error_detail": {
+                "type": "string",
+                "nullable": true
+              },
+              "cta_text": {
+                "type": "string",
+                "nullable": true
+              },
+              "cta_link": {
+                "type": "string",
+                "nullable": true
+              }
+            },
+            "required": [
+              "error_title",
+              "error_detail",
+              "cta_text",
+              "cta_link"
+            ]
+          },
+          "wallet_connect_cloud_project_id": {
+            "type": "string",
+            "nullable": true
+          },
+          "custom_api_url": {
+            "type": "string",
+            "nullable": true
+          },
+          "embedded_wallet_config": {
+            "type": "object",
+            "properties": {
+              "create_on_login": {
+                "type": "string",
+                "enum": [
+                  "all-users",
+                  "off",
+                  "users-without-wallets"
+                ]
+              },
+              "ethereum": {
+                "type": "object",
+                "properties": {
+                  "create_on_login": {
+                    "type": "string",
+                    "enum": [
+                      "all-users",
+                      "off",
+                      "users-without-wallets"
+                    ]
+                  }
+                },
+                "required": [
+                  "create_on_login"
+                ]
+              },
+              "solana": {
+                "type": "object",
+                "properties": {
+                  "create_on_login": {
+                    "type": "string",
+                    "enum": [
+                      "all-users",
+                      "off",
+                      "users-without-wallets"
+                    ]
+                  }
+                },
+                "required": [
+                  "create_on_login"
+                ]
+              },
+              "user_owned_recovery_options": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "google-drive",
+                    "icloud",
+                    "user-passcode"
+                  ]
+                }
+              },
+              "require_user_owned_recovery_on_create": {
+                "type": "boolean"
+              },
+              "require_user_password_on_create": {
+                "type": "boolean"
+              },
+              "mode": {
+                "type": "string",
+                "enum": [
+                  "legacy-embedded-wallets-only",
+                  "user-controlled-server-wallets-only"
+                ]
+              }
+            },
+            "required": [
+              "create_on_login",
+              "ethereum",
+              "solana",
+              "user_owned_recovery_options",
+              "mode"
+            ]
+          },
+          "enforce_wallet_uis": {
+            "type": "boolean"
+          },
+          "legacy_wallet_ui_config": {
+            "type": "boolean"
+          },
+          "fiat_on_ramp_enabled": {
+            "type": "boolean"
+          },
+          "captcha_enabled": {
+            "type": "boolean"
+          },
+          "enabled_captcha_provider": {
+            "type": "string",
+            "nullable": true,
+            "enum": [
+              "hcaptcha",
+              "turnstile"
+            ]
+          },
+          "twitter_oauth_on_mobile_enabled": {
+            "type": "boolean"
+          },
+          "mfa_methods": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "passkey",
+                "sms",
+                "totp"
+              ]
+            }
+          },
+          "captcha_site_key": {
+            "type": "string"
+          },
+          "verification_key": {
+            "type": "string"
+          },
+          "telegram_auth_config": {
+            "type": "object",
+            "properties": {
+              "bot_id": {
+                "type": "string"
+              },
+              "bot_name": {
+                "type": "string"
+              },
+              "link_enabled": {
+                "type": "boolean"
+              },
+              "seamless_auth_enabled": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "bot_id",
+              "bot_name",
+              "link_enabled",
+              "seamless_auth_enabled"
+            ]
+          },
+          "funding_config": {
+            "type": "object",
+            "properties": {
+              "default_recommended_currency": {
+                "type": "object",
+                "properties": {
+                  "chain": {
+                    "type": "string"
+                  },
+                  "asset": {
+                    "type": "string",
+                    "enum": [
+                      "USDC",
+                      "native-currency"
+                    ]
+                  }
+                },
+                "required": [
+                  "chain"
+                ]
+              },
+              "default_recommended_amount": {
+                "type": "string"
+              },
+              "methods": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "coinbase-onramp",
+                    "external",
+                    "moonpay"
+                  ]
+                }
+              },
+              "options": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "method": {
+                      "type": "string"
+                    },
+                    "provider": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "method",
+                    "provider"
+                  ]
+                }
+              },
+              "prompt_funding_on_wallet_creation": {
+                "type": "boolean"
+              },
+              "cross_chain_bridging_enabled": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "default_recommended_currency",
+              "default_recommended_amount",
+              "methods",
+              "options",
+              "prompt_funding_on_wallet_creation",
+              "cross_chain_bridging_enabled"
+            ]
+          },
+          "max_linked_wallets_per_user": {
+            "type": "number",
+            "nullable": true
+          },
+          "farcaster_link_wallets_enabled": {
+            "type": "boolean"
+          },
+          "whatsapp_enabled": {
+            "type": "boolean"
+          },
+          "smart_wallet_config": {
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "enabled": {
+                    "type": "boolean",
+                    "enum": [
+                      false
+                    ]
+                  }
+                },
+                "required": [
+                  "enabled"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "enabled": {
+                    "type": "boolean",
+                    "enum": [
+                      true
+                    ]
+                  },
+                  "smart_wallet_type": {
+                    "type": "string",
+                    "enum": [
+                      "biconomy",
+                      "coinbase_smart_wallet",
+                      "kernel",
+                      "light_account",
+                      "safe",
+                      "thirdweb"
+                    ]
+                  },
+                  "smart_wallet_version": {
+                    "type": "string"
+                  },
+                  "configured_networks": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "chain_id": {
+                          "type": "string",
+                          "pattern": "^eip155:\\d+$"
+                        },
+                        "bundler_url": {
+                          "type": "string"
+                        },
+                        "paymaster_url": {
+                          "type": "string"
+                        },
+                        "rpc_url": {
+                          "type": "string"
+                        },
+                        "chain_name": {
+                          "type": "string"
+                        },
+                        "paymaster_context": {
+                          "type": "object",
+                          "properties": {
+                            "policy_id": {
+                              "type": "string",
+                              "format": "uuid"
+                            }
+                          },
+                          "required": [
+                            "policy_id"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "chain_id",
+                        "bundler_url"
+                      ]
+                    },
+                    "minItems": 1
+                  }
+                },
+                "required": [
+                  "enabled",
+                  "smart_wallet_type",
+                  "configured_networks"
+                ]
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "logo_url",
+          "icon_url",
+          "terms_and_conditions_url",
+          "privacy_policy_url",
+          "require_users_accept_terms",
+          "theme",
+          "accent_color",
+          "show_wallet_login_first",
+          "allowed_domains",
+          "allowed_native_app_ids",
+          "allowed_native_app_url_schemes",
+          "wallet_auth",
+          "email_auth",
+          "sms_auth",
+          "google_oauth",
+          "twitter_oauth",
+          "discord_oauth",
+          "github_oauth",
+          "spotify_oauth",
+          "instagram_oauth",
+          "tiktok_oauth",
+          "line_oauth",
+          "twitch_oauth",
+          "linkedin_oauth",
+          "apple_oauth",
+          "custom_oauth_providers",
+          "farcaster_auth",
+          "passkey_auth",
+          "passkeys_for_signup_enabled",
+          "telegram_auth",
+          "guest_auth",
+          "solana_wallet_auth",
+          "custom_jwt_auth",
+          "disable_plus_emails",
+          "allowlist_enabled",
+          "allowlist_config",
+          "wallet_connect_cloud_project_id",
+          "custom_api_url",
+          "embedded_wallet_config",
+          "enforce_wallet_uis",
+          "legacy_wallet_ui_config",
+          "fiat_on_ramp_enabled",
+          "captcha_enabled",
+          "enabled_captcha_provider",
+          "twitter_oauth_on_mobile_enabled",
+          "mfa_methods",
+          "verification_key",
+          "max_linked_wallets_per_user",
+          "farcaster_link_wallets_enabled",
+          "whatsapp_enabled",
+          "smart_wallet_config"
+        ],
+        "description": "The response for getting an app.",
+        "title": "AppResponse",
+        "x-stainless-model": "apps.app_response"
       },
       "KrakenEmbedGetAssetListQueryParamsSchema": {
         "type": "object",
@@ -590,7 +1206,10 @@
         "required": [
           "method",
           "params"
-        ]
+        ],
+        "description": "Executes the EVM `personal_sign` RPC (EIP-191) to sign a message.",
+        "title": "EthereumPersonalSignRpcInput",
+        "x-stainless-model": "wallets.ethereum_personal_sign_rpc_input"
       },
       "EthereumSignTransactionRpcInput": {
         "type": "object",
@@ -742,7 +1361,10 @@
         "required": [
           "method",
           "params"
-        ]
+        ],
+        "description": "Executes the EVM `eth_signTransaction` RPC to sign a transaction.",
+        "title": "EthereumSignTransactionRpcInput",
+        "x-stainless-model": "wallets.ethereum_sign_transaction_rpc_input"
       },
       "EthereumSendTransactionRpcInput": {
         "type": "object",
@@ -902,7 +1524,10 @@
           "method",
           "caip2",
           "params"
-        ]
+        ],
+        "description": "Executes the EVM `eth_sendTransaction` RPC to sign and broadcast a transaction.",
+        "title": "EthereumSendTransactionRpcInput",
+        "x-stainless-model": "wallets.ethereum_send_transaction_rpc_input"
       },
       "EthereumSignTypedDataRpcInput": {
         "type": "object",
@@ -981,7 +1606,117 @@
         "required": [
           "method",
           "params"
-        ]
+        ],
+        "description": "Executes the EVM `eth_signTypedData_v4` RPC (EIP-712) to sign a typed data object.",
+        "title": "EthereumSignTypedDataRpcInput",
+        "x-stainless-model": "wallets.ethereum_sign_typed_data_rpc_input"
+      },
+      "EthereumSignUserOperationRpcInput": {
+        "type": "object",
+        "properties": {
+          "method": {
+            "type": "string",
+            "enum": [
+              "eth_signUserOperation"
+            ]
+          },
+          "params": {
+            "type": "object",
+            "properties": {
+              "contract": {
+                "type": "string"
+              },
+              "user_operation": {
+                "type": "object",
+                "properties": {
+                  "sender": {
+                    "type": "string"
+                  },
+                  "nonce": {
+                    "type": "string"
+                  },
+                  "call_data": {
+                    "type": "string"
+                  },
+                  "paymaster": {
+                    "type": "string"
+                  },
+                  "paymaster_data": {
+                    "type": "string"
+                  },
+                  "paymaster_post_op_gas_limit": {
+                    "type": "string"
+                  },
+                  "paymaster_verification_gas_limit": {
+                    "type": "string"
+                  },
+                  "max_priority_fee_per_gas": {
+                    "type": "string"
+                  },
+                  "max_fee_per_gas": {
+                    "type": "string"
+                  },
+                  "call_gas_limit": {
+                    "type": "string"
+                  },
+                  "verification_gas_limit": {
+                    "type": "string"
+                  },
+                  "pre_verification_gas": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "sender",
+                  "nonce",
+                  "call_data",
+                  "paymaster",
+                  "paymaster_data",
+                  "paymaster_post_op_gas_limit",
+                  "paymaster_verification_gas_limit",
+                  "max_priority_fee_per_gas",
+                  "max_fee_per_gas",
+                  "call_gas_limit",
+                  "verification_gas_limit",
+                  "pre_verification_gas"
+                ]
+              },
+              "chain_id": {
+                "oneOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "integer",
+                    "minimum": -9007199254740991,
+                    "maximum": 9007199254740991
+                  }
+                ]
+              }
+            },
+            "required": [
+              "contract",
+              "user_operation",
+              "chain_id"
+            ]
+          },
+          "address": {
+            "type": "string"
+          },
+          "chain_type": {
+            "type": "string",
+            "enum": [
+              "ethereum"
+            ]
+          }
+        },
+        "required": [
+          "method",
+          "params"
+        ],
+        "description": "Executes an RPC method to hash and sign a UserOperation.",
+        "title": "EthereumSignUserOperationRpcInput",
+        "x-stainless-model": "wallets.ethereum_sign_user_operation_rpc_input"
       },
       "EthereumSign7702AuthorizationRpcInput": {
         "type": "object",
@@ -1041,7 +1776,10 @@
         "required": [
           "method",
           "params"
-        ]
+        ],
+        "description": "Signs an EIP-7702 authorization.",
+        "title": "EthereumSign7702AuthorizationRpcInput",
+        "x-stainless-model": "wallets.ethereum_sign_7702_authorization_rpc_input"
       },
       "EthereumSecp256k1SignRpcInput": {
         "type": "object",
@@ -1076,7 +1814,10 @@
         "required": [
           "method",
           "params"
-        ]
+        ],
+        "description": "Signs a raw hash on the secp256k1 curve.",
+        "title": "EthereumSecp256k1SignRpcInput",
+        "x-stainless-model": "wallets.ethereum_secp_256k_1_sign_rpc_input"
       },
       "SolanaSignTransactionRpcInput": {
         "type": "object",
@@ -1118,7 +1859,10 @@
         "required": [
           "method",
           "params"
-        ]
+        ],
+        "description": "Executes the SVM `signTransaction` RPC to sign a transaction.",
+        "title": "SolanaSignTransactionRpcInput",
+        "x-stainless-model": "wallets.solana_sign_transaction_rpc_input"
       },
       "SolanaSignAndSendTransactionRpcInput": {
         "type": "object",
@@ -1168,7 +1912,10 @@
           "method",
           "caip2",
           "params"
-        ]
+        ],
+        "description": "Executes the SVM `signAndSendTransaction` RPC to sign and broadcast a transaction.",
+        "title": "SolanaSignAndSendTransactionRpcInput",
+        "x-stainless-model": "wallets.solana_sign_and_send_transaction_rpc_input"
       },
       "SolanaSignMessageRpcInput": {
         "type": "object",
@@ -1210,7 +1957,10 @@
         "required": [
           "method",
           "params"
-        ]
+        ],
+        "description": "Executes the SVM `signMessage` RPC to sign a message.",
+        "title": "SolanaSignMessageRpcInput",
+        "x-stainless-model": "wallets.solana_sign_message_rpc_input"
       },
       "EthereumSignTransactionRpcResponse": {
         "type": "object",
@@ -1243,7 +1993,10 @@
         "required": [
           "method",
           "data"
-        ]
+        ],
+        "description": "Response to the EVM `eth_signTransaction` RPC.",
+        "title": "EthereumSignTransactionRpcResponse",
+        "x-stainless-model": "wallets.ethereum_sign_transaction_rpc_response"
       },
       "EthereumSendTransactionRpcResponse": {
         "type": "object",
@@ -1397,7 +2150,10 @@
         "required": [
           "method",
           "data"
-        ]
+        ],
+        "description": "Response to the EVM `eth_sendTransaction` RPC.",
+        "title": "EthereumSendTransactionRpcResponse",
+        "x-stainless-model": "wallets.ethereum_send_transaction_rpc_response"
       },
       "EthereumPersonalSignRpcResponse": {
         "type": "object",
@@ -1430,7 +2186,10 @@
         "required": [
           "method",
           "data"
-        ]
+        ],
+        "description": "Response to the EVM `personal_sign` RPC.",
+        "title": "EthereumPersonalSignRpcResponse",
+        "x-stainless-model": "wallets.ethereum_personal_sign_rpc_response"
       },
       "EthereumSignTypedDataRpcResponse": {
         "type": "object",
@@ -1463,7 +2222,46 @@
         "required": [
           "method",
           "data"
-        ]
+        ],
+        "description": "Response to the EVM `eth_signTypedData_v4` RPC.",
+        "title": "EthereumSignTypedDataRpcResponse",
+        "x-stainless-model": "wallets.ethereum_sign_typed_data_rpc_response"
+      },
+      "EthereumSignUserOperationRpcResponse": {
+        "type": "object",
+        "properties": {
+          "method": {
+            "type": "string",
+            "enum": [
+              "eth_signUserOperation"
+            ]
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "signature": {
+                "type": "string"
+              },
+              "encoding": {
+                "type": "string",
+                "enum": [
+                  "hex"
+                ]
+              }
+            },
+            "required": [
+              "signature",
+              "encoding"
+            ]
+          }
+        },
+        "required": [
+          "method",
+          "data"
+        ],
+        "description": "Response to the EVM `eth_signUserOperation` RPC.",
+        "title": "EthereumSignUserOperationRpcResponse",
+        "x-stainless-model": "wallets.ethereum_sign_user_operation_rpc_response"
       },
       "EthereumSign7702AuthorizationRpcResponse": {
         "type": "object",
@@ -1535,7 +2333,10 @@
         "required": [
           "method",
           "data"
-        ]
+        ],
+        "description": "Response to the EVM `eth_sign7702Authorization` RPC.",
+        "title": "EthereumSign7702AuthorizationRpcResponse",
+        "x-stainless-model": "wallets.ethereum_sign_7702_authorization_rpc_response"
       },
       "EthereumSecp256k1SignRpcResponse": {
         "type": "object",
@@ -1568,7 +2369,10 @@
         "required": [
           "method",
           "data"
-        ]
+        ],
+        "description": "Response to the EVM `secp256k1_sign` RPC.",
+        "title": "EthereumSecp256k1SignRpcResponse",
+        "x-stainless-model": "wallets.ethereum_secp_256k_1_sign_rpc_response"
       },
       "SolanaSignTransactionRpcResponse": {
         "type": "object",
@@ -1601,7 +2405,10 @@
         "required": [
           "method",
           "data"
-        ]
+        ],
+        "description": "Response to the SVM `signTransaction` RPC.",
+        "title": "SolanaSignTransactionRpcResponse",
+        "x-stainless-model": "wallets.solana_sign_transaction_rpc_response"
       },
       "SolanaSignAndSendTransactionRpcResponse": {
         "type": "object",
@@ -1635,7 +2442,10 @@
         "required": [
           "method",
           "data"
-        ]
+        ],
+        "description": "Response to the SVM `signAndSendTransaction` RPC.",
+        "title": "SolanaSignAndSendTransactionRpcResponse",
+        "x-stainless-model": "wallets.solana_sign_and_send_transaction_rpc_response"
       },
       "SolanaSignMessageRpcResponse": {
         "type": "object",
@@ -1668,7 +2478,10 @@
         "required": [
           "method",
           "data"
-        ]
+        ],
+        "description": "Response to the SVM `signMessage` RPC.",
+        "title": "SolanaSignMessageRpcResponse",
+        "x-stainless-model": "wallets.solana_sign_message_rpc_response"
       },
       "HPKEEncryption": {
         "type": "string",
@@ -1688,6 +2501,12 @@
       "RawSignResponse": {
         "type": "object",
         "properties": {
+          "method": {
+            "type": "string",
+            "enum": [
+              "raw_sign"
+            ]
+          },
           "data": {
             "type": "object",
             "properties": {
@@ -1708,6 +2527,7 @@
           }
         },
         "required": [
+          "method",
           "data"
         ]
       },
@@ -4451,7 +5271,8 @@
         "type": "string",
         "enum": [
           "ethereum",
-          "solana"
+          "solana",
+          "tron"
         ],
         "description": "The chain type the policy applies to."
       },
@@ -4809,6 +5630,44 @@
         "description": "System attributes, including current unix timestamp (in seconds).",
         "title": "system"
       },
+      "TronTransactionCondition": {
+        "type": "object",
+        "properties": {
+          "field_source": {
+            "type": "string",
+            "enum": [
+              "tron_transaction"
+            ]
+          },
+          "field": {
+            "type": "string",
+            "enum": [
+              "TransferContract.amount",
+              "TransferContract.to_address",
+              "TriggerSmartContract.call_token_value",
+              "TriggerSmartContract.call_value",
+              "TriggerSmartContract.contract_address",
+              "TriggerSmartContract.token_id"
+            ],
+            "description": "Supported TRON transaction fields in format \"TransactionType.field_name\"",
+            "title": "TronTransactionConditionField"
+          },
+          "operator": {
+            "$ref": "#/components/schemas/ConditionOperator"
+          },
+          "value": {
+            "$ref": "#/components/schemas/ConditionValue"
+          }
+        },
+        "required": [
+          "field_source",
+          "field",
+          "operator",
+          "value"
+        ],
+        "description": "TRON transaction fields for TransferContract and TriggerSmartContract transaction types.",
+        "title": "tron_transaction"
+      },
       "PolicyMethod": {
         "type": "string",
         "enum": [
@@ -4817,9 +5676,11 @@
           "eth_sign7702Authorization",
           "eth_signTransaction",
           "eth_signTypedData_v4",
+          "eth_signUserOperation",
           "exportPrivateKey",
           "signAndSendTransaction",
-          "signTransaction"
+          "signTransaction",
+          "signTransactionBytes"
         ]
       },
       "PolicyCondition": {
@@ -4850,6 +5711,9 @@
           },
           {
             "$ref": "#/components/schemas/SystemCondition"
+          },
+          {
+            "$ref": "#/components/schemas/TronTransactionCondition"
           }
         ],
         "discriminator": {
@@ -4863,7 +5727,8 @@
             "solana_program_instruction": "#/components/schemas/SolanaProgramInstructionCondition",
             "solana_system_program_instruction": "#/components/schemas/SolanaSystemProgramInstructionCondition",
             "solana_token_program_instruction": "#/components/schemas/SolanaTokenProgramInstructionCondition",
-            "system": "#/components/schemas/SystemCondition"
+            "system": "#/components/schemas/SystemCondition",
+            "tron_transaction": "#/components/schemas/TronTransactionCondition"
           }
         },
         "description": "A condition that must be true for the rule action to be applied.",
@@ -6165,485 +7030,1257 @@
           "status"
         ]
       },
-      "AnalyticsEventInput": {
+      "RpcIntentResponse": {
         "type": "object",
         "properties": {
-          "event_name": {
+          "intent_id": {
             "type": "string",
-            "maxLength": 255
+            "description": "Unique ID for the intent"
           },
-          "client_id": {
+          "created_by_display_name": {
             "type": "string",
-            "nullable": true,
-            "maxLength": 255
+            "description": "Display name of the user who created the intent"
           },
-          "payload": {
-            "type": "object",
-            "additionalProperties": {
-              "nullable": true
-            }
-          }
-        },
-        "required": [
-          "event_name",
-          "client_id"
-        ],
-        "description": "The input for capturing an analytics event.",
-        "title": "AnalyticsEventInput"
-      },
-      "AppResponse": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "logo_url": {
+          "created_by_id": {
             "type": "string",
-            "nullable": true
+            "description": "ID of the user who created the intent. If undefined, the intent was created using the app secret"
           },
-          "icon_url": {
+          "created_at": {
+            "type": "number",
+            "description": "Unix timestamp when the intent was created"
+          },
+          "resource_id": {
             "type": "string",
-            "nullable": true
+            "description": "ID of the resource being modified (wallet_id, policy_id, etc)"
           },
-          "terms_and_conditions_url": {
-            "type": "string",
-            "nullable": true
-          },
-          "privacy_policy_url": {
-            "type": "string",
-            "nullable": true
-          },
-          "require_users_accept_terms": {
-            "type": "boolean",
-            "nullable": true
-          },
-          "theme": {
-            "type": "string"
-          },
-          "accent_color": {
-            "type": "string",
-            "nullable": true
-          },
-          "show_wallet_login_first": {
-            "type": "boolean"
-          },
-          "allowed_domains": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "allowed_native_app_ids": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "allowed_native_app_url_schemes": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "wallet_auth": {
-            "type": "boolean"
-          },
-          "email_auth": {
-            "type": "boolean"
-          },
-          "sms_auth": {
-            "type": "boolean"
-          },
-          "google_oauth": {
-            "type": "boolean"
-          },
-          "twitter_oauth": {
-            "type": "boolean"
-          },
-          "discord_oauth": {
-            "type": "boolean"
-          },
-          "github_oauth": {
-            "type": "boolean"
-          },
-          "spotify_oauth": {
-            "type": "boolean"
-          },
-          "instagram_oauth": {
-            "type": "boolean"
-          },
-          "tiktok_oauth": {
-            "type": "boolean"
-          },
-          "line_oauth": {
-            "type": "boolean"
-          },
-          "twitch_oauth": {
-            "type": "boolean"
-          },
-          "linkedin_oauth": {
-            "type": "boolean"
-          },
-          "apple_oauth": {
-            "type": "boolean"
-          },
-          "custom_oauth_providers": {
+          "authorization_details": {
             "type": "array",
             "items": {
               "type": "object",
               "properties": {
-                "provider": {
-                  "$ref": "#/components/schemas/CustomOAuthProviderID"
+                "members": {
+                  "type": "array",
+                  "items": {
+                    "oneOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "string",
+                            "enum": [
+                              "user"
+                            ]
+                          },
+                          "user_id": {
+                            "type": "string",
+                            "description": "User ID of the key quorum member"
+                          },
+                          "display_name": {
+                            "type": "string",
+                            "description": "Display name for the user (email, etc)"
+                          },
+                          "has_signed": {
+                            "type": "boolean",
+                            "description": "Whether this member has signed the intent"
+                          }
+                        },
+                        "required": [
+                          "type",
+                          "user_id",
+                          "has_signed"
+                        ],
+                        "title": "User member"
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "string",
+                            "enum": [
+                              "key"
+                            ]
+                          },
+                          "public_key": {
+                            "type": "string",
+                            "description": "Public key of the key quorum member"
+                          },
+                          "display_name": {
+                            "type": "string",
+                            "description": "Display name for the key (if any)"
+                          },
+                          "has_signed": {
+                            "type": "boolean",
+                            "description": "Whether this key has signed the intent"
+                          }
+                        },
+                        "required": [
+                          "type",
+                          "public_key",
+                          "has_signed"
+                        ],
+                        "title": "Key member"
+                      }
+                    ]
+                  },
+                  "description": "Members in this authorization quorum"
                 },
-                "provider_display_name": {
-                  "type": "string"
+                "threshold": {
+                  "type": "number",
+                  "description": "Number of signatures required from this quorum"
                 },
-                "provider_icon_url": {
-                  "type": "string"
-                },
-                "enabled": {
-                  "type": "boolean"
+                "display_name": {
+                  "type": "string",
+                  "description": "Display name of the key quorum"
                 }
               },
               "required": [
-                "provider",
-                "provider_display_name",
-                "provider_icon_url",
-                "enabled"
+                "members",
+                "threshold"
               ]
-            }
-          },
-          "farcaster_auth": {
-            "type": "boolean"
-          },
-          "passkey_auth": {
-            "type": "boolean"
-          },
-          "passkeys_for_signup_enabled": {
-            "type": "boolean"
-          },
-          "telegram_auth": {
-            "type": "boolean"
-          },
-          "guest_auth": {
-            "type": "boolean"
-          },
-          "solana_wallet_auth": {
-            "type": "boolean"
-          },
-          "custom_jwt_auth": {
-            "type": "boolean"
-          },
-          "disable_plus_emails": {
-            "type": "boolean"
-          },
-          "allowlist_enabled": {
-            "type": "boolean"
-          },
-          "allowlist_config": {
-            "type": "object",
-            "properties": {
-              "error_title": {
-                "type": "string",
-                "nullable": true
-              },
-              "error_detail": {
-                "type": "string",
-                "nullable": true
-              },
-              "cta_text": {
-                "type": "string",
-                "nullable": true
-              },
-              "cta_link": {
-                "type": "string",
-                "nullable": true
-              }
             },
-            "required": [
-              "error_title",
-              "error_detail",
-              "cta_text",
-              "cta_link"
-            ]
+            "description": "Detailed authorization information including key quorum members, thresholds, and signature status"
           },
-          "wallet_connect_cloud_project_id": {
+          "status": {
             "type": "string",
-            "nullable": true
+            "enum": [
+              "executed",
+              "expired",
+              "failed",
+              "pending",
+              "rejected"
+            ],
+            "description": "Current status of the intent"
           },
-          "custom_api_url": {
-            "type": "string",
-            "nullable": true
-          },
-          "embedded_wallet_config": {
-            "type": "object",
-            "properties": {
-              "create_on_login": {
-                "type": "string",
-                "enum": [
-                  "all-users",
-                  "off",
-                  "users-without-wallets"
-                ]
-              },
-              "ethereum": {
-                "type": "object",
-                "properties": {
-                  "create_on_login": {
-                    "type": "string",
-                    "enum": [
-                      "all-users",
-                      "off",
-                      "users-without-wallets"
-                    ]
-                  }
-                },
-                "required": [
-                  "create_on_login"
-                ]
-              },
-              "solana": {
-                "type": "object",
-                "properties": {
-                  "create_on_login": {
-                    "type": "string",
-                    "enum": [
-                      "all-users",
-                      "off",
-                      "users-without-wallets"
-                    ]
-                  }
-                },
-                "required": [
-                  "create_on_login"
-                ]
-              },
-              "user_owned_recovery_options": {
-                "type": "array",
-                "items": {
-                  "type": "string",
-                  "enum": [
-                    "google-drive",
-                    "icloud",
-                    "user-passcode"
-                  ]
-                }
-              },
-              "require_user_owned_recovery_on_create": {
-                "type": "boolean"
-              },
-              "require_user_password_on_create": {
-                "type": "boolean"
-              },
-              "mode": {
-                "type": "string",
-                "enum": [
-                  "legacy-embedded-wallets-only",
-                  "user-controlled-server-wallets-only"
-                ]
-              }
-            },
-            "required": [
-              "create_on_login",
-              "ethereum",
-              "solana",
-              "user_owned_recovery_options",
-              "mode"
-            ]
-          },
-          "enforce_wallet_uis": {
-            "type": "boolean"
-          },
-          "legacy_wallet_ui_config": {
-            "type": "boolean"
-          },
-          "fiat_on_ramp_enabled": {
-            "type": "boolean"
-          },
-          "captcha_enabled": {
-            "type": "boolean"
-          },
-          "twitter_oauth_on_mobile_enabled": {
-            "type": "boolean"
-          },
-          "mfa_methods": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "enum": [
-                "passkey",
-                "sms",
-                "totp"
-              ]
-            }
-          },
-          "captcha_site_key": {
-            "type": "string"
-          },
-          "verification_key": {
-            "type": "string"
-          },
-          "telegram_auth_config": {
-            "type": "object",
-            "properties": {
-              "bot_id": {
-                "type": "string"
-              },
-              "bot_name": {
-                "type": "string"
-              },
-              "link_enabled": {
-                "type": "boolean"
-              },
-              "seamless_auth_enabled": {
-                "type": "boolean"
-              }
-            },
-            "required": [
-              "bot_id",
-              "bot_name",
-              "link_enabled",
-              "seamless_auth_enabled"
-            ]
-          },
-          "funding_config": {
-            "type": "object",
-            "properties": {
-              "default_recommended_currency": {
-                "type": "object",
-                "properties": {
-                  "chain": {
-                    "type": "string"
-                  },
-                  "asset": {
-                    "type": "string",
-                    "enum": [
-                      "USDC",
-                      "native-currency"
-                    ]
-                  }
-                },
-                "required": [
-                  "chain"
-                ]
-              },
-              "default_recommended_amount": {
-                "type": "string"
-              },
-              "methods": {
-                "type": "array",
-                "items": {
-                  "type": "string",
-                  "enum": [
-                    "coinbase-onramp",
-                    "external",
-                    "moonpay"
-                  ]
-                }
-              },
-              "options": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "method": {
-                      "type": "string"
-                    },
-                    "provider": {
-                      "type": "string"
-                    }
-                  },
-                  "required": [
-                    "method",
-                    "provider"
-                  ]
-                }
-              },
-              "prompt_funding_on_wallet_creation": {
-                "type": "boolean"
-              },
-              "cross_chain_bridging_enabled": {
-                "type": "boolean"
-              }
-            },
-            "required": [
-              "default_recommended_currency",
-              "default_recommended_amount",
-              "methods",
-              "options",
-              "prompt_funding_on_wallet_creation",
-              "cross_chain_bridging_enabled"
-            ]
-          },
-          "max_linked_wallets_per_user": {
+          "expires_at": {
             "type": "number",
-            "nullable": true
+            "description": "Unix timestamp when the intent expires"
           },
-          "farcaster_link_wallets_enabled": {
-            "type": "boolean"
+          "intent_type": {
+            "type": "string",
+            "enum": [
+              "RPC"
+            ]
           },
-          "whatsapp_enabled": {
-            "type": "boolean"
+          "request_details": {
+            "type": "object",
+            "properties": {
+              "method": {
+                "type": "string",
+                "enum": [
+                  "POST"
+                ]
+              },
+              "url": {
+                "type": "string"
+              },
+              "body": {
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/EthereumPersonalSignRpcInput"
+                  },
+                  {
+                    "$ref": "#/components/schemas/EthereumSignTypedDataRpcInput"
+                  },
+                  {
+                    "$ref": "#/components/schemas/EthereumSignTransactionRpcInput"
+                  },
+                  {
+                    "$ref": "#/components/schemas/EthereumSignUserOperationRpcInput"
+                  },
+                  {
+                    "$ref": "#/components/schemas/EthereumSendTransactionRpcInput"
+                  },
+                  {
+                    "$ref": "#/components/schemas/EthereumSign7702AuthorizationRpcInput"
+                  },
+                  {
+                    "$ref": "#/components/schemas/EthereumSecp256k1SignRpcInput"
+                  },
+                  {
+                    "$ref": "#/components/schemas/SolanaSignMessageRpcInput"
+                  },
+                  {
+                    "$ref": "#/components/schemas/SolanaSignTransactionRpcInput"
+                  },
+                  {
+                    "$ref": "#/components/schemas/SolanaSignAndSendTransactionRpcInput"
+                  }
+                ],
+                "discriminator": {
+                  "propertyName": "method",
+                  "mapping": {
+                    "personal_sign": "#/components/schemas/EthereumPersonalSignRpcInput",
+                    "eth_signTypedData_v4": "#/components/schemas/EthereumSignTypedDataRpcInput",
+                    "eth_signTransaction": "#/components/schemas/EthereumSignTransactionRpcInput",
+                    "eth_signUserOperation": "#/components/schemas/EthereumSignUserOperationRpcInput",
+                    "eth_sendTransaction": "#/components/schemas/EthereumSendTransactionRpcInput",
+                    "eth_sign7702Authorization": "#/components/schemas/EthereumSign7702AuthorizationRpcInput",
+                    "secp256k1_sign": "#/components/schemas/EthereumSecp256k1SignRpcInput",
+                    "signMessage": "#/components/schemas/SolanaSignMessageRpcInput",
+                    "signTransaction": "#/components/schemas/SolanaSignTransactionRpcInput",
+                    "signAndSendTransaction": "#/components/schemas/SolanaSignAndSendTransactionRpcInput"
+                  }
+                }
+              }
+            },
+            "required": [
+              "method",
+              "url",
+              "body"
+            ],
+            "description": "The original RPC request that would be sent to the wallet endpoint"
+          },
+          "current_resource_data": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Wallet"
+              },
+              {
+                "description": "Current state of the wallet before any changes. If undefined, the resource was deleted and no longer exists"
+              }
+            ]
+          },
+          "action_result": {
+            "type": "object",
+            "properties": {
+              "status_code": {
+                "type": "number",
+                "description": "HTTP status code from the action execution"
+              },
+              "executed_at": {
+                "type": "number",
+                "description": "Unix timestamp when the action was executed"
+              },
+              "authorized_by_display_name": {
+                "type": "string",
+                "description": "Display name of the key quorum that authorized execution"
+              },
+              "authorized_by_id": {
+                "type": "string",
+                "description": "ID of the key quorum that authorized execution"
+              },
+              "response_body": {
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/EthereumPersonalSignRpcResponse"
+                  },
+                  {
+                    "$ref": "#/components/schemas/EthereumSignTypedDataRpcResponse"
+                  },
+                  {
+                    "$ref": "#/components/schemas/EthereumSignTransactionRpcResponse"
+                  },
+                  {
+                    "$ref": "#/components/schemas/EthereumSendTransactionRpcResponse"
+                  },
+                  {
+                    "$ref": "#/components/schemas/EthereumSignUserOperationRpcResponse"
+                  },
+                  {
+                    "$ref": "#/components/schemas/EthereumSign7702AuthorizationRpcResponse"
+                  },
+                  {
+                    "$ref": "#/components/schemas/EthereumSecp256k1SignRpcResponse"
+                  },
+                  {
+                    "$ref": "#/components/schemas/SolanaSignMessageRpcResponse"
+                  },
+                  {
+                    "$ref": "#/components/schemas/SolanaSignTransactionRpcResponse"
+                  },
+                  {
+                    "$ref": "#/components/schemas/SolanaSignAndSendTransactionRpcResponse"
+                  }
+                ],
+                "discriminator": {
+                  "propertyName": "method",
+                  "mapping": {
+                    "personal_sign": "#/components/schemas/EthereumPersonalSignRpcResponse",
+                    "eth_signTypedData_v4": "#/components/schemas/EthereumSignTypedDataRpcResponse",
+                    "eth_signTransaction": "#/components/schemas/EthereumSignTransactionRpcResponse",
+                    "eth_sendTransaction": "#/components/schemas/EthereumSendTransactionRpcResponse",
+                    "eth_signUserOperation": "#/components/schemas/EthereumSignUserOperationRpcResponse",
+                    "eth_sign7702Authorization": "#/components/schemas/EthereumSign7702AuthorizationRpcResponse",
+                    "secp256k1_sign": "#/components/schemas/EthereumSecp256k1SignRpcResponse",
+                    "signMessage": "#/components/schemas/SolanaSignMessageRpcResponse",
+                    "signTransaction": "#/components/schemas/SolanaSignTransactionRpcResponse",
+                    "signAndSendTransaction": "#/components/schemas/SolanaSignAndSendTransactionRpcResponse"
+                  }
+                },
+                "example": {
+                  "method": "eth_sendTransaction",
+                  "data": {
+                    "hash": "0x0775aeed9c9ce6e0fbc4db25c5e4e6368029651c905c286f813126a09025a21e",
+                    "caip2": "eip155:8453",
+                    "transaction_request": {
+                      "nonce": 1,
+                      "to": "0xF1DBff66C993EE895C8cb176c30b07A559d76496",
+                      "from": "0x38Bc05d7b69F63D05337829fA5Dc4896F179B5fA",
+                      "value": "0x1",
+                      "gas_limit": "0x5208",
+                      "max_fee_per_gas": "0xfc328",
+                      "max_priority_fee_per_gas": "0xf4240",
+                      "type": 2,
+                      "chain_id": "1"
+                    }
+                  }
+                }
+              }
+            },
+            "required": [
+              "status_code",
+              "executed_at",
+              "response_body"
+            ],
+            "description": "Result of RPC execution (only present if status is 'executed' or 'failed')"
           }
         },
         "required": [
-          "id",
-          "name",
-          "logo_url",
-          "icon_url",
-          "terms_and_conditions_url",
-          "privacy_policy_url",
-          "require_users_accept_terms",
-          "theme",
-          "accent_color",
-          "show_wallet_login_first",
-          "allowed_domains",
-          "allowed_native_app_ids",
-          "allowed_native_app_url_schemes",
-          "wallet_auth",
-          "email_auth",
-          "sms_auth",
-          "google_oauth",
-          "twitter_oauth",
-          "discord_oauth",
-          "github_oauth",
-          "spotify_oauth",
-          "instagram_oauth",
-          "tiktok_oauth",
-          "line_oauth",
-          "twitch_oauth",
-          "linkedin_oauth",
-          "apple_oauth",
-          "custom_oauth_providers",
-          "farcaster_auth",
-          "passkey_auth",
-          "passkeys_for_signup_enabled",
-          "telegram_auth",
-          "guest_auth",
-          "solana_wallet_auth",
-          "custom_jwt_auth",
-          "disable_plus_emails",
-          "allowlist_enabled",
-          "allowlist_config",
-          "wallet_connect_cloud_project_id",
-          "custom_api_url",
-          "embedded_wallet_config",
-          "enforce_wallet_uis",
-          "legacy_wallet_ui_config",
-          "fiat_on_ramp_enabled",
-          "captcha_enabled",
-          "twitter_oauth_on_mobile_enabled",
-          "mfa_methods",
-          "verification_key",
-          "max_linked_wallets_per_user",
-          "farcaster_link_wallets_enabled",
-          "whatsapp_enabled"
+          "intent_id",
+          "created_by_display_name",
+          "created_at",
+          "resource_id",
+          "authorization_details",
+          "status",
+          "expires_at",
+          "intent_type",
+          "request_details"
         ],
-        "description": "The response for getting an app.",
-        "title": "AppResponse"
+        "description": "Response for an RPC intent creation request",
+        "example": {
+          "intent_id": "clpq1234567890abcdefghij",
+          "intent_type": "RPC",
+          "created_by_display_name": "developer@example.com",
+          "created_by_id": "did:privy:clabcd123",
+          "created_at": 1741834854578,
+          "resource_id": "xs76o3pi0v5syd62ui1wmijw",
+          "authorization_details": [
+            {
+              "members": [
+                {
+                  "type": "user",
+                  "user_id": "did:privy:clabcd123",
+                  "display_name": "admin@example.com",
+                  "has_signed": false
+                }
+              ],
+              "threshold": 1,
+              "display_name": "Admin Key Quorum"
+            }
+          ],
+          "status": "pending",
+          "expires_at": 1741921254578,
+          "request_details": {
+            "method": "POST",
+            "url": "https://api.privy.io/v1/wallets/xs76o3pi0v5syd62ui1wmijw/rpc",
+            "body": {
+              "method": "eth_sendTransaction",
+              "caip2": "eip155:8453",
+              "chain_type": "ethereum",
+              "params": {
+                "transaction": {
+                  "to": "0x0000000000000000000000000000000000000000",
+                  "value": 1
+                }
+              }
+            }
+          }
+        }
+      },
+      "WalletIntentResponse": {
+        "type": "object",
+        "properties": {
+          "intent_id": {
+            "type": "string",
+            "description": "Unique ID for the intent"
+          },
+          "created_by_display_name": {
+            "type": "string",
+            "description": "Display name of the user who created the intent"
+          },
+          "created_by_id": {
+            "type": "string",
+            "description": "ID of the user who created the intent. If undefined, the intent was created using the app secret"
+          },
+          "created_at": {
+            "type": "number",
+            "description": "Unix timestamp when the intent was created"
+          },
+          "resource_id": {
+            "type": "string",
+            "description": "ID of the resource being modified (wallet_id, policy_id, etc)"
+          },
+          "authorization_details": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "members": {
+                  "type": "array",
+                  "items": {
+                    "oneOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "string",
+                            "enum": [
+                              "user"
+                            ]
+                          },
+                          "user_id": {
+                            "type": "string",
+                            "description": "User ID of the key quorum member"
+                          },
+                          "display_name": {
+                            "type": "string",
+                            "description": "Display name for the user (email, etc)"
+                          },
+                          "has_signed": {
+                            "type": "boolean",
+                            "description": "Whether this member has signed the intent"
+                          }
+                        },
+                        "required": [
+                          "type",
+                          "user_id",
+                          "has_signed"
+                        ],
+                        "title": "User member"
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "string",
+                            "enum": [
+                              "key"
+                            ]
+                          },
+                          "public_key": {
+                            "type": "string",
+                            "description": "Public key of the key quorum member"
+                          },
+                          "display_name": {
+                            "type": "string",
+                            "description": "Display name for the key (if any)"
+                          },
+                          "has_signed": {
+                            "type": "boolean",
+                            "description": "Whether this key has signed the intent"
+                          }
+                        },
+                        "required": [
+                          "type",
+                          "public_key",
+                          "has_signed"
+                        ],
+                        "title": "Key member"
+                      }
+                    ]
+                  },
+                  "description": "Members in this authorization quorum"
+                },
+                "threshold": {
+                  "type": "number",
+                  "description": "Number of signatures required from this quorum"
+                },
+                "display_name": {
+                  "type": "string",
+                  "description": "Display name of the key quorum"
+                }
+              },
+              "required": [
+                "members",
+                "threshold"
+              ]
+            },
+            "description": "Detailed authorization information including key quorum members, thresholds, and signature status"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "executed",
+              "expired",
+              "failed",
+              "pending",
+              "rejected"
+            ],
+            "description": "Current status of the intent"
+          },
+          "expires_at": {
+            "type": "number",
+            "description": "Unix timestamp when the intent expires"
+          },
+          "intent_type": {
+            "type": "string",
+            "enum": [
+              "WALLET"
+            ]
+          },
+          "request_details": {
+            "type": "object",
+            "properties": {
+              "method": {
+                "type": "string",
+                "enum": [
+                  "PATCH"
+                ]
+              },
+              "url": {
+                "type": "string"
+              },
+              "body": {
+                "type": "object",
+                "properties": {
+                  "policy_ids": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 24,
+                      "maxLength": 24
+                    },
+                    "maxItems": 1,
+                    "description": "New policy IDs to enforce on the wallet. Currently, only one policy is supported per wallet."
+                  },
+                  "owner": {
+                    "$ref": "#/components/schemas/OwnerInput"
+                  },
+                  "owner_id": {
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/OwnerIdInput"
+                      },
+                      {
+                        "nullable": true
+                      }
+                    ]
+                  },
+                  "additional_signers": {
+                    "$ref": "#/components/schemas/WalletAdditionalSigner"
+                  }
+                }
+              }
+            },
+            "required": [
+              "method",
+              "url",
+              "body"
+            ],
+            "description": "The original wallet update request that would be sent to the wallet endpoint"
+          },
+          "current_resource_data": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Wallet"
+              },
+              {
+                "description": "Current state of the wallet before any changes. If undefined, the resource was deleted and no longer exists"
+              }
+            ]
+          },
+          "action_result": {
+            "type": "object",
+            "properties": {
+              "status_code": {
+                "type": "number",
+                "description": "HTTP status code from the action execution"
+              },
+              "executed_at": {
+                "type": "number",
+                "description": "Unix timestamp when the action was executed"
+              },
+              "authorized_by_display_name": {
+                "type": "string",
+                "description": "Display name of the key quorum that authorized execution"
+              },
+              "authorized_by_id": {
+                "type": "string",
+                "description": "ID of the key quorum that authorized execution"
+              },
+              "response_body": {
+                "$ref": "#/components/schemas/Wallet"
+              },
+              "prior_state": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/Wallet"
+                  },
+                  {
+                    "description": "State of the wallet immediately before execution"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "status_code",
+              "executed_at",
+              "response_body",
+              "prior_state"
+            ],
+            "description": "Result of wallet update execution (only present if status is 'executed' or 'failed')"
+          }
+        },
+        "required": [
+          "intent_id",
+          "created_by_display_name",
+          "created_at",
+          "resource_id",
+          "authorization_details",
+          "status",
+          "expires_at",
+          "intent_type",
+          "request_details"
+        ],
+        "description": "Response for a wallet update intent creation request"
+      },
+      "PolicyIntentResponse": {
+        "type": "object",
+        "properties": {
+          "intent_id": {
+            "type": "string",
+            "description": "Unique ID for the intent"
+          },
+          "created_by_display_name": {
+            "type": "string",
+            "description": "Display name of the user who created the intent"
+          },
+          "created_by_id": {
+            "type": "string",
+            "description": "ID of the user who created the intent. If undefined, the intent was created using the app secret"
+          },
+          "created_at": {
+            "type": "number",
+            "description": "Unix timestamp when the intent was created"
+          },
+          "resource_id": {
+            "type": "string",
+            "description": "ID of the resource being modified (wallet_id, policy_id, etc)"
+          },
+          "authorization_details": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "members": {
+                  "type": "array",
+                  "items": {
+                    "oneOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "string",
+                            "enum": [
+                              "user"
+                            ]
+                          },
+                          "user_id": {
+                            "type": "string",
+                            "description": "User ID of the key quorum member"
+                          },
+                          "display_name": {
+                            "type": "string",
+                            "description": "Display name for the user (email, etc)"
+                          },
+                          "has_signed": {
+                            "type": "boolean",
+                            "description": "Whether this member has signed the intent"
+                          }
+                        },
+                        "required": [
+                          "type",
+                          "user_id",
+                          "has_signed"
+                        ],
+                        "title": "User member"
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "string",
+                            "enum": [
+                              "key"
+                            ]
+                          },
+                          "public_key": {
+                            "type": "string",
+                            "description": "Public key of the key quorum member"
+                          },
+                          "display_name": {
+                            "type": "string",
+                            "description": "Display name for the key (if any)"
+                          },
+                          "has_signed": {
+                            "type": "boolean",
+                            "description": "Whether this key has signed the intent"
+                          }
+                        },
+                        "required": [
+                          "type",
+                          "public_key",
+                          "has_signed"
+                        ],
+                        "title": "Key member"
+                      }
+                    ]
+                  },
+                  "description": "Members in this authorization quorum"
+                },
+                "threshold": {
+                  "type": "number",
+                  "description": "Number of signatures required from this quorum"
+                },
+                "display_name": {
+                  "type": "string",
+                  "description": "Display name of the key quorum"
+                }
+              },
+              "required": [
+                "members",
+                "threshold"
+              ]
+            },
+            "description": "Detailed authorization information including key quorum members, thresholds, and signature status"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "executed",
+              "expired",
+              "failed",
+              "pending",
+              "rejected"
+            ],
+            "description": "Current status of the intent"
+          },
+          "expires_at": {
+            "type": "number",
+            "description": "Unix timestamp when the intent expires"
+          },
+          "intent_type": {
+            "type": "string",
+            "enum": [
+              "POLICY"
+            ]
+          },
+          "request_details": {
+            "type": "object",
+            "properties": {
+              "method": {
+                "type": "string",
+                "enum": [
+                  "PATCH"
+                ]
+              },
+              "url": {
+                "type": "string"
+              },
+              "body": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 50,
+                    "description": "Name to assign to policy."
+                  },
+                  "rules": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/PolicyRuleRequestBody"
+                    }
+                  },
+                  "owner": {
+                    "$ref": "#/components/schemas/OwnerInput"
+                  },
+                  "owner_id": {
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/OwnerIdInput"
+                      },
+                      {
+                        "nullable": true
+                      }
+                    ]
+                  }
+                }
+              }
+            },
+            "required": [
+              "method",
+              "url",
+              "body"
+            ],
+            "description": "The original policy update request that would be sent to the policy endpoint"
+          },
+          "current_resource_data": {
+            "type": "object",
+            "properties": {
+              "version": {
+                "type": "string",
+                "enum": [
+                  "1.0"
+                ],
+                "description": "Version of the policy. Currently, 1.0 is the only version."
+              },
+              "name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 50,
+                "description": "Name to assign to policy."
+              },
+              "chain_type": {
+                "$ref": "#/components/schemas/PolicyChainType"
+              },
+              "id": {
+                "type": "string",
+                "minLength": 24,
+                "maxLength": 24,
+                "description": "Unique ID of the created policy. This will be the primary identifier when using the policy in the future."
+              },
+              "owner_id": {
+                "type": "string",
+                "nullable": true,
+                "description": "The key quorum ID of the owner of the policy."
+              },
+              "created_at": {
+                "type": "number",
+                "description": "Unix timestamp of when the policy was created in milliseconds."
+              },
+              "rules": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/PolicyRuleResponse"
+                }
+              }
+            },
+            "required": [
+              "version",
+              "name",
+              "chain_type",
+              "id",
+              "owner_id",
+              "created_at",
+              "rules"
+            ],
+            "description": "Current state of the policy before any changes. If undefined, the resource was deleted and no longer exists"
+          },
+          "action_result": {
+            "type": "object",
+            "properties": {
+              "status_code": {
+                "type": "number",
+                "description": "HTTP status code from the action execution"
+              },
+              "executed_at": {
+                "type": "number",
+                "description": "Unix timestamp when the action was executed"
+              },
+              "authorized_by_display_name": {
+                "type": "string",
+                "description": "Display name of the key quorum that authorized execution"
+              },
+              "authorized_by_id": {
+                "type": "string",
+                "description": "ID of the key quorum that authorized execution"
+              },
+              "response_body": {
+                "type": "object",
+                "properties": {
+                  "version": {
+                    "type": "string",
+                    "enum": [
+                      "1.0"
+                    ],
+                    "description": "Version of the policy. Currently, 1.0 is the only version."
+                  },
+                  "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 50,
+                    "description": "Name to assign to policy."
+                  },
+                  "chain_type": {
+                    "$ref": "#/components/schemas/PolicyChainType"
+                  },
+                  "id": {
+                    "type": "string",
+                    "minLength": 24,
+                    "maxLength": 24,
+                    "description": "Unique ID of the created policy. This will be the primary identifier when using the policy in the future."
+                  },
+                  "owner_id": {
+                    "type": "string",
+                    "nullable": true,
+                    "description": "The key quorum ID of the owner of the policy."
+                  },
+                  "created_at": {
+                    "type": "number",
+                    "description": "Unix timestamp of when the policy was created in milliseconds."
+                  },
+                  "rules": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/PolicyRuleResponse"
+                    }
+                  }
+                },
+                "required": [
+                  "version",
+                  "name",
+                  "chain_type",
+                  "id",
+                  "owner_id",
+                  "created_at",
+                  "rules"
+                ]
+              },
+              "prior_state": {
+                "type": "object",
+                "properties": {
+                  "version": {
+                    "type": "string",
+                    "enum": [
+                      "1.0"
+                    ],
+                    "description": "Version of the policy. Currently, 1.0 is the only version."
+                  },
+                  "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 50,
+                    "description": "Name to assign to policy."
+                  },
+                  "chain_type": {
+                    "$ref": "#/components/schemas/PolicyChainType"
+                  },
+                  "id": {
+                    "type": "string",
+                    "minLength": 24,
+                    "maxLength": 24,
+                    "description": "Unique ID of the created policy. This will be the primary identifier when using the policy in the future."
+                  },
+                  "owner_id": {
+                    "type": "string",
+                    "nullable": true,
+                    "description": "The key quorum ID of the owner of the policy."
+                  },
+                  "created_at": {
+                    "type": "number",
+                    "description": "Unix timestamp of when the policy was created in milliseconds."
+                  },
+                  "rules": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/PolicyRuleResponse"
+                    }
+                  }
+                },
+                "required": [
+                  "version",
+                  "name",
+                  "chain_type",
+                  "id",
+                  "owner_id",
+                  "created_at",
+                  "rules"
+                ],
+                "description": "State of the policy immediately before execution"
+              }
+            },
+            "required": [
+              "status_code",
+              "executed_at",
+              "response_body",
+              "prior_state"
+            ],
+            "description": "Result of policy update execution (only present if status is 'executed' or 'failed')"
+          }
+        },
+        "required": [
+          "intent_id",
+          "created_by_display_name",
+          "created_at",
+          "resource_id",
+          "authorization_details",
+          "status",
+          "expires_at",
+          "intent_type",
+          "request_details"
+        ],
+        "description": "Response for a policy update intent creation request"
+      },
+      "KeyQuorumIntentResponse": {
+        "type": "object",
+        "properties": {
+          "intent_id": {
+            "type": "string",
+            "description": "Unique ID for the intent"
+          },
+          "created_by_display_name": {
+            "type": "string",
+            "description": "Display name of the user who created the intent"
+          },
+          "created_by_id": {
+            "type": "string",
+            "description": "ID of the user who created the intent. If undefined, the intent was created using the app secret"
+          },
+          "created_at": {
+            "type": "number",
+            "description": "Unix timestamp when the intent was created"
+          },
+          "resource_id": {
+            "type": "string",
+            "description": "ID of the resource being modified (wallet_id, policy_id, etc)"
+          },
+          "authorization_details": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "members": {
+                  "type": "array",
+                  "items": {
+                    "oneOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "string",
+                            "enum": [
+                              "user"
+                            ]
+                          },
+                          "user_id": {
+                            "type": "string",
+                            "description": "User ID of the key quorum member"
+                          },
+                          "display_name": {
+                            "type": "string",
+                            "description": "Display name for the user (email, etc)"
+                          },
+                          "has_signed": {
+                            "type": "boolean",
+                            "description": "Whether this member has signed the intent"
+                          }
+                        },
+                        "required": [
+                          "type",
+                          "user_id",
+                          "has_signed"
+                        ],
+                        "title": "User member"
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "string",
+                            "enum": [
+                              "key"
+                            ]
+                          },
+                          "public_key": {
+                            "type": "string",
+                            "description": "Public key of the key quorum member"
+                          },
+                          "display_name": {
+                            "type": "string",
+                            "description": "Display name for the key (if any)"
+                          },
+                          "has_signed": {
+                            "type": "boolean",
+                            "description": "Whether this key has signed the intent"
+                          }
+                        },
+                        "required": [
+                          "type",
+                          "public_key",
+                          "has_signed"
+                        ],
+                        "title": "Key member"
+                      }
+                    ]
+                  },
+                  "description": "Members in this authorization quorum"
+                },
+                "threshold": {
+                  "type": "number",
+                  "description": "Number of signatures required from this quorum"
+                },
+                "display_name": {
+                  "type": "string",
+                  "description": "Display name of the key quorum"
+                }
+              },
+              "required": [
+                "members",
+                "threshold"
+              ]
+            },
+            "description": "Detailed authorization information including key quorum members, thresholds, and signature status"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "executed",
+              "expired",
+              "failed",
+              "pending",
+              "rejected"
+            ],
+            "description": "Current status of the intent"
+          },
+          "expires_at": {
+            "type": "number",
+            "description": "Unix timestamp when the intent expires"
+          },
+          "intent_type": {
+            "type": "string",
+            "enum": [
+              "KEY_QUORUM"
+            ]
+          },
+          "request_details": {
+            "type": "object",
+            "properties": {
+              "method": {
+                "type": "string",
+                "enum": [
+                  "PATCH"
+                ]
+              },
+              "url": {
+                "type": "string"
+              },
+              "body": {
+                "type": "object",
+                "properties": {
+                  "public_keys": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "List of P-256 public keys of the keys that should be authorized to sign on the key quorum, in base64-encoded DER format."
+                  },
+                  "authorization_threshold": {
+                    "type": "number",
+                    "minimum": 1,
+                    "description": "The number of keys that must sign for an action to be valid. Must be less than or equal to total number of key quorum members."
+                  },
+                  "display_name": {
+                    "type": "string",
+                    "maxLength": 50
+                  },
+                  "user_ids": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "List of user IDs of the users that should be authorized to sign on the key quorum."
+                  }
+                }
+              }
+            },
+            "required": [
+              "method",
+              "url",
+              "body"
+            ],
+            "description": "The original key quorum update request that would be sent to the key quorum endpoint"
+          },
+          "current_resource_data": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/KeyQuorum"
+              },
+              {
+                "description": "Current state of the key quorum before any changes. If undefined, the resource was deleted and no longer exists"
+              }
+            ]
+          },
+          "action_result": {
+            "type": "object",
+            "properties": {
+              "status_code": {
+                "type": "number",
+                "description": "HTTP status code from the action execution"
+              },
+              "executed_at": {
+                "type": "number",
+                "description": "Unix timestamp when the action was executed"
+              },
+              "authorized_by_display_name": {
+                "type": "string",
+                "description": "Display name of the key quorum that authorized execution"
+              },
+              "authorized_by_id": {
+                "type": "string",
+                "description": "ID of the key quorum that authorized execution"
+              },
+              "response_body": {
+                "$ref": "#/components/schemas/KeyQuorum"
+              },
+              "prior_state": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/KeyQuorum"
+                  },
+                  {
+                    "description": "State of the key quorum immediately before execution"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "status_code",
+              "executed_at",
+              "response_body",
+              "prior_state"
+            ],
+            "description": "Result of key quorum update execution (only present if status is 'executed' or 'failed')"
+          }
+        },
+        "required": [
+          "intent_id",
+          "created_by_display_name",
+          "created_at",
+          "resource_id",
+          "authorization_details",
+          "status",
+          "expires_at",
+          "intent_type",
+          "request_details"
+        ],
+        "description": "Response for a key quorum update intent creation request"
+      },
+      "IntentResponse": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/RpcIntentResponse"
+          },
+          {
+            "$ref": "#/components/schemas/WalletIntentResponse"
+          },
+          {
+            "$ref": "#/components/schemas/PolicyIntentResponse"
+          },
+          {
+            "$ref": "#/components/schemas/KeyQuorumIntentResponse"
+          }
+        ],
+        "discriminator": {
+          "propertyName": "intent_type",
+          "mapping": {
+            "RPC": "#/components/schemas/RpcIntentResponse",
+            "WALLET": "#/components/schemas/WalletIntentResponse",
+            "POLICY": "#/components/schemas/PolicyIntentResponse",
+            "KEY_QUORUM": "#/components/schemas/KeyQuorumIntentResponse"
+          }
+        },
+        "description": "Response for getting an intent (discriminated union based on intent_type)"
       },
       "CoinbaseOnRampInitInput": {
         "description": "The input for initializing a Coinbase on-ramp session.",
@@ -10010,86 +11647,7 @@
           },
           {
             "schema": {
-              "oneOf": [
-                {
-                  "type": "string",
-                  "enum": [
-                    "cosmos"
-                  ]
-                },
-                {
-                  "type": "string",
-                  "enum": [
-                    "stellar"
-                  ]
-                },
-                {
-                  "type": "string",
-                  "enum": [
-                    "sui"
-                  ]
-                },
-                {
-                  "type": "string",
-                  "enum": [
-                    "aptos"
-                  ]
-                },
-                {
-                  "type": "string",
-                  "enum": [
-                    "movement"
-                  ]
-                },
-                {
-                  "type": "string",
-                  "enum": [
-                    "tron"
-                  ]
-                },
-                {
-                  "type": "string",
-                  "enum": [
-                    "bitcoin-segwit"
-                  ]
-                },
-                {
-                  "type": "string",
-                  "enum": [
-                    "near"
-                  ]
-                },
-                {
-                  "type": "string",
-                  "enum": [
-                    "ton"
-                  ]
-                },
-                {
-                  "type": "string",
-                  "enum": [
-                    "starknet"
-                  ]
-                },
-                {
-                  "type": "string",
-                  "enum": [
-                    "spark"
-                  ]
-                },
-                {
-                  "type": "string",
-                  "enum": [
-                    "solana"
-                  ]
-                },
-                {
-                  "type": "string",
-                  "enum": [
-                    "ethereum"
-                  ]
-                }
-              ]
+              "$ref": "#/components/schemas/WalletChainType"
             },
             "required": false,
             "name": "chain_type",
@@ -10333,16 +11891,19 @@
               "schema": {
                 "oneOf": [
                   {
-                    "$ref": "#/components/schemas/EthereumSignTransactionRpcInput"
-                  },
-                  {
-                    "$ref": "#/components/schemas/EthereumSendTransactionRpcInput"
-                  },
-                  {
                     "$ref": "#/components/schemas/EthereumPersonalSignRpcInput"
                   },
                   {
                     "$ref": "#/components/schemas/EthereumSignTypedDataRpcInput"
+                  },
+                  {
+                    "$ref": "#/components/schemas/EthereumSignTransactionRpcInput"
+                  },
+                  {
+                    "$ref": "#/components/schemas/EthereumSignUserOperationRpcInput"
+                  },
+                  {
+                    "$ref": "#/components/schemas/EthereumSendTransactionRpcInput"
                   },
                   {
                     "$ref": "#/components/schemas/EthereumSign7702AuthorizationRpcInput"
@@ -10351,27 +11912,28 @@
                     "$ref": "#/components/schemas/EthereumSecp256k1SignRpcInput"
                   },
                   {
+                    "$ref": "#/components/schemas/SolanaSignMessageRpcInput"
+                  },
+                  {
                     "$ref": "#/components/schemas/SolanaSignTransactionRpcInput"
                   },
                   {
                     "$ref": "#/components/schemas/SolanaSignAndSendTransactionRpcInput"
-                  },
-                  {
-                    "$ref": "#/components/schemas/SolanaSignMessageRpcInput"
                   }
                 ],
                 "discriminator": {
                   "propertyName": "method",
                   "mapping": {
-                    "eth_signTransaction": "#/components/schemas/EthereumSignTransactionRpcInput",
-                    "eth_sendTransaction": "#/components/schemas/EthereumSendTransactionRpcInput",
                     "personal_sign": "#/components/schemas/EthereumPersonalSignRpcInput",
                     "eth_signTypedData_v4": "#/components/schemas/EthereumSignTypedDataRpcInput",
+                    "eth_signTransaction": "#/components/schemas/EthereumSignTransactionRpcInput",
+                    "eth_signUserOperation": "#/components/schemas/EthereumSignUserOperationRpcInput",
+                    "eth_sendTransaction": "#/components/schemas/EthereumSendTransactionRpcInput",
                     "eth_sign7702Authorization": "#/components/schemas/EthereumSign7702AuthorizationRpcInput",
                     "secp256k1_sign": "#/components/schemas/EthereumSecp256k1SignRpcInput",
+                    "signMessage": "#/components/schemas/SolanaSignMessageRpcInput",
                     "signTransaction": "#/components/schemas/SolanaSignTransactionRpcInput",
-                    "signAndSendTransaction": "#/components/schemas/SolanaSignAndSendTransactionRpcInput",
-                    "signMessage": "#/components/schemas/SolanaSignMessageRpcInput"
+                    "signAndSendTransaction": "#/components/schemas/SolanaSignAndSendTransactionRpcInput"
                   }
                 },
                 "example": {
@@ -10397,13 +11959,10 @@
                 "schema": {
                   "oneOf": [
                     {
-                      "$ref": "#/components/schemas/SolanaSignTransactionRpcResponse"
+                      "$ref": "#/components/schemas/EthereumPersonalSignRpcResponse"
                     },
                     {
-                      "$ref": "#/components/schemas/SolanaSignAndSendTransactionRpcResponse"
-                    },
-                    {
-                      "$ref": "#/components/schemas/SolanaSignMessageRpcResponse"
+                      "$ref": "#/components/schemas/EthereumSignTypedDataRpcResponse"
                     },
                     {
                       "$ref": "#/components/schemas/EthereumSignTransactionRpcResponse"
@@ -10412,30 +11971,37 @@
                       "$ref": "#/components/schemas/EthereumSendTransactionRpcResponse"
                     },
                     {
-                      "$ref": "#/components/schemas/EthereumPersonalSignRpcResponse"
-                    },
-                    {
-                      "$ref": "#/components/schemas/EthereumSignTypedDataRpcResponse"
+                      "$ref": "#/components/schemas/EthereumSignUserOperationRpcResponse"
                     },
                     {
                       "$ref": "#/components/schemas/EthereumSign7702AuthorizationRpcResponse"
                     },
                     {
                       "$ref": "#/components/schemas/EthereumSecp256k1SignRpcResponse"
+                    },
+                    {
+                      "$ref": "#/components/schemas/SolanaSignMessageRpcResponse"
+                    },
+                    {
+                      "$ref": "#/components/schemas/SolanaSignTransactionRpcResponse"
+                    },
+                    {
+                      "$ref": "#/components/schemas/SolanaSignAndSendTransactionRpcResponse"
                     }
                   ],
                   "discriminator": {
                     "propertyName": "method",
                     "mapping": {
-                      "signTransaction": "#/components/schemas/SolanaSignTransactionRpcResponse",
-                      "signAndSendTransaction": "#/components/schemas/SolanaSignAndSendTransactionRpcResponse",
-                      "signMessage": "#/components/schemas/SolanaSignMessageRpcResponse",
-                      "eth_signTransaction": "#/components/schemas/EthereumSignTransactionRpcResponse",
-                      "eth_sendTransaction": "#/components/schemas/EthereumSendTransactionRpcResponse",
                       "personal_sign": "#/components/schemas/EthereumPersonalSignRpcResponse",
                       "eth_signTypedData_v4": "#/components/schemas/EthereumSignTypedDataRpcResponse",
+                      "eth_signTransaction": "#/components/schemas/EthereumSignTransactionRpcResponse",
+                      "eth_sendTransaction": "#/components/schemas/EthereumSendTransactionRpcResponse",
+                      "eth_signUserOperation": "#/components/schemas/EthereumSignUserOperationRpcResponse",
                       "eth_sign7702Authorization": "#/components/schemas/EthereumSign7702AuthorizationRpcResponse",
-                      "secp256k1_sign": "#/components/schemas/EthereumSecp256k1SignRpcResponse"
+                      "secp256k1_sign": "#/components/schemas/EthereumSecp256k1SignRpcResponse",
+                      "signMessage": "#/components/schemas/SolanaSignMessageRpcResponse",
+                      "signTransaction": "#/components/schemas/SolanaSignTransactionRpcResponse",
+                      "signAndSendTransaction": "#/components/schemas/SolanaSignAndSendTransactionRpcResponse"
                     }
                   },
                   "example": {
@@ -10642,6 +12208,7 @@
                     "oneOf": [
                       {
                         "type": "object",
+                        "title": "Hash",
                         "description": "Sign a pre-computed hash",
                         "properties": {
                           "hash": {
@@ -10655,7 +12222,8 @@
                       },
                       {
                         "type": "object",
-                        "description": "Hash and sign bytes (Tron only)",
+                        "title": "Bytes",
+                        "description": "Hash and sign bytes using the specified encoding and hash function.",
                         "properties": {
                           "bytes": {
                             "type": "string",
@@ -10664,14 +12232,24 @@
                           "encoding": {
                             "type": "string",
                             "enum": [
+                              "hex",
                               "utf-8"
                             ],
-                            "description": "Encoding scheme. Currently only utf-8 is supported."
+                            "description": "The encoding scheme for the bytes."
+                          },
+                          "hash_function": {
+                            "type": "string",
+                            "enum": [
+                              "keccak256",
+                              "sha256"
+                            ],
+                            "description": "The hash function to hash the bytes."
                           }
                         },
                         "required": [
                           "bytes",
-                          "encoding"
+                          "encoding",
+                          "hash_function"
                         ]
                       }
                     ]
@@ -10680,11 +12258,26 @@
                 "required": [
                   "params"
                 ],
-                "description": "Provide either `hash` (to sign a pre-computed hash) OR both `bytes` and `encoding` (to hash and then sign). These options are mutually exclusive.",
-                "title": "raw_sign",
-                "example": {
-                  "params": {
-                    "hash": "0x0775aeed9c9ce6e0fbc4db25c5e4e6368029651c905c286f813126a09025a21e"
+                "description": "Provide either `hash` (to sign a pre-computed hash) OR `bytes`, `encoding`, and `hash_function` (to hash and then sign). These options are mutually exclusive.",
+                "title": "raw_sign"
+              },
+              "examples": {
+                "with-hash": {
+                  "summary": "Sign a pre-computed hash",
+                  "value": {
+                    "params": {
+                      "hash": "0x0775aeed9c9ce6e0fbc4db25c5e4e6368029651c905c286f813126a09025a21e"
+                    }
+                  }
+                },
+                "with-bytes": {
+                  "summary": "Hash and sign bytes",
+                  "value": {
+                    "params": {
+                      "bytes": "0a0234ea220809701d7a17a77e04408093e981a6335a66080112620a2d747970652e676f6f676c65617069732e636f6d2f70726f746f636f6c2e5472616e73666572436f6e747261637412310a15417009bf59e27d2031a23a61e1590289fc3d21b3cd121541132b98ed6fb80a2d45f177cdef091ae2d9dc115418e80770a0bee581a633",
+                      "encoding": "hex",
+                      "hash_function": "sha256"
+                    }
                   }
                 }
               }
@@ -10965,7 +12558,14 @@
             "schema": {
               "type": "string",
               "enum": [
-                "base"
+                "arbitrum",
+                "base",
+                "ethereum",
+                "linea",
+                "optimism",
+                "polygon",
+                "sepolia",
+                "solana"
               ]
             },
             "required": true,
@@ -11007,8 +12607,7 @@
           },
           {
             "schema": {
-              "type": "string",
-              "pattern": "^0x[0-9a-fA-F]+$"
+              "type": "string"
             },
             "required": false,
             "name": "tx_hash",
@@ -12606,6 +14205,141 @@
         "operationId": "lookUpUserByTelegramUsername"
       }
     },
+    "/v1/users/instagram/username": {
+      "post": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Lookup User by Instagram Username",
+        "description": "Looks up a user by their Instagram username.",
+        "security": [
+          {
+            "appSecretAuth": []
+          }
+        ],
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "username": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "username"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Object with user data.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/users/twitch/username": {
+      "post": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Lookup User by Twitch Username",
+        "description": "Looks up a user by their Twitch username.",
+        "security": [
+          {
+            "appSecretAuth": []
+          }
+        ],
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "username": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "username"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Object with user data.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/users/spotify/subject": {
+      "post": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Lookup User by Spotify Subject",
+        "description": "Looks up a user by their Spotify subject (user ID).",
+        "security": [
+          {
+            "appSecretAuth": []
+          }
+        ],
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "subject": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "subject"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Object with user data.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/users/search": {
       "post": {
         "tags": [
@@ -12628,12 +14362,12 @@
                   {
                     "type": "object",
                     "properties": {
-                      "search_term": {
+                      "searchTerm": {
                         "type": "string"
                       }
                     },
                     "required": [
-                      "search_term"
+                      "searchTerm"
                     ]
                   },
                   {
@@ -12756,86 +14490,7 @@
                           "maxItems": 1
                         },
                         "chain_type": {
-                          "oneOf": [
-                            {
-                              "type": "string",
-                              "enum": [
-                                "cosmos"
-                              ]
-                            },
-                            {
-                              "type": "string",
-                              "enum": [
-                                "stellar"
-                              ]
-                            },
-                            {
-                              "type": "string",
-                              "enum": [
-                                "sui"
-                              ]
-                            },
-                            {
-                              "type": "string",
-                              "enum": [
-                                "aptos"
-                              ]
-                            },
-                            {
-                              "type": "string",
-                              "enum": [
-                                "movement"
-                              ]
-                            },
-                            {
-                              "type": "string",
-                              "enum": [
-                                "tron"
-                              ]
-                            },
-                            {
-                              "type": "string",
-                              "enum": [
-                                "bitcoin-segwit"
-                              ]
-                            },
-                            {
-                              "type": "string",
-                              "enum": [
-                                "near"
-                              ]
-                            },
-                            {
-                              "type": "string",
-                              "enum": [
-                                "ton"
-                              ]
-                            },
-                            {
-                              "type": "string",
-                              "enum": [
-                                "starknet"
-                              ]
-                            },
-                            {
-                              "type": "string",
-                              "enum": [
-                                "spark"
-                              ]
-                            },
-                            {
-                              "type": "string",
-                              "enum": [
-                                "solana"
-                              ]
-                            },
-                            {
-                              "type": "string",
-                              "enum": [
-                                "ethereum"
-                              ]
-                            }
-                          ]
+                          "$ref": "#/components/schemas/WalletChainType"
                         },
                         "create_smart_wallet": {
                           "type": "boolean"
@@ -14074,6 +15729,34 @@
             "required": true,
             "name": "condition_set_id",
             "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            },
+            "required": false,
+            "name": "cursor",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "number",
+              "nullable": true,
+              "maximum": 100
+            },
+            "required": false,
+            "name": "limit",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "description": "Filter items by value containing the query string."
+            },
+            "required": false,
+            "name": "query",
+            "in": "query"
           }
         ],
         "responses": {
@@ -14146,15 +15829,6 @@
             "required": true,
             "name": "condition_set_item_id",
             "in": "path"
-          },
-          {
-            "schema": {
-              "type": "string",
-              "description": "Request authorization signature. If multiple signatures are required, they should be comma separated."
-            },
-            "required": false,
-            "name": "privy-authorization-signature",
-            "in": "header"
           }
         ],
         "responses": {
@@ -18067,6 +19741,402 @@
           }
         },
         "operationId": "configureAppForFiatOnOffRamping"
+      }
+    },
+    "/v1/apps/{app_id}/intents/{intent_id}": {
+      "get": {
+        "tags": [
+          "Intents"
+        ],
+        "summary": "Get intent",
+        "description": "Retrieve an intent by ID. Returns the intent details including its current status, authorization details, and execution result if applicable.",
+        "security": [
+          {
+            "appSecretAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "description": "ID of the app."
+            },
+            "required": true,
+            "name": "app_id",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "description": "ID of the intent."
+            },
+            "required": true,
+            "name": "intent_id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Intent details.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IntentResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/apps/{app_id}/intents/wallets/{wallet_id}/rpc": {
+      "post": {
+        "tags": [
+          "Intents"
+        ],
+        "summary": "Create RPC intent",
+        "description": "Create an intent to execute an RPC method on a wallet. The intent must be authorized by either the wallet owner or signers before it can be executed.",
+        "security": [
+          {
+            "appSecretAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "description": "ID of the app."
+            },
+            "required": true,
+            "name": "app_id",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "description": "ID of the wallet."
+            },
+            "required": true,
+            "name": "wallet_id",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/EthereumPersonalSignRpcInput"
+                  },
+                  {
+                    "$ref": "#/components/schemas/EthereumSignTypedDataRpcInput"
+                  },
+                  {
+                    "$ref": "#/components/schemas/EthereumSignTransactionRpcInput"
+                  },
+                  {
+                    "$ref": "#/components/schemas/EthereumSignUserOperationRpcInput"
+                  },
+                  {
+                    "$ref": "#/components/schemas/EthereumSendTransactionRpcInput"
+                  },
+                  {
+                    "$ref": "#/components/schemas/EthereumSign7702AuthorizationRpcInput"
+                  },
+                  {
+                    "$ref": "#/components/schemas/EthereumSecp256k1SignRpcInput"
+                  },
+                  {
+                    "$ref": "#/components/schemas/SolanaSignMessageRpcInput"
+                  },
+                  {
+                    "$ref": "#/components/schemas/SolanaSignTransactionRpcInput"
+                  },
+                  {
+                    "$ref": "#/components/schemas/SolanaSignAndSendTransactionRpcInput"
+                  }
+                ],
+                "discriminator": {
+                  "propertyName": "method",
+                  "mapping": {
+                    "personal_sign": "#/components/schemas/EthereumPersonalSignRpcInput",
+                    "eth_signTypedData_v4": "#/components/schemas/EthereumSignTypedDataRpcInput",
+                    "eth_signTransaction": "#/components/schemas/EthereumSignTransactionRpcInput",
+                    "eth_signUserOperation": "#/components/schemas/EthereumSignUserOperationRpcInput",
+                    "eth_sendTransaction": "#/components/schemas/EthereumSendTransactionRpcInput",
+                    "eth_sign7702Authorization": "#/components/schemas/EthereumSign7702AuthorizationRpcInput",
+                    "secp256k1_sign": "#/components/schemas/EthereumSecp256k1SignRpcInput",
+                    "signMessage": "#/components/schemas/SolanaSignMessageRpcInput",
+                    "signTransaction": "#/components/schemas/SolanaSignTransactionRpcInput",
+                    "signAndSendTransaction": "#/components/schemas/SolanaSignAndSendTransactionRpcInput"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Created RPC intent.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcIntentResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/apps/{app_id}/intents/wallets/{wallet_id}": {
+      "patch": {
+        "tags": [
+          "Intents"
+        ],
+        "summary": "Create wallet update intent",
+        "description": "Create an intent to update a wallet. The intent must be authorized by the wallet owner before it can be executed.",
+        "security": [
+          {
+            "appSecretAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "description": "ID of the app."
+            },
+            "required": true,
+            "name": "app_id",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "description": "ID of the wallet."
+            },
+            "required": true,
+            "name": "wallet_id",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "policy_ids": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 24,
+                      "maxLength": 24
+                    },
+                    "maxItems": 1,
+                    "description": "New policy IDs to enforce on the wallet. Currently, only one policy is supported per wallet."
+                  },
+                  "owner": {
+                    "$ref": "#/components/schemas/OwnerInput"
+                  },
+                  "owner_id": {
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/OwnerIdInput"
+                      },
+                      {
+                        "nullable": true
+                      }
+                    ]
+                  },
+                  "additional_signers": {
+                    "$ref": "#/components/schemas/WalletAdditionalSigner"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Created wallet update intent.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WalletIntentResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/apps/{app_id}/intents/policies/{policy_id}": {
+      "patch": {
+        "tags": [
+          "Intents"
+        ],
+        "summary": "Create policy update intent",
+        "description": "Create an intent to update a policy. The intent must be authorized by the policy owner before it can be executed.",
+        "security": [
+          {
+            "appSecretAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "description": "ID of the app."
+            },
+            "required": true,
+            "name": "app_id",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "description": "ID of the policy."
+            },
+            "required": true,
+            "name": "policy_id",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 50,
+                    "description": "Name to assign to policy."
+                  },
+                  "rules": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/PolicyRuleRequestBody"
+                    }
+                  },
+                  "owner": {
+                    "$ref": "#/components/schemas/OwnerInput"
+                  },
+                  "owner_id": {
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/OwnerIdInput"
+                      },
+                      {
+                        "nullable": true
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Created policy update intent.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PolicyIntentResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/apps/{app_id}/intents/key_quorums/{key_quorum_id}": {
+      "patch": {
+        "tags": [
+          "Intents"
+        ],
+        "summary": "Create key quorum update intent",
+        "description": "Create an intent to update a key quorum. The intent must be authorized by the key quorum members before it can be executed.",
+        "security": [
+          {
+            "appSecretAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "description": "ID of the app."
+            },
+            "required": true,
+            "name": "app_id",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "description": "ID of the key quorum."
+            },
+            "required": true,
+            "name": "key_quorum_id",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "public_keys": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "List of P-256 public keys of the keys that should be authorized to sign on the key quorum, in base64-encoded DER format."
+                  },
+                  "authorization_threshold": {
+                    "type": "number",
+                    "minimum": 1,
+                    "description": "The number of keys that must sign for an action to be valid. Must be less than or equal to total number of key quorum members."
+                  },
+                  "display_name": {
+                    "type": "string",
+                    "maxLength": 50
+                  },
+                  "user_ids": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "List of user IDs of the users that should be authorized to sign on the key quorum."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Created key quorum update intent.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KeyQuorumIntentResponse"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/v1/kraken_embed/quotes": {
