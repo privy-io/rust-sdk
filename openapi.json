@@ -247,6 +247,20 @@
         "title": "AnalyticsEventInput",
         "x-stainless-model": "analytics.analytics_event_input"
       },
+      "WalletCustodian": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "description": "Information about the custodian managing this wallet.",
+        "title": "WalletCustodian",
+        "x-stainless-model": "wallets.wallet_custodian"
+      },
       "AppResponse": {
         "type": "object",
         "properties": {
@@ -522,6 +536,14 @@
           "captcha_enabled": {
             "type": "boolean"
           },
+          "enabled_captcha_provider": {
+            "type": "string",
+            "nullable": true,
+            "enum": [
+              "hcaptcha",
+              "turnstile"
+            ]
+          },
           "twitter_oauth_on_mobile_enabled": {
             "type": "boolean"
           },
@@ -643,6 +665,95 @@
           },
           "whatsapp_enabled": {
             "type": "boolean"
+          },
+          "smart_wallet_config": {
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "enabled": {
+                    "type": "boolean",
+                    "enum": [
+                      false
+                    ]
+                  }
+                },
+                "required": [
+                  "enabled"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "enabled": {
+                    "type": "boolean",
+                    "enum": [
+                      true
+                    ]
+                  },
+                  "smart_wallet_type": {
+                    "type": "string",
+                    "enum": [
+                      "biconomy",
+                      "coinbase_smart_wallet",
+                      "kernel",
+                      "light_account",
+                      "safe",
+                      "thirdweb"
+                    ]
+                  },
+                  "smart_wallet_version": {
+                    "type": "string"
+                  },
+                  "configured_networks": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "chain_id": {
+                          "type": "string",
+                          "pattern": "^eip155:\\d+$"
+                        },
+                        "bundler_url": {
+                          "type": "string"
+                        },
+                        "paymaster_url": {
+                          "type": "string"
+                        },
+                        "rpc_url": {
+                          "type": "string"
+                        },
+                        "chain_name": {
+                          "type": "string"
+                        },
+                        "paymaster_context": {
+                          "type": "object",
+                          "properties": {
+                            "policy_id": {
+                              "type": "string",
+                              "format": "uuid"
+                            }
+                          },
+                          "required": [
+                            "policy_id"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "chain_id",
+                        "bundler_url"
+                      ]
+                    },
+                    "minItems": 1
+                  }
+                },
+                "required": [
+                  "enabled",
+                  "smart_wallet_type",
+                  "configured_networks"
+                ]
+              }
+            ]
           }
         },
         "required": [
@@ -691,12 +802,14 @@
           "legacy_wallet_ui_config",
           "fiat_on_ramp_enabled",
           "captcha_enabled",
+          "enabled_captcha_provider",
           "twitter_oauth_on_mobile_enabled",
           "mfa_methods",
           "verification_key",
           "max_linked_wallets_per_user",
           "farcaster_link_wallets_enabled",
-          "whatsapp_enabled"
+          "whatsapp_enabled",
+          "smart_wallet_config"
         ],
         "description": "The response for getting an app.",
         "title": "AppResponse",
