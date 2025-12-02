@@ -343,7 +343,7 @@ async fn test_wallets_solana_sign_transaction() -> Result<()> {
 
 #[tokio::test]
 #[traced_test]
-#[mark_flaky_tests::flaky]
+#[ignore = "ignore tests that attempt to move funds as wallets are not funded"]
 async fn test_wallets_solana_sign_and_send_transaction() -> Result<()> {
     let client = get_test_client()?;
 
@@ -680,7 +680,7 @@ async fn test_wallets_ethereum_sign_transaction() -> Result<()> {
 
 #[tokio::test]
 #[traced_test]
-// #[mark_flaky_tests::flaky]
+#[ignore = "ignore tests that attempt to move funds as wallets are not funded"]
 async fn test_wallets_ethereum_send_transaction() -> Result<()> {
     let client = get_test_client()?;
 
