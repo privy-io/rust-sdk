@@ -155,5 +155,29 @@
   },
   "/v1/kraken_embed/assets/{asset_id}": {
     "get": { "operationId": "getKrakenEmbedAssets" }
-  }
+  },
+  "/v1/users/instagram/username": {
+    "post": { "operationId": "updateUserInstagramUsername" }
+  },
+  "/v1/users/twitch/username": {
+    "post": { "operationId": "updateUserTwitchUsername" }
+  },
+  "/v1/users/spotify/subject": {
+    "post": { "operationId": "updateUserSpotifySubject" }
+  },
+  "/v1/apps/{app_id}/intents/{intent_id}": {
+    "get": { "operationId": "getAppIntent" },
+  },
+  "/v1/apps/{app_id}/intents/wallets/{wallet_id}/rpc": {
+    "post": { "operationId": "appWalletRpc" }
+  },
+  "/v1/apps/{app_id}/intents/wallets/{wallet_id}": {
+    "patch": { "operationId": "updateAppWallet" }
+  },
+  "/v1/apps/{app_id}/intents/policies/{policy_id}": {
+    "patch": { "operationId": "updateAppPolicy" }
+  },
+  "/v1/apps/{app_id}/intents/key_quorums/{key_quorum_id}": {
+    "patch": { "operationId": "updateAppKeyQuorum" }
+  },
 }
