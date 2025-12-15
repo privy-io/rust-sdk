@@ -24,7 +24,7 @@ jobs:
         run: mise gen-openapi
 
       - name: create pull request
-        uses: peter-evans/create-pull-request@v3
+        uses: peter-evans/create-pull-request@v8
         with:
           token: ${{ secrets.REPO_SCOPED_TOKEN }}
           commit-message: Generate latest changes from OpenApi spec
