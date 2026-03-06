@@ -24,8 +24,9 @@ This project uses [release-plz](https://github.com/release-plz/release-plz) for 
 
 The release process is configured via GitHub Actions in `.github/workflows/release-plz.yml`:
 
-- **Triggers**: Runs on pushes to `master` branch and manual workflow dispatch
-- **Permissions**: Requires `REPO_SCOPED_TOKEN` and `CARGO_REGISTRY_TOKEN` secrets
+- **Triggers**: Runs on pushes to `main` branch and manual workflow dispatch
+- **Authentication**: Uses trusted publishing (OIDC) for crates.io authentication
+- **Permissions**: Requires `REPO_SCOPED_TOKEN` secret for GitHub operations
 - **Rust Version**: Uses minimum supported Rust version (1.88)
 - **Semver Checking**: Uses `cargo-semver-checks` to detect API breaking changes
 
@@ -106,12 +107,21 @@ mise pull-openapi
 
 This will regenerate the client code based on the latest API specification.
 
-## Secrets Configuration
+## Configuration
 
-The automated release process requires these GitHub repository secrets:
+### Trusted Publishing Setup
 
-- `REPO_SCOPED_TOKEN`: GitHub personal access token with repo permissions
-- `CARGO_REGISTRY_TOKEN`: crates.io API token for publishing
+This project uses trusted publishing (OIDC) for secure authentication with crates.io. To set this up:
+
+1. Go to your crate settings on crates.io
+2. Navigate to the "Trusted Publishers" section
+3. Add this GitHub repository as a trusted publisher:
+   - Provider: GitHub Actions
+   - Repository owner: `privy-io`
+   - Repository name: `rust-sdk`
+   - Workflow filename: `release-plz.yml`
+   - Environment name: (leave blank unless using a specific environment)
+
 
 ## Related Documentation
 
