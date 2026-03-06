@@ -107,21 +107,6 @@ mise pull-openapi
 
 This will regenerate the client code based on the latest API specification.
 
-## Configuration
-
-### Trusted Publishing Setup
-
-This project uses trusted publishing (OIDC) for secure authentication with crates.io. To set this up:
-
-1. Go to your crate settings on crates.io
-2. Navigate to the "Trusted Publishers" section
-3. Add this GitHub repository as a trusted publisher:
-   - Provider: GitHub Actions
-   - Repository owner: `privy-io`
-   - Repository name: `rust-sdk`
-   - Workflow filename: `release-plz.yml`
-   - Environment name: (leave blank unless using a specific environment)
-
 
 ## Related Documentation
 
