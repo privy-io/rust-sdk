@@ -60,10 +60,16 @@ curl -s https://api.privy.io/v1/openapi.json \
 [tasks.gen-openapi]
 description = "Generate the Rust code for the Privy API"
 depends = ["pull-openapi"]
+env = { RUSTUP_TOOLCHAIN = "nightly" }
 run = """
 #!/usr/bin/env bash
 
 set -e
+
+# cargo-progenitor needs nightly to run the formatter, due to some flags.
+# it will try to find nightly rustfmt but we want our lib to target stable, so we
+# set the toolchain var above, and then run rustup install just for this script
+rustup install
 
 # get current crate version
 VERSION=$(grep -m 1 "^version" crates/privy-openapi/Cargo.toml | cut -d '"' -f 2)
