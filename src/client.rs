@@ -9,9 +9,9 @@ use reqwest::header::{CONTENT_TYPE, HeaderValue};
 use crate::{PrivyCreateError, generated::Client, get_auth_header, jwt_exchange::JwtExchange};
 
 const DEFAULT_BASE_URL: &str = "https://api.privy.io";
-const APP_ID_ENV_VAR: &str = "PRIVY_APP_ID";
-const APP_SECRET_ENV_VAR: &str = "PRIVY_APP_SECRET";
-const BASE_URL_ENV_VAR: &str = "PRIVY_BASE_URL";
+const APP_ID_ENV_VAR: &str = "PRIVY_TEST_APP_ID";
+const APP_SECRET_ENV_VAR: &str = "PRIVY_TEST_APP_SECRET";
+const BASE_URL_ENV_VAR: &str = "PRIVY_TEST_URL";
 
 /// Privy client for interacting with the Privy API.
 ///
