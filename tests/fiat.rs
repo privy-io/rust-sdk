@@ -29,7 +29,7 @@ async fn test_fiat_configure_app() -> Result<()> {
 }
 
 #[tokio::test]
-#[ignore = "Fiat flows have max limits, so we don't want to run this test on CI. Leaving code in to serve as API contract test."]
+#[ignore = "Don't want to run fiat e2e flows on CI, but leaving code in to serve as API contract test."]
 async fn test_fiat_get_status() -> Result<()> {
     let client = common::get_test_client()?;
     let user = common::ensure_test_user(&client).await?;
@@ -54,7 +54,7 @@ async fn test_fiat_get_status() -> Result<()> {
 }
 
 #[tokio::test]
-#[ignore = "Fiat flows have max limits, so we don't want to run this test on CI. Leaving code in to serve as API contract test."]
+#[ignore = "Don't want to run fiat e2e flows on CI, but leaving code in to serve as API contract test."]
 async fn test_fiat_get_kyc_link() -> Result<()> {
     let client = common::get_test_client()?;
     let user = common::ensure_test_user(&client).await?;
@@ -83,7 +83,7 @@ async fn test_fiat_get_kyc_link() -> Result<()> {
 }
 
 #[tokio::test]
-#[ignore = "Fiat flows have max limits, so we don't want to run this test on CI. Leaving code in to serve as API contract test."]
+#[ignore = "Don't want to run fiat e2e flows on CI, but leaving code in to serve as API contract test."]
 async fn test_fiat_accounts_get() -> Result<()> {
     let client = common::get_test_client()?;
     let user = common::ensure_test_user(&client).await?;
@@ -107,7 +107,7 @@ async fn test_fiat_accounts_get() -> Result<()> {
 }
 
 #[tokio::test]
-#[ignore = "Fiat flows have max limits, so we don't want to run this test on CI. Leaving code in to serve as API contract test."]
+#[ignore = "Don't want to run fiat e2e flows on CI, but leaving code in to serve as API contract test."]
 async fn test_fiat_accounts_create() -> Result<()> {
     let client = common::get_test_client()?;
     let user = common::ensure_test_user(&client).await?;
@@ -140,7 +140,7 @@ async fn test_fiat_accounts_create() -> Result<()> {
 }
 
 #[tokio::test]
-#[ignore = "Fiat flows have max limits, so we don't want to run this test on CI. Leaving code in to serve as API contract test."]
+#[ignore = "Don't want to run fiat e2e flows on CI, but leaving code in to serve as API contract test."]
 async fn test_fiat_kyc_create() -> Result<()> {
     let client = common::get_test_client()?;
     let user = common::ensure_test_user(&client).await?;
@@ -200,7 +200,7 @@ async fn test_fiat_kyc_create() -> Result<()> {
 }
 
 #[tokio::test]
-#[ignore = "Fiat flows have max limits, so we don't want to run this test on CI. Leaving code in to serve as API contract test."]
+#[ignore = "Don't want to run fiat e2e flows on CI, but leaving code in to serve as API contract test."]
 async fn test_fiat_onramp_create() -> Result<()> {
     let client = common::get_test_client()?;
     let user = common::ensure_test_user(&client).await?;
@@ -234,7 +234,7 @@ async fn test_fiat_onramp_create() -> Result<()> {
 }
 
 #[tokio::test]
-#[ignore = "Fiat flows have max limits, so we don't want to run this test on CI. Leaving code in to serve as API contract test."]
+#[ignore = "Don't want to run fiat e2e flows on CI, but leaving code in to serve as API contract test."]
 async fn test_fiat_offramp_create() -> Result<()> {
     let client = common::get_test_client()?;
     let user = common::ensure_test_user(&client).await?;
