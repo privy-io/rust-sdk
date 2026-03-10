@@ -24,8 +24,9 @@ This project uses [release-plz](https://github.com/release-plz/release-plz) for 
 
 The release process is configured via GitHub Actions in `.github/workflows/release-plz.yml`:
 
-- **Triggers**: Runs on pushes to `master` branch and manual workflow dispatch
-- **Permissions**: Requires `REPO_SCOPED_TOKEN` and `CARGO_REGISTRY_TOKEN` secrets
+- **Triggers**: Runs on pushes to `main` branch and manual workflow dispatch
+- **Authentication**: Uses trusted publishing (OIDC) for crates.io authentication
+- **Permissions**: Requires `REPO_SCOPED_TOKEN` secret for GitHub operations
 - **Rust Version**: Uses minimum supported Rust version (1.88)
 - **Semver Checking**: Uses `cargo-semver-checks` to detect API breaking changes
 
@@ -106,12 +107,6 @@ mise pull-openapi
 
 This will regenerate the client code based on the latest API specification.
 
-## Secrets Configuration
-
-The automated release process requires these GitHub repository secrets:
-
-- `REPO_SCOPED_TOKEN`: GitHub personal access token with repo permissions
-- `CARGO_REGISTRY_TOKEN`: crates.io API token for publishing
 
 ## Related Documentation
 
