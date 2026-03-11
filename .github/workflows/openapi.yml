@@ -26,7 +26,7 @@ jobs:
       - name: create pull request
         uses: peter-evans/create-pull-request@v3
         with:
-          token: ${{ secrets.REPO_SCOPED_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
           commit-message: Generate latest changes from OpenApi spec
           title: Generate latest changes from OpenApi spec
           body: |
