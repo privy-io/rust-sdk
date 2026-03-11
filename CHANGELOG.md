@@ -5,6 +5,33 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [0.1.0-alpha.5](https://github.com/privy-io/rust-sdk/compare/privy-rs-v0.1.0-alpha.4...privy-rs-v0.1.0-alpha.5) - 2026-03-11
+
+### Added
+
+- base introduction for alloy signer implementation
+
+### Fixed
+
+- fix renamed items in tests
+- made it harder to enable vulnerable log statements
+- clippy, naming
+- feature flag in example
+
+### Other
+
+- replace REPO_SCOPED_TOKEN with built-in GITHUB_TOKEN
+- Merge remote-tracking branch 'origin/main' into ajin/trusted_publishing
+- Merge pull request #86 from privy-io/dependabot/github_actions/actions/cache-5
+- update ignore message
+- ignore fiat tests and fix env vars
+- Generate latest changes from OpenApi spec
+- add new opids to patch
+- add set -e to bail when script fails
+- point progenitor CLI to main
+- mark more tests as flaky
+- BREAKING CHANGE: improve private key memory hygiene
+
 ## [0.1.0-alpha.4](https://github.com/privy-io/rust-sdk/compare/privy-rs-v0.1.0-alpha.3...privy-rs-v0.1.0-alpha.4) - 2025-11-06
 
 ### Fixed
