@@ -25,8 +25,7 @@ This project uses [release-plz](https://github.com/release-plz/release-plz) for 
 The release process is configured via GitHub Actions in `.github/workflows/release-plz.yml`:
 
 - **Triggers**: Runs on pushes to `main` branch and manual workflow dispatch
-- **Authentication**: Uses trusted publishing (OIDC) for crates.io authentication
-- **Permissions**: Requires `REPO_SCOPED_TOKEN` secret for GitHub operations
+- **Authentication**: Uses trusted publishing (OIDC) for crates.io and the built-in `GITHUB_TOKEN` for GitHub operations
 - **Rust Version**: Uses minimum supported Rust version (1.88)
 - **Semver Checking**: Uses `cargo-semver-checks` to detect API breaking changes
 
@@ -106,7 +105,6 @@ mise pull-openapi
 ```
 
 This will regenerate the client code based on the latest API specification.
-
 
 ## Related Documentation
 
