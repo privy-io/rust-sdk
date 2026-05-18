@@ -4,19 +4,14 @@
 
 ```
 tests/
-├── common/mod.rs         # Shared helpers (client setup, wallet/user/policy creation, JWT minting)
-├── wallets.rs            # Wallet CRUD, RPC signing (Ethereum + Solana), import, export
-├── users.rs              # User CRUD and lookup by various identifiers
-├── policies.rs           # Policy and rule CRUD with authorization
-├── key_quorums.rs        # Key quorum management with authorization
-├── transactions.rs       # Transaction queries
-├── e2e.rs                # End-to-end quorum wallet workflow (2-of-3 signing)
-├── client_behavior.rs    # Client config tests (uses httpmock, no real API calls)
-├── alloy_integration.rs  # Alloy signer adapter tests
-├── fiat.rs               # Fiat on/off-ramp operations
-├── test_private_key.pem  # P-256 test key for authorization tests
-└── test_public_key.pem
+├── common/mod.rs      # Shared helpers (client setup, wallet/user/policy creation, JWT minting)
+├── *.rs               # Integration tests per resource (wallets, users, policies, etc.)
+├── e2e.rs             # End-to-end workflows (e.g., quorum signing)
+├── client_behavior.rs # Unit-style tests using httpmock (no real API calls)
+└── test_*.pem         # P-256 test keys for authorization tests
 ```
+
+Each resource test file follows the same pattern: imports `mod common`, uses `get_test_client()`, and tests CRUD + signing operations against the staging API.
 
 ## Running Tests
 
