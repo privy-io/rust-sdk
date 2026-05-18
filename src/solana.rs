@@ -23,6 +23,39 @@ use crate::{
     },
 };
 
+/// Options for signing and sending a Solana transaction.
+///
+/// This struct uses `#[non_exhaustive]` to allow new fields to be added in the future
+/// without breaking existing code. Always construct using `..Default::default()`:
+///
+/// ```rust
+/// use privy_rs::solana::SignAndSendTransactionOptions;
+///
+/// let options = SignAndSendTransactionOptions::new().with_sponsor(true);
+/// ```
+#[derive(Debug, Clone, Default)]
+#[non_exhaustive]
+pub struct SignAndSendTransactionOptions {
+    /// Whether to sponsor (pay for) the transaction fees.
+    /// - `Some(true)` — enable gas sponsorship
+    /// - `Some(false)` — explicitly disable gas sponsorship
+    /// - `None` — use the server default
+    pub sponsor: Option<bool>,
+}
+
+impl SignAndSendTransactionOptions {
+    /// Creates a new `SignAndSendTransactionOptions` with all defaults.
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    /// Sets the sponsor option.
+    pub fn with_sponsor(mut self, sponsor: bool) -> Self {
+        self.sponsor = Some(sponsor);
+        self
+    }
+}
+
 /// Service for Solana-specific wallet operations.
 ///
 /// Provides convenient methods for common Solana wallet operations such as:
@@ -291,6 +324,54 @@ impl SolanaService {
         authorization_context: &AuthorizationContext,
         idempotency_key: Option<&str>,
     ) -> Result<ResponseValue<WalletRpcResponse>, PrivySignedApiError> {
+        self.sign_and_send_transaction_with_options(
+            wallet_id,
+            caip2,
+            transaction,
+            authorization_context,
+            idempotency_key,
+            &SignAndSendTransactionOptions::default(),
+        )
+        .await
+    }
+
+    /// Signs and sends a Solana transaction with additional options such as gas sponsorship.
+    ///
+    /// This method is identical to [`sign_and_send_transaction`](Self::sign_and_send_transaction)
+    /// but accepts a [`SignAndSendTransactionOptions`] struct for additional configuration.
+    ///
+    /// # Examples
+    ///
+    /// ```rust,no_run
+    /// # async fn example() -> Result<(), Box<dyn std::error::Error>> {
+    /// use privy_rs::{AuthorizationContext, PrivyClient, solana::SignAndSendTransactionOptions};
+    ///
+    /// let client = PrivyClient::new("app_id".to_string(), "app_secret".to_string())?;
+    /// let solana_service = client.wallets().solana();
+    /// let auth_ctx = AuthorizationContext::new();
+    ///
+    /// let options = SignAndSendTransactionOptions::new().with_sponsor(true);
+    ///
+    /// let result = solana_service.sign_and_send_transaction_with_options(
+    ///     "wallet_id",
+    ///     "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp",
+    ///     "base64-encoded-transaction",
+    ///     &auth_ctx,
+    ///     None,
+    ///     &options,
+    /// ).await?;
+    /// # Ok(())
+    /// # }
+    /// ```
+    pub async fn sign_and_send_transaction_with_options(
+        &self,
+        wallet_id: &str,
+        caip2: &str,
+        transaction: &str,
+        authorization_context: &AuthorizationContext,
+        idempotency_key: Option<&str>,
+        options: &SignAndSendTransactionOptions,
+    ) -> Result<ResponseValue<WalletRpcResponse>, PrivySignedApiError> {
         let caip2_parsed = SolanaSignAndSendTransactionRpcInputCaip2::from_str(caip2)
             .map_err(|_| Error::InvalidRequest("Invalid CAIP-2 format".to_string()))?;
 
@@ -304,7 +385,7 @@ impl SolanaService {
                     encoding: SolanaSignAndSendTransactionRpcInputParamsEncoding::Base64,
                     transaction: transaction.to_string(),
                 },
-                sponsor: Some(false),
+                sponsor: options.sponsor,
             },
         );
 

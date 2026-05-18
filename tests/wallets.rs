@@ -746,6 +746,120 @@ async fn test_wallets_ethereum_send_transaction() -> Result<()> {
 
 #[tokio::test]
 #[traced_test]
+#[ignore = "ignore tests that attempt to move funds as wallets are not funded"]
+async fn test_wallets_ethereum_send_transaction_with_options_sponsored() -> Result<()> {
+    let client = get_test_client()?;
+
+    let funded_ethereum_wallet_id =
+        std::env::var("FUNDED_ETHEREUM_WALLET_ID").expect("FUNDED_ETHEREUM_WALLET_ID must be set");
+    let funded_ethereum_wallet_address = std::env::var("FUNDED_ETHEREUM_WALLET_ADDRESS")
+        .expect("FUNDED_ETHEREUM_WALLET_ADDRESS must be set");
+    let funded_ethereum_wallet_owner_subject_id = std::env::var("FUNDED_WALLETS_OWNER_SUBJECT_ID")
+        .expect("FUNDED_WALLETS_OWNER_SUBJECT_ID must be set");
+    let recipient_address = std::env::var("ETHEREUM_RECIPIENT_ADDRESS")
+        .expect("ETHEREUM_RECIPIENT_ADDRESS must be set");
+
+    let transaction = EthereumSendTransactionRpcInputParamsTransaction {
+        to: Some(recipient_address),
+        value: Some(EthereumSendTransactionRpcInputParamsTransactionValue::Integer(100)),
+        chain_id: None,
+        from: Some(funded_ethereum_wallet_address.clone()),
+        max_fee_per_gas: None,
+        max_priority_fee_per_gas: None,
+        nonce: None,
+        type_: None,
+        data: Some("0x".to_string()),
+        gas_limit: None,
+        gas_price: None,
+    };
+
+    let options = privy_rs::SendTransactionOptions::new().with_sponsor(true);
+
+    let ctx = AuthorizationContext::new().push(JwtUser(
+        client.clone(),
+        mint_staging_jwt(&funded_ethereum_wallet_owner_subject_id)?,
+    ));
+
+    let result = debug_response!(client.wallets().ethereum().send_transaction_with_options(
+        &funded_ethereum_wallet_id,
+        "eip155:11155111",
+        transaction,
+        &ctx,
+        None,
+        &options,
+    ))
+    .await?;
+
+    println!("Ethereum sponsored transaction sent: {result:?}");
+
+    match result.into_inner() {
+        WalletRpcResponse::EthereumSendTransactionRpcResponse(_) => {}
+        _ => panic!("Expected EthereumSendTransactionRpcResponse"),
+    }
+
+    Ok(())
+}
+
+#[tokio::test]
+#[traced_test]
+#[ignore = "ignore tests that attempt to move funds as wallets are not funded"]
+async fn test_wallets_solana_sign_and_send_transaction_with_options_sponsored() -> Result<()> {
+    let client = get_test_client()?;
+
+    let funded_solana_wallet_id =
+        std::env::var("FUNDED_SOLANA_WALLET_ID").expect("FUNDED_SOLANA_WALLET_ID must be set");
+    let funded_solana_wallet_address = std::env::var("FUNDED_SOLANA_WALLET_ADDRESS")
+        .expect("FUNDED_SOLANA_WALLET_ADDRESS must be set");
+    let funded_solana_wallet_owner_subject_id =
+        std::env::var("FUNDED_SOLANA_WALLET_OWNER_SUBJECT_ID")
+            .expect("FUNDED_SOLANA_WALLET_OWNER_SUBJECT_ID must be set");
+
+    let from_pubkey = Pubkey::from_str(&funded_solana_wallet_address).unwrap();
+    let to_pubkey = Pubkey::from_str(&funded_solana_wallet_address).unwrap();
+    let lamports = 100;
+
+    let transaction = Transaction::new_with_payer(
+        &[solana_system_interface::instruction::transfer(
+            &from_pubkey,
+            &to_pubkey,
+            lamports,
+        )],
+        None,
+    );
+
+    let transaction = STANDARD.encode(bincode::serialize(&transaction).unwrap());
+
+    let options = privy_rs::SignAndSendTransactionOptions::new().with_sponsor(true);
+
+    let ctx = AuthorizationContext::new().push(JwtUser(
+        client.clone(),
+        mint_staging_jwt(&funded_solana_wallet_owner_subject_id)?,
+    ));
+
+    let result = debug_response!(
+        client.wallets().solana().sign_and_send_transaction_with_options(
+            &funded_solana_wallet_id,
+            "solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1",
+            &transaction,
+            &ctx,
+            None,
+            &options,
+        )
+    )
+    .await?;
+
+    println!("Solana sponsored transaction sent: {result:?}");
+
+    match result.into_inner() {
+        WalletRpcResponse::SolanaSignAndSendTransactionRpcResponse(_) => {}
+        _ => panic!("Expected SolanaSignAndSendTransactionRpcResponse"),
+    }
+
+    Ok(())
+}
+
+#[tokio::test]
+#[traced_test]
 async fn test_ethereum_wallet_import() -> Result<()> {
     let client = get_test_client()?;
 
