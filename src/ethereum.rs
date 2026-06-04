@@ -25,6 +25,39 @@ use crate::{
     },
 };
 
+/// Options for sending an Ethereum transaction.
+///
+/// This struct uses `#[non_exhaustive]` to allow new fields to be added in the future
+/// without breaking existing code. Always construct using `..Default::default()`:
+///
+/// ```rust
+/// use privy_rs::ethereum::SendTransactionOptions;
+///
+/// let options = SendTransactionOptions::new().with_sponsor(true);
+/// ```
+#[derive(Debug, Clone, Default)]
+#[non_exhaustive]
+pub struct SendTransactionOptions {
+    /// Whether to sponsor (pay for) the gas fees of this transaction.
+    /// - `Some(true)` — enable gas sponsorship
+    /// - `Some(false)` — explicitly disable gas sponsorship
+    /// - `None` — use the server default
+    pub sponsor: Option<bool>,
+}
+
+impl SendTransactionOptions {
+    /// Creates a new `SendTransactionOptions` with all defaults.
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    /// Sets the sponsor option.
+    pub fn with_sponsor(mut self, sponsor: bool) -> Self {
+        self.sponsor = Some(sponsor);
+        self
+    }
+}
+
 /// Service for Ethereum-specific wallet operations.
 ///
 /// Provides convenient methods for common Ethereum wallet operations such as:
@@ -548,6 +581,65 @@ impl EthereumService {
         authorization_context: &AuthorizationContext,
         idempotency_key: Option<&str>,
     ) -> Result<ResponseValue<WalletRpcResponse>, PrivySignedApiError> {
+        self.send_transaction_with_options(
+            wallet_id,
+            caip2,
+            transaction,
+            authorization_context,
+            idempotency_key,
+            &SendTransactionOptions::default(),
+        )
+        .await
+    }
+
+    /// Signs and sends a transaction with additional options such as gas sponsorship.
+    ///
+    /// This method is identical to [`send_transaction`](Self::send_transaction) but accepts
+    /// a [`SendTransactionOptions`] struct for additional configuration.
+    ///
+    /// # Examples
+    ///
+    /// ```rust,no_run
+    /// # use anyhow::Result;
+    /// # async fn example() -> Result<()> {
+    /// use privy_rs::{AuthorizationContext, ethereum::SendTransactionOptions, generated::types::*};
+    /// # use privy_rs::PrivyClient;
+    ///
+    /// # let client = PrivyClient::new("app_id".to_string(), "app_secret".to_string())?;
+    /// let ethereum_service = client.wallets().ethereum();
+    /// let auth_ctx = AuthorizationContext::new();
+    ///
+    /// let transaction = EthereumSendTransactionRpcInputParamsTransaction {
+    ///     to: Some("0x742d35Cc6635C0532925a3b8c17d6d1E9C2F7ca".to_string()),
+    ///     value: None, gas_limit: None, max_fee_per_gas: None,
+    ///     max_priority_fee_per_gas: None, data: None, chain_id: None,
+    ///     from: None, gas_price: None, nonce: None, type_: None,
+    /// };
+    ///
+    /// let options = SendTransactionOptions::new().with_sponsor(true);
+    ///
+    /// let result = ethereum_service
+    ///     .send_transaction_with_options(
+    ///         "wallet_id",
+    ///         "eip155:1",
+    ///         transaction,
+    ///         &auth_ctx,
+    ///         None,
+    ///         &options,
+    ///     )
+    ///     .await?;
+    /// # Ok(())
+    /// # }
+    /// ```
+    pub async fn send_transaction_with_options(
+        &self,
+        wallet_id: &str,
+        caip2: &str,
+        transaction: EthereumSendTransactionRpcInputParamsTransaction,
+        authorization_context: &AuthorizationContext,
+        idempotency_key: Option<&str>,
+        options: &SendTransactionOptions,
+    ) -> Result<ResponseValue<WalletRpcResponse>, PrivySignedApiError> {
         let rpc_body =
             WalletRpcBody::EthereumSendTransactionRpcInput(EthereumSendTransactionRpcInput {
                 address: None,
@@ -557,7 +649,7 @@ impl EthereumService {
                 chain_type: None,
                 method: EthereumSendTransactionRpcInputMethod::EthSendTransaction,
                 params: EthereumSendTransactionRpcInputParams { transaction },
-                sponsor: Some(false),
+                sponsor: options.sponsor,
             });
 
         self.wallets_client

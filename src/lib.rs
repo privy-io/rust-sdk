@@ -29,8 +29,10 @@ pub(crate) mod utils;
 
 pub use client::PrivyClient;
 pub use errors::*;
+pub use ethereum::SendTransactionOptions;
 pub use keys::*;
 pub use privy_hpke::PrivyHpke;
+pub use solana::SignAndSendTransactionOptions;
 pub use utils::{
     Method, Utils, WalletApiRequestSignatureInput, format_request_for_authorization_signature,
     generate_authorization_signatures,
