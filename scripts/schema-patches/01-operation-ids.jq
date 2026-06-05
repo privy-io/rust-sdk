@@ -31,7 +31,8 @@
     "post": { "operationId": "createUserWallet" }
   },
   "/v1/users/{user_id}/custom_metadata": {
-    "post": { "operationId": "updateUserCustomMetadata" }
+    "post": { "operationId": "updateUserCustomMetadata" },
+    "patch": { "operationId": "patchUserCustomMetadata" }
   },
   "/v1/wallets": {
     "post": { "operationId": "createWallet" },
