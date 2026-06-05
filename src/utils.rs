@@ -211,7 +211,7 @@ mod tests {
     use super::*;
     use crate::{
         AuthorizationContext, IntoKey, PrivateKey,
-        generated::types::{OwnerInput, UpdateWalletBody},
+        generated::types::{OwnerInput, OwnerInputPublicKey, P256PublicKey, WalletUpdateRequestBody},
         get_auth_header,
     };
 
@@ -224,8 +224,10 @@ mod tests {
         let public_key = key.get_key().await.unwrap().public_key();
 
         // Create the request body that will be sent using the generated privy-api type
-        let update_wallet_body = UpdateWalletBody {
-            owner: Some(OwnerInput::PublicKey(public_key.to_string())),
+        let update_wallet_body = WalletUpdateRequestBody {
+            owner: Some(OwnerInput::Variant1(OwnerInputPublicKey {
+                public_key: P256PublicKey(public_key.to_string()),
+            })),
             ..Default::default()
         };
 

@@ -18,7 +18,12 @@
 //! ```
 
 use anyhow::Result;
-use privy_rs::{PrivyClient, generated::types::AuthenticateBody};
+use privy_rs::{
+    PrivyClient,
+    generated::types::{
+        WalletAuthenticateRequestBody, WalletAuthenticateRequestBodyEncryptionType,
+    },
+};
 use tracing_subscriber::EnvFilter;
 
 #[tokio::main]
@@ -38,10 +43,10 @@ async fn main() -> Result<()> {
 
     let jwt_auth = client
         .wallets()
-        .authenticate_with_jwt(&AuthenticateBody {
+        .authenticate_with_jwt(&WalletAuthenticateRequestBody {
             user_jwt,
-            encryption_type: None,
-            recipient_public_key: None,
+            encryption_type: WalletAuthenticateRequestBodyEncryptionType::Hpke,
+            recipient_public_key: String::new(),
         })
         .await?;
 

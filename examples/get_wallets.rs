@@ -42,7 +42,7 @@ async fn main() -> Result<()> {
         public_key
     );
 
-    let wallets = client.wallets().list(None, None, Some(5.0), None).await?;
+    let wallets = client.wallets().list(None, None, None, None, Some(5.0), None).await?;
 
     tracing::info!("got wallets: {:?}", wallets);
 

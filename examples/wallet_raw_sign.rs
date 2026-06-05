@@ -19,7 +19,7 @@
 use anyhow::Result;
 use privy_rs::{
     AuthorizationContext, JwtUser, PrivateKey, PrivyApiError, PrivyClient, PrivySignedApiError,
-    generated::types::{RawSign, RawSignParams},
+    generated::types::{RawSignHashParams, RawSignInput, RawSignInputParams},
 };
 use tracing_subscriber::EnvFilter;
 
@@ -55,10 +55,10 @@ async fn main() -> Result<()> {
             &wallet_id,
             &ctx,
             None, // No idempotency key
-            &RawSign {
-                params: RawSignParams::Hash {
-                    hash: "0xdeadbeef".to_string(),
-                },
+            &RawSignInput {
+                params: RawSignInputParams::HashParams(RawSignHashParams {
+                    hash: "0xdeadbeef".parse().unwrap(),
+                }),
             },
         )
         .await

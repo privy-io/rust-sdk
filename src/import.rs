@@ -9,9 +9,9 @@ use crate::{
     generated::{
         Error, ResponseValue,
         types::{
-            PrivateKeySubmitInput, Wallet, WalletImportInitializationRequest,
-            WalletImportInitializationResponse, WalletImportSubmissionRequest,
-            WalletImportSubmissionRequestOwner, WalletImportSubmissionRequestWallet,
+            AdditionalSignerInput, OwnerInput, PolicyInput, PrivateKeySubmitInput, Wallet,
+            WalletImportInitBody, WalletImportInitializationResponse,
+            WalletImportSubmissionRequest, WalletImportSubmissionRequestWallet,
             WalletImportSupportedChains,
         },
     },
@@ -28,13 +28,13 @@ pub struct WalletImport {
 impl WalletImport {
     pub(crate) async fn new(
         client: WalletsClient,
-        request: WalletImportInitializationRequest,
+        request: WalletImportInitBody,
     ) -> Result<Self, PrivyApiError> {
         let (address, chain_type) = match &request {
-            WalletImportInitializationRequest::PrivateKeyInitInput(input) => {
+            WalletImportInitBody::PrivateKeyInitInput(input) => {
                 (input.address.to_owned(), input.chain_type)
             }
-            WalletImportInitializationRequest::HdInitInput(input) => {
+            WalletImportInitBody::HdInitInput(input) => {
                 (input.address.to_owned(), input.chain_type)
             }
         };
@@ -94,11 +94,9 @@ impl WalletImport {
     pub(crate) async fn submit(
         self,
         private_key_hex: &str,
-        owner: Option<WalletImportSubmissionRequestOwner>,
+        owner: Option<OwnerInput>,
         policy_ids: Vec<String>,
-        additional_signers: Vec<
-            crate::generated::types::WalletImportSubmissionRequestAdditionalSignersItem,
-        >,
+        additional_signers: Option<AdditionalSignerInput>,
     ) -> Result<ResponseValue<Wallet>, PrivyApiError> {
         // Encrypt the private key using HPKE
         let (ciphertext, encapsulated_key) = self
@@ -113,6 +111,7 @@ impl WalletImport {
             encapsulated_key,
             encryption_type: self.initialization_response.encryption_type,
             entropy_type: crate::generated::types::PrivateKeySubmitInputEntropyType::PrivateKey,
+            hpke_config: None,
         };
 
         // Create the submission request
@@ -120,8 +119,10 @@ impl WalletImport {
             wallet: WalletImportSubmissionRequestWallet::PrivateKeySubmitInput(wallet_input),
             owner,
             owner_id: None,
-            policy_ids,
+            policy_ids: Some(PolicyInput(policy_ids)),
             additional_signers,
+            display_name: None,
+            external_id: None,
         };
 
         // Submit the import request

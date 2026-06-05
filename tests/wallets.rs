@@ -13,7 +13,7 @@ mod common;
 #[tokio::test]
 async fn test_wallets_list() -> Result<()> {
     let client = get_test_client()?;
-    let wallets = client.wallets().list(None, None, Some(10.0), None).await?;
+    let wallets = client.wallets().list(None, None, None, None, Some(10.0), None).await?;
 
     println!("Retrieved {} wallets", wallets.data.len());
 
@@ -29,7 +29,9 @@ async fn test_wallets_create() -> Result<()> {
         additional_signers: None,
         owner: None,
         owner_id: None,
-        policy_ids: vec![],
+        policy_ids: None,
+        display_name: None,
+        external_id: None,
     };
 
     let wallet = client.wallets().create(None, &create_body).await?;
@@ -79,16 +81,16 @@ async fn test_wallets_authenticate_with_jwt() -> Result<()> {
     tracing::info!("JWT token: {:?}", jwt_token);
 
     let privy_hpke = PrivyHpke::new();
-    let auth_body = AuthenticateBody {
-        encryption_type: Some(AuthenticateBodyEncryptionType::Hpke),
+    let auth_body = WalletAuthenticateRequestBody {
+        encryption_type: WalletAuthenticateRequestBodyEncryptionType::Hpke,
         user_jwt: jwt_token,
-        recipient_public_key: Some(privy_hpke.public_key().unwrap()),
+        recipient_public_key: privy_hpke.public_key().unwrap(),
     };
 
     let result = debug_response!(client.wallets().authenticate_with_jwt(&auth_body)).await?;
 
     match result.into_inner() {
-        AuthenticateResponse::WithEncryption { .. } => {
+        WalletAuthenticateWithJwtResponse::WithEncryption { .. } => {
             println!("JWT authentication successful for user: {}", user.id);
         }
         _ => panic!("Unexpected response type"),
@@ -102,10 +104,10 @@ async fn test_wallets_raw_sign_with_auth_context() -> Result<()> {
     let client = get_test_client()?;
     let wallet_id = get_test_wallet_id_by_type(&client, WalletChainType::Tron, None).await?;
 
-    let raw_sign_body = privy_rs::generated::types::RawSign {
-        params: RawSignParams::Hash {
-            hash: "0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef".to_string(),
-        },
+    let raw_sign_body = privy_rs::generated::types::RawSignInput {
+        params: RawSignInputParams::HashParams(RawSignHashParams {
+            hash: "0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef".parse().unwrap(),
+        }),
     };
 
     let ctx = AuthorizationContext::new();
@@ -136,8 +138,10 @@ async fn test_wallets_update_with_auth_context() -> Result<()> {
     let private_key = PrivateKey::new(private_key.to_string());
     let public_key = private_key.get_key().await?.public_key();
 
-    let update_body = UpdateWalletBody {
-        owner: Some(OwnerInput::PublicKey(public_key.to_string())),
+    let update_body = WalletUpdateRequestBody {
+        owner: Some(OwnerInput::Variant1(OwnerInputPublicKey {
+            public_key: P256PublicKey(public_key.to_string()),
+        })),
         ..Default::default()
     };
 
@@ -149,8 +153,10 @@ async fn test_wallets_update_with_auth_context() -> Result<()> {
     let mut rng = rand::thread_rng();
     let other = SecretKey::<p256::NistP256>::random(&mut rng);
 
-    let update_body = UpdateWalletBody {
-        owner: Some(OwnerInput::PublicKey(other.public_key().to_string())),
+    let update_body = WalletUpdateRequestBody {
+        owner: Some(OwnerInput::Variant1(OwnerInputPublicKey {
+            public_key: P256PublicKey(other.public_key().to_string()),
+        })),
         ..Default::default()
     };
 
@@ -207,15 +213,16 @@ async fn test_wallets_transactions_get() -> Result<()> {
     let client = get_test_client()?;
     let wallet_id = get_test_wallet_id_by_type(&client, WalletChainType::Ethereum, None).await?;
 
-    let asset = WalletTransactionsAsset::String(WalletTransactionsAssetString::Eth);
+    let asset = WalletTransactionsAsset::WalletEthereumAsset(WalletEthereumAsset::Eth);
     let chain = WalletTransactionsChain::Base;
 
     let transactions = debug_response!(client.wallets().transactions().get(
         &wallet_id,
-        &asset,
+        Some(&asset),
         chain,
         None,
         Some(10.0),
+        None,
         None
     ))
     .await?;
@@ -233,14 +240,14 @@ async fn test_wallets_balance_get() -> Result<()> {
     let client = get_test_client()?;
     let wallet_id = get_test_wallet_id_by_type(&client, WalletChainType::Solana, None).await?;
 
-    let asset = GetWalletBalanceAsset::String(GetWalletBalanceAssetString::Sol);
+    let asset = GetWalletBalanceAsset::WalletSolanaAsset(WalletSolanaAsset::Sol);
     let chain = GetWalletBalanceChain::String(GetWalletBalanceChainString::Solana);
 
     let balance = debug_response!(
         client
             .wallets()
             .balance()
-            .get(&wallet_id, &asset, &chain, None)
+            .get(&wallet_id, Some(&asset), Some(&chain), None, None)
     )
     .await?;
 

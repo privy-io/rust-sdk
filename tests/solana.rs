@@ -18,14 +18,15 @@ async fn test_solana_sign_message() -> Result<()> {
     let wallet_id = get_test_wallet_id_by_type(&client, WalletChainType::Solana, None).await?;
 
     let message = "Hello, Solana!";
-    let rpc_body = WalletRpcBody::SolanaSignMessageRpcInput(SolanaSignMessageRpcInput {
+    let rpc_body = WalletRpcRequestBody::SolanaSignMessageRpcInput(SolanaSignMessageRpcInput {
         address: None,
         chain_type: None,
         method: SolanaSignMessageRpcInputMethod::SignMessage,
         params: SolanaSignMessageRpcInputParams {
             encoding: SolanaSignMessageRpcInputParamsEncoding::Base64,
-            message: STANDARD.encode(message),
+            message: STANDARD.encode(message).parse().unwrap(),
         },
+        wallet_id: None,
     });
 
     let result = debug_response!(client.wallets().rpc(
@@ -54,14 +55,15 @@ async fn test_solana_sign_transaction() -> Result<()> {
 
     let transaction = "AQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAEDArczbMia1tLmq7zz4DinMNN0pJ1JtLdqIJPUw3YrGCzYAMHBsgN27lcgB6H2WQvFgyZuJYHa46puOQo9yQ8CVQbd9uHXZaGT2cvhRs7reawctIXtX1s3kTqM9YV+/wCp20C7Wj2aiuk5TReAXo+VTVg8QTHjs0UjNMMKCvpzZ+ABAgEBARU=";
 
-    let rpc_body = WalletRpcBody::SolanaSignTransactionRpcInput(SolanaSignTransactionRpcInput {
+    let rpc_body = WalletRpcRequestBody::SolanaSignTransactionRpcInput(SolanaSignTransactionRpcInput {
         address: None,
         chain_type: None,
         method: SolanaSignTransactionRpcInputMethod::SignTransaction,
         params: SolanaSignTransactionRpcInputParams {
             encoding: SolanaSignTransactionRpcInputParamsEncoding::Base64,
-            transaction: transaction.to_string(),
+            transaction: transaction.parse().unwrap(),
         },
+        wallet_id: None,
     });
 
     let result = debug_response!(client.wallets().rpc(
@@ -113,19 +115,19 @@ async fn test_solana_sign_and_send_transaction() -> Result<()> {
     let transaction = STANDARD.encode(bincode::serialize(&transaction).unwrap());
 
     let rpc_body =
-        WalletRpcBody::SolanaSignAndSendTransactionRpcInput(SolanaSignAndSendTransactionRpcInput {
+        WalletRpcRequestBody::SolanaSignAndSendTransactionRpcInput(SolanaSignAndSendTransactionRpcInput {
             address: None,
-            caip2: SolanaSignAndSendTransactionRpcInputCaip2::from_str(
-                "solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1",
-            )
-            .unwrap(),
+            caip2: "solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1".parse().unwrap(),
             chain_type: None,
             method: SolanaSignAndSendTransactionRpcInputMethod::SignAndSendTransaction,
             params: SolanaSignAndSendTransactionRpcInputParams {
                 encoding: SolanaSignAndSendTransactionRpcInputParamsEncoding::Base64,
-                transaction,
+                transaction: transaction.parse().unwrap(),
             },
             sponsor: Some(false),
+            wallet_id: None,
+            optimistic_broadcast: None,
+            reference_id: None,
         });
 
     let ctx = AuthorizationContext::new().push(JwtUser(

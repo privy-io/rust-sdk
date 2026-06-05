@@ -11,16 +11,16 @@ use crate::{
         types::{
             EthereumPersonalSignRpcInput, EthereumPersonalSignRpcInputMethod,
             EthereumPersonalSignRpcInputParams, EthereumPersonalSignRpcInputParamsEncoding,
-            EthereumSecp256k1SignRpcInput, EthereumSecp256k1SignRpcInputMethod,
-            EthereumSecp256k1SignRpcInputParams, EthereumSendTransactionRpcInput,
-            EthereumSendTransactionRpcInputMethod, EthereumSendTransactionRpcInputParams,
-            EthereumSendTransactionRpcInputParamsTransaction,
-            EthereumSign7702AuthorizationRpcInput, EthereumSign7702AuthorizationRpcInputMethod,
+            EthereumPersonalSignRpcInputParamsMessage, EthereumSecp256k1SignRpcInput,
+            EthereumSecp256k1SignRpcInputMethod, EthereumSecp256k1SignRpcInputParams,
+            EthereumSendTransactionRpcInput, EthereumSendTransactionRpcInputMethod,
+            EthereumSendTransactionRpcInputParams, EthereumSign7702AuthorizationRpcInput,
+            EthereumSign7702AuthorizationRpcInputMethod,
             EthereumSign7702AuthorizationRpcInputParams, EthereumSignTransactionRpcInput,
             EthereumSignTransactionRpcInputMethod, EthereumSignTransactionRpcInputParams,
-            EthereumSignTransactionRpcInputParamsTransaction, EthereumSignTypedDataRpcInput,
-            EthereumSignTypedDataRpcInputMethod, EthereumSignTypedDataRpcInputParams,
-            EthereumSignTypedDataRpcInputParamsTypedData, WalletRpcBody, WalletRpcResponse,
+            EthereumSignTypedDataRpcInput, EthereumSignTypedDataRpcInputMethod,
+            EthereumSignTypedDataRpcInputParams, EthereumTypedDataInput, Hex,
+            UnsignedEthereumTransaction, WalletRpcRequestBody, WalletRpcResponse,
         },
     },
 };
@@ -162,14 +162,16 @@ impl EthereumService {
         authorization_context: &AuthorizationContext,
         idempotency_key: Option<&str>,
     ) -> Result<ResponseValue<WalletRpcResponse>, PrivySignedApiError> {
-        let rpc_body = WalletRpcBody::EthereumPersonalSignRpcInput(EthereumPersonalSignRpcInput {
+        let rpc_body = WalletRpcRequestBody::EthereumPersonalSignRpcInput(EthereumPersonalSignRpcInput {
             address: None,
             chain_type: None,
             method: EthereumPersonalSignRpcInputMethod::PersonalSign,
             params: EthereumPersonalSignRpcInputParams {
                 encoding: EthereumPersonalSignRpcInputParamsEncoding::Utf8,
-                message: message.to_string(),
+                message: message.parse::<EthereumPersonalSignRpcInputParamsMessage>()
+                    .map_err(|e| Error::InvalidRequest(e.to_string()))?,
             },
+            wallet_id: None,
         });
 
         self.wallets_client
@@ -223,14 +225,16 @@ impl EthereumService {
     ) -> Result<ResponseValue<WalletRpcResponse>, PrivySignedApiError> {
         let hex_message = format!("0x{}", hex::encode(message));
 
-        let rpc_body = WalletRpcBody::EthereumPersonalSignRpcInput(EthereumPersonalSignRpcInput {
+        let rpc_body = WalletRpcRequestBody::EthereumPersonalSignRpcInput(EthereumPersonalSignRpcInput {
             address: None,
             chain_type: None,
             method: EthereumPersonalSignRpcInputMethod::PersonalSign,
             params: EthereumPersonalSignRpcInputParams {
                 encoding: EthereumPersonalSignRpcInputParamsEncoding::Hex,
-                message: hex_message,
+                message: hex_message.parse::<EthereumPersonalSignRpcInputParamsMessage>()
+                    .map_err(|e| Error::InvalidRequest(e.to_string()))?,
             },
+            wallet_id: None,
         });
 
         self.wallets_client
@@ -290,13 +294,15 @@ impl EthereumService {
         idempotency_key: Option<&str>,
     ) -> Result<ResponseValue<WalletRpcResponse>, PrivySignedApiError> {
         let rpc_body =
-            WalletRpcBody::EthereumSecp256k1SignRpcInput(EthereumSecp256k1SignRpcInput {
+            WalletRpcRequestBody::EthereumSecp256k1SignRpcInput(EthereumSecp256k1SignRpcInput {
                 address: None,
                 chain_type: None,
                 method: EthereumSecp256k1SignRpcInputMethod::Secp256k1Sign,
                 params: EthereumSecp256k1SignRpcInputParams {
-                    hash: hash.to_string(),
+                    hash: hash.parse::<Hex>()
+                        .map_err(|e| Error::InvalidRequest(e.to_string()))?,
                 },
+                wallet_id: None,
             });
 
         self.wallets_client
@@ -334,8 +340,9 @@ impl EthereumService {
     /// let auth_ctx = AuthorizationContext::new();
     ///
     /// let params = EthereumSign7702AuthorizationRpcInputParams {
-    ///     chain_id: EthereumSign7702AuthorizationRpcInputParamsChainId::Integer(1),
-    ///     contract: "0x1234567890abcdef1234567890abcdef12345678".to_string(),
+    ///     chain_id: Quantity::Integer(1),
+    ///     contract: "0x1234567890abcdef1234567890abcdef12345678".into(),
+    ///     executor: None,
     ///     nonce: None,
     /// };
     ///
@@ -354,12 +361,13 @@ impl EthereumService {
         authorization_context: &AuthorizationContext,
         idempotency_key: Option<&str>,
     ) -> Result<ResponseValue<WalletRpcResponse>, PrivySignedApiError> {
-        let rpc_body = WalletRpcBody::EthereumSign7702AuthorizationRpcInput(
+        let rpc_body = WalletRpcRequestBody::EthereumSign7702AuthorizationRpcInput(
             EthereumSign7702AuthorizationRpcInput {
                 address: None,
                 chain_type: None,
                 method: EthereumSign7702AuthorizationRpcInputMethod::EthSign7702Authorization,
                 params,
+                wallet_id: None,
             },
         );
 
@@ -398,11 +406,11 @@ impl EthereumService {
     /// let auth_ctx = AuthorizationContext::new();
     ///
     /// // Create EIP-712 typed data structure
-    /// let typed_data = EthereumSignTypedDataRpcInputParamsTypedData {
-    ///     domain: Default::default(),
-    ///     message: Default::default(),
+    /// let typed_data = EthereumTypedDataInput {
+    ///     domain: TypedDataDomainInputParams(serde_json::Map::new()),
+    ///     message: serde_json::Map::new(),
     ///     primary_type: "Mail".to_string(),
-    ///     types: Default::default(),
+    ///     types: TypedDataTypesInputParams(std::collections::HashMap::new()),
     /// };
     ///
     /// let signature = ethereum_service
@@ -422,16 +430,17 @@ impl EthereumService {
     pub async fn sign_typed_data(
         &self,
         wallet_id: &str,
-        typed_data: EthereumSignTypedDataRpcInputParamsTypedData,
+        typed_data: EthereumTypedDataInput,
         authorization_context: &AuthorizationContext,
         idempotency_key: Option<&str>,
     ) -> Result<ResponseValue<WalletRpcResponse>, PrivySignedApiError> {
         let rpc_body =
-            WalletRpcBody::EthereumSignTypedDataRpcInput(EthereumSignTypedDataRpcInput {
+            WalletRpcRequestBody::EthereumSignTypedDataRpcInput(EthereumSignTypedDataRpcInput {
                 address: None,
                 chain_type: None,
                 method: EthereumSignTypedDataRpcInputMethod::EthSignTypedDataV4,
                 params: EthereumSignTypedDataRpcInputParams { typed_data },
+                wallet_id: None,
             });
 
         self.wallets_client
@@ -467,7 +476,7 @@ impl EthereumService {
     /// let ethereum_service = client.wallets().ethereum();
     /// let auth_ctx = AuthorizationContext::new();
     ///
-    /// let transaction = EthereumSignTransactionRpcInputParamsTransaction {
+    /// let transaction = UnsignedStandardEthereumTransaction {
     ///     to: Some("0x742d35Cc6635C0532925a3b8c17d6d1E9C2F7ca".to_string()),
     ///     value: None,
     ///     gas_limit: None,
@@ -479,10 +488,11 @@ impl EthereumService {
     ///     max_fee_per_gas: None,
     ///     max_priority_fee_per_gas: None,
     ///     type_: None,
+    ///     authorization_list: vec![],
     /// };
     ///
     /// let signed_tx = ethereum_service
-    ///     .sign_transaction("clz2rqy4500061234abcd1234", transaction, &auth_ctx, None)
+    ///     .sign_transaction("clz2rqy4500061234abcd1234", transaction.into(), &auth_ctx, None)
     ///     .await?;
     ///
     /// println!("Transaction signed successfully");
@@ -492,16 +502,17 @@ impl EthereumService {
     pub async fn sign_transaction(
         &self,
         wallet_id: &str,
-        transaction: EthereumSignTransactionRpcInputParamsTransaction,
+        transaction: UnsignedEthereumTransaction,
         authorization_context: &AuthorizationContext,
         idempotency_key: Option<&str>,
     ) -> Result<ResponseValue<WalletRpcResponse>, PrivySignedApiError> {
         let rpc_body =
-            WalletRpcBody::EthereumSignTransactionRpcInput(EthereumSignTransactionRpcInput {
+            WalletRpcRequestBody::EthereumSignTransactionRpcInput(EthereumSignTransactionRpcInput {
                 address: None,
                 chain_type: None,
                 method: EthereumSignTransactionRpcInputMethod::EthSignTransaction,
                 params: EthereumSignTransactionRpcInputParams { transaction },
+                wallet_id: None,
             });
 
         self.wallets_client
@@ -538,25 +549,26 @@ impl EthereumService {
     /// let ethereum_service = client.wallets().ethereum();
     /// let auth_ctx = AuthorizationContext::new();
     ///
-    /// let transaction = EthereumSendTransactionRpcInputParamsTransaction {
+    /// let transaction = UnsignedStandardEthereumTransaction {
     ///     to: Some("0x742d35Cc6635C0532925a3b8c17d6d1E9C2F7ca".to_string()),
     ///     value: None,
     ///     gas_limit: None,
     ///     max_fee_per_gas: None,
     ///     max_priority_fee_per_gas: None,
-    ///     data: Some("0x".to_string()),
+    ///     data: None,
     ///     chain_id: None,
     ///     from: None,
     ///     gas_price: None,
     ///     nonce: None,
     ///     type_: None,
+    ///     authorization_list: vec![],
     /// };
     ///
     /// let result = ethereum_service
     ///     .send_transaction(
     ///         "clz2rqy4500061234abcd1234",
     ///         "eip155:1",
-    ///         transaction,
+    ///         transaction.into(),
     ///         &auth_ctx,
     ///         None,
     ///     )
@@ -577,7 +589,7 @@ impl EthereumService {
         &self,
         wallet_id: &str,
         caip2: &str,
-        transaction: EthereumSendTransactionRpcInputParamsTransaction,
+        transaction: UnsignedEthereumTransaction,
         authorization_context: &AuthorizationContext,
         idempotency_key: Option<&str>,
     ) -> Result<ResponseValue<WalletRpcResponse>, PrivySignedApiError> {
@@ -609,12 +621,13 @@ impl EthereumService {
     /// let ethereum_service = client.wallets().ethereum();
     /// let auth_ctx = AuthorizationContext::new();
     ///
-    /// let transaction = EthereumSendTransactionRpcInputParamsTransaction {
+    /// let transaction: UnsignedEthereumTransaction = UnsignedStandardEthereumTransaction {
     ///     to: Some("0x742d35Cc6635C0532925a3b8c17d6d1E9C2F7ca".to_string()),
     ///     value: None, gas_limit: None, max_fee_per_gas: None,
     ///     max_priority_fee_per_gas: None, data: None, chain_id: None,
     ///     from: None, gas_price: None, nonce: None, type_: None,
-    /// };
+    ///     authorization_list: vec![],
+    /// }.into();
     ///
     /// let options = SendTransactionOptions::new().with_sponsor(true);
     ///
@@ -635,21 +648,24 @@ impl EthereumService {
         &self,
         wallet_id: &str,
         caip2: &str,
-        transaction: EthereumSendTransactionRpcInputParamsTransaction,
+        transaction: UnsignedEthereumTransaction,
         authorization_context: &AuthorizationContext,
         idempotency_key: Option<&str>,
         options: &SendTransactionOptions,
     ) -> Result<ResponseValue<WalletRpcResponse>, PrivySignedApiError> {
         let rpc_body =
-            WalletRpcBody::EthereumSendTransactionRpcInput(EthereumSendTransactionRpcInput {
+            WalletRpcRequestBody::EthereumSendTransactionRpcInput(EthereumSendTransactionRpcInput {
                 address: None,
                 caip2: caip2
                     .parse()
                     .map_err(|_| Error::InvalidRequest("Invalid CAIP-2 format".to_string()))?,
                 chain_type: None,
+                experimental_data_suffix: None,
                 method: EthereumSendTransactionRpcInputMethod::EthSendTransaction,
                 params: EthereumSendTransactionRpcInputParams { transaction },
+                reference_id: None,
                 sponsor: options.sponsor,
+                wallet_id: None,
             });
 
         self.wallets_client

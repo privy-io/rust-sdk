@@ -22,7 +22,8 @@ use privy_rs::{
     AuthorizationContext, JwtUser, PrivateKey, PrivyApiError, PrivyClient, PrivySignedApiError,
     generated::types::{
         SolanaSignMessageRpcInput, SolanaSignMessageRpcInputMethod,
-        SolanaSignMessageRpcInputParams, SolanaSignMessageRpcInputParamsEncoding, WalletRpcBody,
+        SolanaSignMessageRpcInputParams, SolanaSignMessageRpcInputParamsEncoding,
+        WalletRpcRequestBody,
     },
 };
 use tracing_subscriber::EnvFilter;
@@ -59,14 +60,15 @@ async fn main() -> Result<()> {
             &wallet_id,
             &ctx,
             None, // No idempotency key
-            &WalletRpcBody::SolanaSignMessageRpcInput(SolanaSignMessageRpcInput {
+            &WalletRpcRequestBody::SolanaSignMessageRpcInput(SolanaSignMessageRpcInput {
                 address: Some("7EcDhSYGxXyscszYEp35KHN8vvw3svAuLKTzXwCFLtV".to_string()),
                 chain_type: None,
                 method: SolanaSignMessageRpcInputMethod::SignMessage,
                 params: SolanaSignMessageRpcInputParams {
                     encoding: SolanaSignMessageRpcInputParamsEncoding::Base64,
-                    message: STANDARD.encode("hello world"),
+                    message: STANDARD.encode("hello world").parse().unwrap(),
                 },
+                wallet_id: None,
             }),
         )
         .await

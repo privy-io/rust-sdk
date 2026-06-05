@@ -12,13 +12,16 @@ use crate::{
     generated::{
         Error, ResponseValue,
         types::{
-            SolanaSignAndSendTransactionRpcInput, SolanaSignAndSendTransactionRpcInputCaip2,
+            Caip2, SolanaSignAndSendTransactionRpcInput,
             SolanaSignAndSendTransactionRpcInputMethod, SolanaSignAndSendTransactionRpcInputParams,
-            SolanaSignAndSendTransactionRpcInputParamsEncoding, SolanaSignMessageRpcInput,
+            SolanaSignAndSendTransactionRpcInputParamsEncoding,
+            SolanaSignAndSendTransactionRpcInputParamsTransaction, SolanaSignMessageRpcInput,
             SolanaSignMessageRpcInputMethod, SolanaSignMessageRpcInputParams,
-            SolanaSignMessageRpcInputParamsEncoding, SolanaSignTransactionRpcInput,
-            SolanaSignTransactionRpcInputMethod, SolanaSignTransactionRpcInputParams,
-            SolanaSignTransactionRpcInputParamsEncoding, WalletRpcBody, WalletRpcResponse,
+            SolanaSignMessageRpcInputParamsEncoding, SolanaSignMessageRpcInputParamsMessage,
+            SolanaSignTransactionRpcInput, SolanaSignTransactionRpcInputMethod,
+            SolanaSignTransactionRpcInputParams, SolanaSignTransactionRpcInputParamsEncoding,
+            SolanaSignTransactionRpcInputParamsTransaction, WalletRpcRequestBody,
+            WalletRpcResponse,
         },
     },
 };
@@ -167,14 +170,16 @@ impl SolanaService {
         authorization_context: &AuthorizationContext,
         idempotency_key: Option<&str>,
     ) -> Result<ResponseValue<WalletRpcResponse>, PrivySignedApiError> {
-        let rpc_body = WalletRpcBody::SolanaSignMessageRpcInput(SolanaSignMessageRpcInput {
+        let rpc_body = WalletRpcRequestBody::SolanaSignMessageRpcInput(SolanaSignMessageRpcInput {
             address: None,
             chain_type: None,
             method: SolanaSignMessageRpcInputMethod::SignMessage,
             params: SolanaSignMessageRpcInputParams {
                 encoding: SolanaSignMessageRpcInputParamsEncoding::Base64,
-                message: message.to_string(),
+                message: message.parse::<SolanaSignMessageRpcInputParamsMessage>()
+                    .map_err(|e| Error::InvalidRequest(e.to_string()))?,
             },
+            wallet_id: None,
         });
 
         self.wallets_client
@@ -238,14 +243,16 @@ impl SolanaService {
         idempotency_key: Option<&str>,
     ) -> Result<ResponseValue<WalletRpcResponse>, PrivySignedApiError> {
         let rpc_body =
-            WalletRpcBody::SolanaSignTransactionRpcInput(SolanaSignTransactionRpcInput {
+            WalletRpcRequestBody::SolanaSignTransactionRpcInput(SolanaSignTransactionRpcInput {
                 address: None,
                 chain_type: None,
                 method: SolanaSignTransactionRpcInputMethod::SignTransaction,
                 params: SolanaSignTransactionRpcInputParams {
                     encoding: SolanaSignTransactionRpcInputParamsEncoding::Base64,
-                    transaction: transaction.to_string(),
+                    transaction: transaction.parse::<SolanaSignTransactionRpcInputParamsTransaction>()
+                        .map_err(|e| Error::InvalidRequest(e.to_string()))?,
                 },
+                wallet_id: None,
             });
 
         self.wallets_client
@@ -372,20 +379,24 @@ impl SolanaService {
         idempotency_key: Option<&str>,
         options: &SignAndSendTransactionOptions,
     ) -> Result<ResponseValue<WalletRpcResponse>, PrivySignedApiError> {
-        let caip2_parsed = SolanaSignAndSendTransactionRpcInputCaip2::from_str(caip2)
+        let caip2_parsed = Caip2::from_str(caip2)
             .map_err(|_| Error::InvalidRequest("Invalid CAIP-2 format".to_string()))?;
 
-        let rpc_body = WalletRpcBody::SolanaSignAndSendTransactionRpcInput(
+        let rpc_body = WalletRpcRequestBody::SolanaSignAndSendTransactionRpcInput(
             SolanaSignAndSendTransactionRpcInput {
                 address: None,
                 caip2: caip2_parsed,
                 chain_type: None,
                 method: SolanaSignAndSendTransactionRpcInputMethod::SignAndSendTransaction,
+                optimistic_broadcast: None,
                 params: SolanaSignAndSendTransactionRpcInputParams {
                     encoding: SolanaSignAndSendTransactionRpcInputParamsEncoding::Base64,
-                    transaction: transaction.to_string(),
+                    transaction: transaction.parse::<SolanaSignAndSendTransactionRpcInputParamsTransaction>()
+                        .map_err(|e| Error::InvalidRequest(e.to_string()))?,
                 },
+                reference_id: None,
                 sponsor: options.sponsor,
+                wallet_id: None,
             },
         );
 

@@ -4,9 +4,8 @@ use crate::{
     ethereum::EthereumService,
     generate_authorization_signatures,
     generated::types::{
-        HpkeEncryption, PrivateKeyInitInput, Wallet, WalletExportRequestBody,
-        WalletImportSubmissionRequestAdditionalSignersItem, WalletImportSubmissionRequestOwner,
-        WalletImportSupportedChains,
+        AdditionalSignerInput, HpkeEncryption, OwnerInput, PrivateKeyInitInput, Wallet,
+        WalletExportRequestBody, WalletImportSupportedChains,
     },
     import::WalletImport,
     solana::SolanaService,
@@ -26,7 +25,7 @@ impl WalletsClient {
         wallet_id: &'a str,
         ctx: &'a AuthorizationContext,
         privy_idempotency_key: Option<&'a str>,
-        body: &'a crate::generated::types::WalletRpcBody,
+        body: &'a crate::generated::types::WalletRpcRequestBody,
     ) -> Result<ResponseValue<crate::generated::types::WalletRpcResponse>, PrivySignedApiError>
     {
         let sig = generate_authorization_signatures(
@@ -40,7 +39,7 @@ impl WalletsClient {
         .await?;
 
         Ok(self
-            ._rpc(wallet_id, Some(&sig), privy_idempotency_key, body)
+            ._rpc(wallet_id, Some(&sig), privy_idempotency_key, None, body)
             .await?)
     }
 
@@ -56,7 +55,7 @@ impl WalletsClient {
         wallet_id: &'a str,
         ctx: &'a AuthorizationContext,
         privy_idempotency_key: Option<&'a str>,
-        body: &'a crate::generated::types::RawSign,
+        body: &'a crate::generated::types::RawSignInput,
     ) -> Result<ResponseValue<crate::generated::types::RawSignResponse>, PrivySignedApiError> {
         let sig = generate_authorization_signatures(
             ctx,
@@ -69,7 +68,7 @@ impl WalletsClient {
         .await?;
 
         Ok(self
-            ._raw_sign(wallet_id, Some(&sig), privy_idempotency_key, body)
+            ._raw_sign(wallet_id, Some(&sig), privy_idempotency_key, None, body)
             .await?)
     }
 
@@ -83,7 +82,7 @@ impl WalletsClient {
         &'a self,
         wallet_id: &'a str,
         ctx: &'a AuthorizationContext,
-        body: &'a crate::generated::types::UpdateWalletBody,
+        body: &'a crate::generated::types::WalletUpdateRequestBody,
     ) -> Result<ResponseValue<crate::generated::types::Wallet>, PrivySignedApiError> {
         let sig = generate_authorization_signatures(
             ctx,
@@ -95,7 +94,7 @@ impl WalletsClient {
         )
         .await?;
 
-        Ok(self._update(wallet_id, Some(&sig), body).await?)
+        Ok(self._update(wallet_id, Some(&sig), None, body).await?)
     }
 
     /// Export a wallet
@@ -115,6 +114,7 @@ impl WalletsClient {
         let privy_hpke = PrivyHpke::new();
         let body = WalletExportRequestBody {
             encryption_type: HpkeEncryption::Hpke,
+            export_seed_phrase: None,
             recipient_public_key: privy_hpke.public_key()?,
         };
 
@@ -128,7 +128,7 @@ impl WalletsClient {
         )
         .await?;
 
-        let resp = self._export(wallet_id, Some(&sig), &body).await?;
+        let resp = self._export(wallet_id, Some(&sig), None, &body).await?;
 
         tracing::debug!("Encapsulated key: {:?}", resp);
 
@@ -143,13 +143,13 @@ impl WalletsClient {
         address: String,
         private_key_hex: &str,
         chain_type: WalletImportSupportedChains,
-        owner: Option<WalletImportSubmissionRequestOwner>,
+        owner: Option<OwnerInput>,
         policy_ids: Vec<String>,
-        additional_signers: Vec<WalletImportSubmissionRequestAdditionalSignersItem>,
+        additional_signers: Option<AdditionalSignerInput>,
     ) -> Result<ResponseValue<Wallet>, PrivyApiError> {
         WalletImport::new(
             self.clone(),
-            crate::generated::types::WalletImportInitializationRequest::PrivateKeyInitInput(
+            crate::generated::types::WalletImportInitBody::PrivateKeyInitInput(
                 PrivateKeyInitInput {
                     address: address.clone(),
                     chain_type,
