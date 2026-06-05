@@ -25,7 +25,8 @@ use p256::elliptic_curve::SecretKey;
 use privy_rs::{
     AuthorizationContext, PrivateKey, PrivyClient,
     generated::types::{
-        CreateKeyQuorumBody, CreateKeyQuorumBodyDisplayName, CreateWalletBody, WalletChainType,
+        CreateWalletBody, KeyQuorumCreateRequestBody, KeyQuorumCreateRequestBodyDisplayName,
+        WalletChainType,
     },
 };
 use tracing_subscriber::EnvFilter;
@@ -72,11 +73,12 @@ async fn main() -> Result<()> {
     tracing::info!("Creating 2-of-3 key quorum");
 
     let quorum_display_name =
-        CreateKeyQuorumBodyDisplayName::try_from(format!("Quorum Example {timestamp}").as_str())?;
+        KeyQuorumCreateRequestBodyDisplayName::try_from(format!("Quorum Example {timestamp}").as_str())?;
 
-    let quorum_body = CreateKeyQuorumBody {
+    let quorum_body = KeyQuorumCreateRequestBody {
         authorization_threshold: Some(2.0), // 2-of-3 threshold
         display_name: Some(quorum_display_name),
+        key_quorum_ids: vec![],
         public_keys: vec![pubkey1, pubkey2, pubkey3],
         user_ids: vec![],
     };
@@ -95,9 +97,11 @@ async fn main() -> Result<()> {
     let create_body = CreateWalletBody {
         chain_type: WalletChainType::Ethereum,
         additional_signers: None,
+        display_name: None,
+        external_id: None,
         owner: None,
         owner_id: Some(key_quorum.id.parse().unwrap()),
-        policy_ids: vec![],
+        policy_ids: None,
     };
 
     let wallet = client
