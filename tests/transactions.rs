@@ -1,7 +1,6 @@
 use anyhow::Result;
 use privy_rs::generated::types::{
-    WalletChainType, WalletTransactionsAsset, WalletTransactionsAssetString,
-    WalletTransactionsChain,
+    WalletChainType, WalletSolanaAsset, WalletTransactionsAsset, WalletTransactionsChain,
 };
 
 mod common;
@@ -18,11 +17,12 @@ async fn test_transactions_get() -> Result<()> {
     // Get the first transaction from wallet transactions
     let transactions_response = debug_response!(client.wallets().transactions().get(
         &wallet_id,
-        &WalletTransactionsAsset::String(WalletTransactionsAssetString::Sol),
+        Some(&WalletTransactionsAsset::WalletSolanaAsset(WalletSolanaAsset::Sol)),
         WalletTransactionsChain::Base,
         None,      // No cursor for first page
         Some(1.0), // Limit to 1 transaction to get one ID,
         None,
+        None,      // No tx_hash filter
     ))
     .await?;
 
