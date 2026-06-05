@@ -4,7 +4,6 @@ on:
   push:
     branches: [main, arlyon/next]
   pull_request:
-    branches: [main, arlyon/next]
 
 env:
   CARGO_TERM_COLOR: always
