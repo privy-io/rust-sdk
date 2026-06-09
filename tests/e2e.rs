@@ -40,11 +40,12 @@ async fn test_wallets_e2e_quorum_workflow() -> Result<()> {
         .as_secs();
 
     let quorum_display_name =
-        CreateKeyQuorumBodyDisplayName::try_from(format!("E2E Test Quorum {timestamp}").as_str())?;
+        KeyQuorumCreateRequestBodyDisplayName::try_from(format!("E2E Test Quorum {timestamp}").as_str())?;
 
-    let quorum_body = CreateKeyQuorumBody {
+    let quorum_body = KeyQuorumCreateRequestBody {
         authorization_threshold: Some(2.0), // 2-of-3 threshold
         display_name: Some(quorum_display_name),
+        key_quorum_ids: vec![],
         public_keys: vec![pubkey1, pubkey2, pubkey3],
         user_ids: vec![],
     };
@@ -61,9 +62,11 @@ async fn test_wallets_e2e_quorum_workflow() -> Result<()> {
     let create_body = CreateWalletBody {
         chain_type: WalletChainType::Ethereum,
         additional_signers: None,
+        display_name: None,
+        external_id: None,
         owner: None,
         owner_id: Some(key_quorum.id.parse().unwrap()),
-        policy_ids: vec![],
+        policy_ids: None,
     };
 
     let wallet = client
@@ -158,11 +161,12 @@ async fn test_rpc_e2e_quorum_workflow() -> Result<()> {
         .as_secs();
 
     let quorum_display_name =
-        CreateKeyQuorumBodyDisplayName::try_from(format!("E2E Test Quorum {timestamp}").as_str())?;
+        KeyQuorumCreateRequestBodyDisplayName::try_from(format!("E2E Test Quorum {timestamp}").as_str())?;
 
-    let quorum_body = CreateKeyQuorumBody {
+    let quorum_body = KeyQuorumCreateRequestBody {
         authorization_threshold: Some(2.0), // 2-of-3 threshold
         display_name: Some(quorum_display_name),
+        key_quorum_ids: vec![],
         public_keys: vec![pubkey1, pubkey2, pubkey3],
         user_ids: vec![],
     };
@@ -179,9 +183,11 @@ async fn test_rpc_e2e_quorum_workflow() -> Result<()> {
     let create_body = CreateWalletBody {
         chain_type: WalletChainType::Ethereum,
         additional_signers: None,
+        display_name: None,
+        external_id: None,
         owner: None,
         owner_id: Some(key_quorum.id.parse().unwrap()),
-        policy_ids: vec![],
+        policy_ids: None,
     };
 
     let wallet = client

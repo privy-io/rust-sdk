@@ -4,8 +4,8 @@ use anyhow::Result;
 use privy_rs::{
     AuthorizationContext, JwtUser,
     generated::types::{
-        CreateKeyQuorumBody, CreateKeyQuorumBodyDisplayName, LinkedAccount, UpdateKeyQuorumBody,
-        UpdateKeyQuorumBodyDisplayName,
+        KeyQuorumCreateRequestBody, KeyQuorumCreateRequestBodyDisplayName, KeyQuorumId,
+        LinkedAccount, KeyQuorumUpdateRequestBody, KeyQuorumUpdateRequestBodyDisplayName,
     },
 };
 
@@ -23,11 +23,12 @@ async fn test_key_quorums_create() -> Result<()> {
         .duration_since(SystemTime::UNIX_EPOCH)?
         .as_secs();
     let display_name =
-        CreateKeyQuorumBodyDisplayName::try_from(format!("Test KQ {timestamp}").as_str())?;
+        KeyQuorumCreateRequestBodyDisplayName::try_from(format!("Test KQ {timestamp}").as_str())?;
 
-    let create_body = CreateKeyQuorumBody {
+    let create_body = KeyQuorumCreateRequestBody {
         authorization_threshold: Some(1.0),
         display_name: Some(display_name),
+        key_quorum_ids: vec![],
         public_keys: vec![],
         user_ids: vec![test_user.id.clone()],
     };
@@ -55,11 +56,12 @@ async fn test_key_quorums_get() -> Result<()> {
         .duration_since(SystemTime::UNIX_EPOCH)?
         .as_secs();
     let display_name =
-        CreateKeyQuorumBodyDisplayName::try_from(format!("Test Get KQ {timestamp}").as_str())?;
+        KeyQuorumCreateRequestBodyDisplayName::try_from(format!("Test Get KQ {timestamp}").as_str())?;
 
-    let create_body = CreateKeyQuorumBody {
+    let create_body = KeyQuorumCreateRequestBody {
         authorization_threshold: Some(1.0),
         display_name: Some(display_name),
+        key_quorum_ids: vec![],
         public_keys: vec![],
         user_ids: vec![test_user.id.clone()],
     };
@@ -68,7 +70,8 @@ async fn test_key_quorums_get() -> Result<()> {
     let key_quorum_id = created.into_inner().id;
 
     // Now test getting the key quorum
-    let result = client.key_quorums().get(&key_quorum_id).await?;
+    let kq_id = KeyQuorumId::from(key_quorum_id.clone());
+    let result = client.key_quorums().get(&kq_id).await?;
 
     println!("Retrieved key quorum: {result:?}");
 
@@ -102,28 +105,30 @@ async fn test_key_quorums_update_with_auth_context() -> Result<()> {
         .duration_since(SystemTime::UNIX_EPOCH)?
         .as_secs();
     let display_name =
-        CreateKeyQuorumBodyDisplayName::try_from(format!("Test Update KQ {timestamp}").as_str())?;
+        KeyQuorumCreateRequestBodyDisplayName::try_from(format!("Test Update KQ {timestamp}").as_str())?;
 
-    let create_body = CreateKeyQuorumBody {
+    let create_body = KeyQuorumCreateRequestBody {
         authorization_threshold: Some(1.0),
         display_name: Some(display_name),
+        key_quorum_ids: vec![],
         public_keys: vec![],
         user_ids: vec![test_user.id.clone()],
     };
 
     let created = debug_response!(client.key_quorums().create(&create_body)).await?;
-    let key_quorum_id = created.into_inner().id;
+    let key_quorum_id = KeyQuorumId::from(created.into_inner().id);
 
     // Set up authorization context for the update
     let ctx = AuthorizationContext::new().push(JwtUser(client.clone(), jwt));
 
     // Update the key quorum
     let updated_display_name =
-        UpdateKeyQuorumBodyDisplayName::try_from(format!("Updated Test KQ {timestamp}").as_str())?;
+        KeyQuorumUpdateRequestBodyDisplayName::try_from(format!("Updated Test KQ {timestamp}").as_str())?;
 
-    let update_body = UpdateKeyQuorumBody {
+    let update_body = KeyQuorumUpdateRequestBody {
         authorization_threshold: Some(1.0),
         display_name: Some(updated_display_name),
+        key_quorum_ids: vec![],
         public_keys: vec![
             "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEx4aoeD72yykviK+f/ckqE2CItVIG\n1rCnvC3/XZ1HgpOcMEMialRmTrqIK4oZlYd1RfxU3za/C9yjhboIuoPD3g==\n-----END PUBLIC KEY-----".to_string(),
         ],
@@ -174,17 +179,18 @@ async fn test_key_quorums_delete() -> Result<()> {
         .duration_since(SystemTime::UNIX_EPOCH)?
         .as_secs();
     let display_name =
-        CreateKeyQuorumBodyDisplayName::try_from(format!("Test Delete KQ {timestamp}").as_str())?;
+        KeyQuorumCreateRequestBodyDisplayName::try_from(format!("Test Delete KQ {timestamp}").as_str())?;
 
-    let create_body = CreateKeyQuorumBody {
+    let create_body = KeyQuorumCreateRequestBody {
         authorization_threshold: Some(1.0),
         display_name: Some(display_name),
+        key_quorum_ids: vec![],
         public_keys: vec![],
         user_ids: vec![test_user.id.clone()],
     };
 
     let created = client.key_quorums().create(&create_body).await?;
-    let key_quorum_id = created.into_inner().id;
+    let key_quorum_id = KeyQuorumId::from(created.into_inner().id);
 
     // Set up authorization context for the delete
     let ctx = AuthorizationContext::new().push(JwtUser(client.clone(), jwt));
