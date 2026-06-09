@@ -20,8 +20,8 @@ use anyhow::Result;
 use privy_rs::{
     PrivyClient,
     generated::types::{
-        GetWalletBalanceAsset, GetWalletBalanceAssetString, GetWalletBalanceChain,
-        GetWalletBalanceChainString, GetWalletBalanceIncludeCurrency,
+        GetWalletBalanceAsset, GetWalletBalanceChain, GetWalletBalanceChainString,
+        GetWalletBalanceIncludeCurrency, WalletSolanaAsset,
     },
 };
 use tracing_subscriber::EnvFilter;
@@ -50,9 +50,10 @@ async fn main() -> Result<()> {
         .balance()
         .get(
             &wallet_id,
-            &GetWalletBalanceAsset::String(GetWalletBalanceAssetString::Sol),
-            &GetWalletBalanceChain::String(GetWalletBalanceChainString::Solana),
+            Some(&GetWalletBalanceAsset::WalletSolanaAsset(WalletSolanaAsset::Sol)),
+            Some(&GetWalletBalanceChain::String(GetWalletBalanceChainString::Solana)),
             Some(GetWalletBalanceIncludeCurrency::Usd),
+            None,
         )
         .await?;
 

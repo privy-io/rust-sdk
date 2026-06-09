@@ -6,7 +6,12 @@ use std::{
 
 use p256::{NistP256, elliptic_curve::SecretKey};
 
-use crate::{JwtUser, KeyError, PrivyHpke, generated::types::AuthenticateBody};
+use crate::{
+    JwtUser, KeyError, PrivyHpke,
+    generated::types::{
+        WalletAuthenticateRequestBody, WalletAuthenticateRequestBodyEncryptionType,
+    },
+};
 
 const EXPIRY_BUFFER: Duration = Duration::from_secs(60);
 
@@ -68,10 +73,10 @@ impl JwtExchange {
         );
 
         // Build the authentication request with encryption parameters
-        let body = AuthenticateBody {
+        let body = WalletAuthenticateRequestBody {
             user_jwt: jwt.clone(),
-            encryption_type: Some(crate::generated::types::AuthenticateBodyEncryptionType::Hpke),
-            recipient_public_key: Some(public_key_b64),
+            encryption_type: WalletAuthenticateRequestBodyEncryptionType::Hpke,
+            recipient_public_key: public_key_b64,
         };
 
         // Send the authentication request
@@ -85,7 +90,7 @@ impl JwtExchange {
 
         // Process the response based on encryption type
         let (key, expiry) = match auth {
-            crate::generated::types::AuthenticateResponse::WithEncryption {
+            crate::generated::types::WalletAuthenticateWithJwtResponse::WithEncryption {
                 encrypted_authorization_key,
                 expires_at,
                 ..
@@ -100,7 +105,9 @@ impl JwtExchange {
                 let expiry = SystemTime::UNIX_EPOCH + Duration::from_secs_f64(expires_at);
                 (key, expiry)
             }
-            crate::generated::types::AuthenticateResponse::WithoutEncryption { .. } => {
+            crate::generated::types::WalletAuthenticateWithJwtResponse::WithoutEncryption {
+                ..
+            } => {
                 tracing::warn!("Received unencrypted authorization key (fallback mode)");
                 unimplemented!()
             }

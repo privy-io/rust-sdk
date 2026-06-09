@@ -21,7 +21,7 @@ use anyhow::Result;
 use privy_rs::{
     AuthorizationContext, IntoKey, JwtUser, PrivateKey, PrivyApiError, PrivyClient,
     PrivySignedApiError,
-    generated::types::{OwnerInput, UpdateWalletBody},
+    generated::types::{OwnerInput, OwnerInputPublicKey, P256PublicKey, WalletUpdateRequestBody},
 };
 use tracing_subscriber::EnvFilter;
 
@@ -62,8 +62,10 @@ async fn main() -> Result<()> {
         .update(
             &wallet_id,
             &ctx,
-            &UpdateWalletBody {
-                owner: Some(OwnerInput::PublicKey(public_key.to_string())),
+            &WalletUpdateRequestBody {
+                owner: Some(OwnerInput::Variant1(OwnerInputPublicKey {
+                    public_key: P256PublicKey(public_key.to_string()),
+                })),
                 ..Default::default()
             },
         )

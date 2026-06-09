@@ -20,7 +20,7 @@ use anyhow::Result;
 use privy_rs::{
     PrivyClient,
     generated::types::{
-        WalletTransactionsAsset, WalletTransactionsAssetString, WalletTransactionsChain,
+        WalletEthereumAsset, WalletTransactionsAsset, WalletTransactionsChain,
     },
 };
 use tracing_subscriber::EnvFilter;
@@ -43,16 +43,17 @@ async fn main() -> Result<()> {
         wallet_id
     );
 
-    // Get SOL transactions on Solana mainnet
+    // Get ETH transactions on Base
     let transactions = client
         .wallets()
         .transactions()
         .get(
             &wallet_id,
-            &WalletTransactionsAsset::String(WalletTransactionsAssetString::Sol),
+            Some(&WalletTransactionsAsset::WalletEthereumAsset(WalletEthereumAsset::Eth)),
             WalletTransactionsChain::Base,
             None,       // No cursor for first page
-            Some(10.0), // Limit to 10 transactions,
+            Some(10.0), // Limit to 10 transactions
+            None,
             None,
         )
         .await?;

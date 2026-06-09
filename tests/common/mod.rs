@@ -130,9 +130,13 @@ pub async fn get_test_wallet_by_type(
             &CreateWalletBody {
                 chain_type,
                 additional_signers: None,
-                owner: owner.map(|o| OwnerInput::UserId(o.to_string())),
+                owner: owner.map(|o| OwnerInput::Variant0(OwnerInputUser {
+                    user_id: o.to_string(),
+                })),
                 owner_id: None,
-                policy_ids: vec![],
+                policy_ids: None,
+                display_name: None,
+                external_id: None,
             },
         )
         .await?;
@@ -193,19 +197,19 @@ pub async fn ensure_test_user(client: &PrivyClient) -> Result<User> {
 
 pub async fn ensure_test_policy(
     client: &PrivyClient,
-    rules: Vec<PolicyRuleRequestBody>,
+    rules: Vec<CreatePolicyBodyRulesItem>,
 ) -> Result<Policy> {
     ensure_test_policy_with_user(client, rules, None).await
 }
 
 pub async fn ensure_test_policy_with_user(
     client: &PrivyClient,
-    rules: Vec<PolicyRuleRequestBody>,
+    rules: Vec<CreatePolicyBodyRulesItem>,
     user: Option<OwnerInput>,
 ) -> Result<Policy> {
     let unique_name = format!("test-policy-{}", chrono::Utc::now().timestamp());
     let policy_body = CreatePolicyBody {
-        chain_type: PolicyChainType::Solana,
+        chain_type: WalletChainType::Solana,
         name: CreatePolicyBodyName::try_from(unique_name).unwrap(),
         owner: user,
         owner_id: None,

@@ -43,9 +43,11 @@ async fn main() -> Result<()> {
             &CreateWalletBody {
                 chain_type: WalletChainType::Solana,
                 additional_signers: None,
+                display_name: None,
+                external_id: None,
                 owner: None,
                 owner_id: None,
-                policy_ids: vec![],
+                policy_ids: None,
             },
         )
         .await?;
