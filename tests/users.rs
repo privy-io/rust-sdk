@@ -2,9 +2,9 @@ use std::{collections::HashMap, time::SystemTime};
 
 use anyhow::Result;
 use privy_rs::generated::types::{
-    CreateUserBody, CreateUserWalletBody, CreateUserWalletBodyWalletsItem, CustomMetadataValue,
-    LinkedAccount, LinkedAccountEmailInput, LinkedAccountEmailInputType, LinkedAccountInput,
-    SearchUsersBody, UpdateUserCustomMetadataBody, WalletChainType,
+    CreateUserBody, CreateUserWalletBody, CustomMetadataValue, LinkedAccount,
+    LinkedAccountEmailInput, LinkedAccountEmailInputType, LinkedAccountInput, SearchUsersBody,
+    UpdateUserCustomMetadataBody, WalletChainType, WalletCreationInput,
 };
 use tracing_test::traced_test;
 
@@ -124,7 +124,7 @@ async fn test_users_pregenerate_wallets() -> Result<()> {
     let user_id = common::ensure_test_user(&client).await?.id;
 
     let pregenerate_body = CreateUserWalletBody {
-        wallets: vec![CreateUserWalletBodyWalletsItem {
+        wallets: vec![WalletCreationInput {
             chain_type: WalletChainType::Ethereum,
             additional_signers: vec![],
             create_smart_wallet: None,
