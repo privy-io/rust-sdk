@@ -11,11 +11,11 @@ async fn test_policies_create() -> Result<()> {
 
     let unique_name = format!("test-policy-{}", chrono::Utc::now().timestamp());
     let policy_body = CreatePolicyBody {
-        chain_type: PolicyChainType::Solana,
+        chain_type: WalletChainType::Solana,
         name: CreatePolicyBodyName::try_from(unique_name).unwrap(),
         owner: None,
         owner_id: None,
-        rules: vec![PolicyRuleRequestBody {
+        rules: vec![CreatePolicyBodyRulesItem {
             action: PolicyAction::Allow,
             conditions: vec![PolicyCondition::SolanaSystemProgramInstructionCondition(
                 SolanaSystemProgramInstructionCondition {
@@ -25,8 +25,9 @@ async fn test_policies_create() -> Result<()> {
                     value: ConditionValue::String("1000000".to_string()),
                 }
             )],
+            id: None,
             method: PolicyMethod::SignTransaction,
-            name: PolicyRuleRequestBodyName::try_from("test-rule").unwrap(),
+            name: CreatePolicyBodyRulesItemName::try_from("test-rule").unwrap(),
         }],
         version: CreatePolicyBodyVersion::try_from("1.0").unwrap(),
     };
@@ -61,7 +62,7 @@ async fn test_policies_get() -> Result<()> {
 async fn test_policies_get_rule() {
     let client = common::get_test_client().unwrap();
     let policy = common::ensure_test_policy(&client, vec![
-        PolicyRuleRequestBody {
+        CreatePolicyBodyRulesItem {
             action: PolicyAction::Allow,
             conditions: vec![PolicyCondition::SolanaSystemProgramInstructionCondition(
                 SolanaSystemProgramInstructionCondition {
@@ -71,9 +72,9 @@ async fn test_policies_get_rule() {
                     value: ConditionValue::String("2000000".to_string()),
                 }
             )],
-
+            id: None,
             method: PolicyMethod::SignTransaction,
-            name: PolicyRuleRequestBodyName::try_from("updated-rule").unwrap(),
+            name: CreatePolicyBodyRulesItemName::try_from("updated-rule").unwrap(),
         }
     ]).await.unwrap();
 
@@ -98,7 +99,7 @@ async fn test_policies_update_with_auth_context() {
     let policy = common::ensure_test_policy_with_user(
         &client,
         vec![],
-        Some(OwnerInput::PublicKey(pubkey.to_string())),
+        Some(OwnerInput::Variant1(OwnerInputPublicKey { public_key: P256PublicKey(pubkey.to_string()) })),
     )
     .await
     .unwrap();
@@ -106,7 +107,7 @@ async fn test_policies_update_with_auth_context() {
     let ctx = AuthorizationContext::new().push(key);
 
     let update_body = UpdatePolicyBody {
-        owner: Some(OwnerInput::PublicKey(pubkey.to_string())),
+        owner: Some(OwnerInput::Variant1(OwnerInputPublicKey { public_key: P256PublicKey(pubkey.to_string()) })),
         owner_id: None,
         name: Some(UpdatePolicyBodyName::try_from("my-owned-policy").unwrap()),
         rules: vec![PolicyRuleRequestBody {
@@ -151,12 +152,12 @@ async fn test_policies_delete() {
     // First create a policy to delete
     let unique_name = format!("delete-policy-{}", chrono::Utc::now().timestamp());
     let policy_body = CreatePolicyBody {
-        chain_type: PolicyChainType::Solana,
+        chain_type: WalletChainType::Solana,
         name: CreatePolicyBodyName::try_from(unique_name).unwrap(),
         // TODO: set the owner here once we have a JWT
         owner: None,
         owner_id: None,
-        rules: vec![PolicyRuleRequestBody {
+        rules: vec![CreatePolicyBodyRulesItem {
             action: PolicyAction::Allow,
             conditions: vec![PolicyCondition::SolanaSystemProgramInstructionCondition(
                 SolanaSystemProgramInstructionCondition {
@@ -166,8 +167,9 @@ async fn test_policies_delete() {
                     value: ConditionValue::String("1000000".to_string()),
                 }
             )],
+            id: None,
             method: PolicyMethod::SignTransaction,
-            name: PolicyRuleRequestBodyName::try_from("test-rule").unwrap(),
+            name: CreatePolicyBodyRulesItemName::try_from("test-rule").unwrap(),
         }],
         version: CreatePolicyBodyVersion::try_from("1.0").unwrap(),
     };
@@ -230,8 +232,27 @@ async fn test_policies_create_rule() {
 async fn test_policies_update_rule() {
     let client = common::get_test_client().unwrap();
 
-    let mut rule = PolicyRuleRequestBody {
+    let create_rule = CreatePolicyBodyRulesItem {
         action: PolicyAction::Deny,
+        conditions: vec![PolicyCondition::SolanaSystemProgramInstructionCondition(
+            SolanaSystemProgramInstructionCondition {
+                field: SolanaSystemProgramInstructionConditionField::TransferLamports,
+                field_source: SolanaSystemProgramInstructionConditionFieldSource::SolanaSystemProgramInstruction,
+                operator: ConditionOperator::Gt,
+                value: ConditionValue::String("10000000".to_string()),
+            }
+        )],
+        id: None,
+        method: PolicyMethod::SignTransaction,
+        name: CreatePolicyBodyRulesItemName::try_from("my-great-rule").unwrap(),
+    };
+
+    let policy = common::ensure_test_policy(&client, vec![create_rule])
+        .await
+        .unwrap();
+
+    let rule = PolicyRuleRequestBody {
+        action: PolicyAction::Allow,
         conditions: vec![PolicyCondition::SolanaSystemProgramInstructionCondition(
             SolanaSystemProgramInstructionCondition {
                 field: SolanaSystemProgramInstructionConditionField::TransferLamports,
@@ -243,12 +264,6 @@ async fn test_policies_update_rule() {
         method: PolicyMethod::SignTransaction,
         name: PolicyRuleRequestBodyName::try_from("my-great-rule").unwrap(),
     };
-
-    let policy = common::ensure_test_policy(&client, vec![rule.clone()])
-        .await
-        .unwrap();
-
-    rule.action = PolicyAction::Allow;
 
     let private_key = include_str!("./test_private_key.pem");
     let ctx = AuthorizationContext::new().push(PrivateKey::new(private_key.into()));
@@ -271,7 +286,7 @@ async fn test_policies_update_rule() {
 #[tokio::test]
 async fn test_policies_delete_rule() {
     let client = common::get_test_client().unwrap();
-    let policy = common::ensure_test_policy(&client, vec![PolicyRuleRequestBody {
+    let policy = common::ensure_test_policy(&client, vec![CreatePolicyBodyRulesItem {
         action: PolicyAction::Allow,
         conditions: vec![PolicyCondition::SolanaSystemProgramInstructionCondition(
             SolanaSystemProgramInstructionCondition {
@@ -281,8 +296,9 @@ async fn test_policies_delete_rule() {
                 value: ConditionValue::String("1000000".to_string()),
             }
         )],
+        id: None,
         method: PolicyMethod::SignTransaction,
-        name: PolicyRuleRequestBodyName::try_from("my-unique-rule").unwrap(),
+        name: CreatePolicyBodyRulesItemName::try_from("my-unique-rule").unwrap(),
     }]).await.unwrap();
 
     let private_key = include_str!("./test_private_key.pem");

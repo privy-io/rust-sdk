@@ -29,7 +29,7 @@ impl PoliciesClient {
         )
         .await?;
 
-        Ok(self._update(policy_id, Some(&sig), body).await?)
+        Ok(self._update(policy_id, Some(&sig), None, body).await?)
     }
 
     /// Delete a policy
@@ -43,7 +43,7 @@ impl PoliciesClient {
         &'a self,
         policy_id: &'a crate::generated::types::DeletePolicyPolicyId,
         ctx: &'a AuthorizationContext,
-    ) -> Result<ResponseValue<crate::generated::types::DeletePolicyResponse>, PrivySignedApiError>
+    ) -> Result<ResponseValue<crate::generated::types::SuccessResponse>, PrivySignedApiError>
     {
         let sig = generate_authorization_signatures(
             ctx,
@@ -55,7 +55,7 @@ impl PoliciesClient {
         )
         .await?;
 
-        Ok(self._delete(policy_id, Some(&sig)).await?)
+        Ok(self._delete(policy_id, Some(&sig), None).await?)
     }
 
     /// Create a rule for a policy
@@ -82,7 +82,7 @@ impl PoliciesClient {
         )
         .await?;
 
-        Ok(self._create_rule(policy_id, Some(&sig), body).await?)
+        Ok(self._create_rule(policy_id, Some(&sig), None, body).await?)
     }
 
     /// Update a rule for a policy
@@ -98,7 +98,7 @@ impl PoliciesClient {
         rule_id: &'a crate::generated::types::UpdateRuleRuleId,
         ctx: &'a AuthorizationContext,
         body: &'a crate::generated::types::PolicyRuleRequestBody,
-    ) -> Result<ResponseValue<crate::generated::types::UpdateRuleResponse>, PrivySignedApiError>
+    ) -> Result<ResponseValue<crate::generated::types::PolicyRuleResponse>, PrivySignedApiError>
     {
         let sig = generate_authorization_signatures(
             ctx,
@@ -116,7 +116,7 @@ impl PoliciesClient {
         .await?;
 
         Ok(self
-            ._update_rule(policy_id, rule_id, Some(&sig), body)
+            ._update_rule(policy_id, rule_id, Some(&sig), None, body)
             .await?)
     }
 
@@ -132,7 +132,7 @@ impl PoliciesClient {
         policy_id: &'a crate::generated::types::DeleteRulePolicyId,
         rule_id: &'a crate::generated::types::DeleteRuleRuleId,
         ctx: &'a AuthorizationContext,
-    ) -> Result<ResponseValue<crate::generated::types::DeleteRuleResponse>, PrivySignedApiError>
+    ) -> Result<ResponseValue<crate::generated::types::SuccessResponse>, PrivySignedApiError>
     {
         let sig = generate_authorization_signatures(
             ctx,
@@ -149,6 +149,6 @@ impl PoliciesClient {
         )
         .await?;
 
-        Ok(self._delete_rule(policy_id, rule_id, Some(&sig)).await?)
+        Ok(self._delete_rule(policy_id, rule_id, Some(&sig), None).await?)
     }
 }
