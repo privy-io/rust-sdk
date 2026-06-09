@@ -54,6 +54,9 @@ curl -s https://api.privy.io/v1/openapi.json \
   | jq -f scripts/schema-patches/10-kraken-multipart.jq \
   | jq -f scripts/schema-patches/11-deduplicate-properties.jq \
   | jq -f scripts/schema-patches/12-remove-custom-oauth.jq \
+  | jq -f scripts/schema-patches/13-downgrade-openapi-version.jq \
+  | jq -f scripts/schema-patches/14-fix-responses.jq \
+  | jq -f scripts/schema-patches/15-fix-nullable-types.jq \
   > openapi.json
 """
 
@@ -74,8 +77,8 @@ rustup install
 # get current crate version
 VERSION=$(grep -m 1 "^version" crates/privy-openapi/Cargo.toml | cut -d '"' -f 2)
 cargo-progenitor progenitor --input openapi.json --name privy-openapi -o crates/privy-openapi --version $VERSION --license-name "MIT OR Apache-2.0"
-# insert description using sed
-sed -i '2i description="Privy OpenAPI Bindings"' crates/privy-openapi/Cargo.toml
+# insert description after [package] line
+sed -i '' 's/^\\[package\\]/[package]\\ndescription="Privy OpenAPI Bindings"/' crates/privy-openapi/Cargo.toml
 """
 
 [tasks.gen-p256-key]

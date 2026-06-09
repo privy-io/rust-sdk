@@ -275,7 +275,7 @@ fn generate_subclient_code(
 
     // Add imports
     code_parts.push(quote! {
-        use crate::generated::{Client, Error, ResponseValue, ByteStream, types};
+        use crate::generated::{Client, Error, ResponseValue, types};
     });
 
     // Generate code for each resource
@@ -350,6 +350,7 @@ fn generate_resource_code(
     }
 
     let impl_block = quote! {
+        #[allow(clippy::too_many_arguments)]
         impl #client_ident {
             /// Create a new client instance
             pub fn new(client: Client, app_id: String, base_url: String) -> Self {
