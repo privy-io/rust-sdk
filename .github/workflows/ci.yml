@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [main, arlyon/next]
+    branches: [main]
   pull_request:
 
 env:
@@ -49,8 +49,14 @@ jobs:
           path: target
           key: ${{ runner.os }}-cargo-build-target-${{ hashFiles('**/Cargo.lock') }}
 
+      - name: Run clippy
+        run: cargo clippy --all-targets --all-features -- -D warnings
+
       - name: Run tests
         run: cargo test --verbose
 
-      - name: Run clippy
-        run: cargo clippy --all-targets --all-features -- -D warnings
+      - name: Compile examples
+        run: cargo test --examples --no-run
+
+      - name: Run doc tests
+        run: cargo test --doc
