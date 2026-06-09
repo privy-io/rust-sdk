@@ -5,6 +5,25 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [0.1.0-alpha.6](https://github.com/privy-io/rust-sdk/compare/privy-rs-v0.1.0-alpha.5...privy-rs-v0.1.0-alpha.6) - 2026-06-09
+
+### Added
+
+- add send_transaction_with_options for gas sponsorship support
+
+### Fixed
+
+- update transaction and user tests for regenerated types
+- update fiat tests for regenerated types
+- update policy domain for regenerated types
+- update key quorum domain for regenerated types
+- update wallet domain for regenerated types
+
+### Other
+
+- bump semver-compatible production dependencies
+- run test workflow on all pull requests
+
 ## [0.1.0-alpha.5](https://github.com/privy-io/rust-sdk/compare/privy-rs-v0.1.0-alpha.4...privy-rs-v0.1.0-alpha.5) - 2026-03-11
 
 ### Added
