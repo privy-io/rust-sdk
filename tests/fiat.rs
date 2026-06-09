@@ -10,7 +10,7 @@ async fn test_fiat_configure_app() -> Result<()> {
     let app_id = client.app_id();
 
     let body = ConfigureAppForFiatOnOffRampingBody {
-        provider: ConfigureAppForFiatOnOffRampingBodyProvider::Bridge,
+        provider: OnrampProvider::Bridge,
         api_key: "".parse()?,
     };
 
@@ -35,7 +35,7 @@ async fn test_fiat_get_status() -> Result<()> {
     let user = common::ensure_test_user(&client).await?;
 
     let body = UserFiatStatusesBody {
-        provider: UserFiatStatusesBodyProvider::Bridge,
+        provider: OnrampProvider::Bridge,
         tx_hash: None,
     };
 
@@ -63,7 +63,7 @@ async fn test_fiat_get_kyc_link() -> Result<()> {
         email: "TODO".to_string(),
         endorsements: vec![],
         full_name: None,
-        provider: GetUserFiatKycLinkBodyProvider::Bridge,
+        provider: OnrampProvider::Bridge,
         redirect_uri: None,
         type_: Some(GetUserFiatKycLinkBodyType::Individual),
     };
@@ -91,7 +91,7 @@ async fn test_fiat_accounts_get() -> Result<()> {
     let result = client
         .fiat()
         .accounts()
-        .get(&user.id, GetUserFiatAccountsProvider::Bridge)
+        .get(&user.id, OnrampProvider::Bridge)
         .await;
 
     match result {
@@ -113,9 +113,9 @@ async fn test_fiat_accounts_create() -> Result<()> {
     let user = common::ensure_test_user(&client).await?;
 
     let body = CreateUserFiatAccountBody {
-        provider: CreateUserFiatAccountBodyProvider::Bridge,
+        provider: OnrampProvider::Bridge,
         account_owner_name: "TODO".parse()?,
-        currency: CreateUserFiatAccountBodyCurrency::Usd,
+        currency: FiatCurrency::Usd,
         account: None,
         address: None,
         bank_name: None,
@@ -169,6 +169,7 @@ async fn test_fiat_kyc_create() -> Result<()> {
         completed_customer_safety_check_at: None,
         employment_status: None,
         expected_monthly_payments_usd: None,
+        has_accepted_terms_of_service: None,
         has_signed_terms_of_service: None,
         kyc_screen: None,
         middle_name: None,
@@ -206,16 +207,16 @@ async fn test_fiat_onramp_create() -> Result<()> {
     let user = common::ensure_test_user(&client).await?;
 
     let body = InitiateUserFiatOnrampBody {
-        provider: InitiateUserFiatOnrampBodyProvider::Bridge,
+        provider: OnrampProvider::Bridge,
         amount: "100".parse()?,
         destination: InitiateUserFiatOnrampBodyDestination {
             to_address: "0x742d35Cc6634C0532925a3b8D5c9B40AB8a04C8A".to_string(),
-            chain: InitiateUserFiatOnrampBodyDestinationChain::Ethereum,
-            currency: InitiateUserFiatOnrampBodyDestinationCurrency::Usdc,
+            chain: OnrampChain::Ethereum,
+            currency: OnrampAsset::Usdc,
         },
         source: InitiateUserFiatOnrampBodySource {
-            currency: InitiateUserFiatOnrampBodySourceCurrency::Usd,
-            payment_rail: InitiateUserFiatOnrampBodySourcePaymentRail::Wire,
+            currency: FiatCurrency::Usd,
+            payment_rail: FiatPaymentRail::Wire,
         },
     };
 
@@ -240,16 +241,16 @@ async fn test_fiat_offramp_create() -> Result<()> {
     let user = common::ensure_test_user(&client).await?;
 
     let body = InitiateUserFiatOfframpBody {
-        provider: InitiateUserFiatOfframpBodyProvider::Bridge,
+        provider: OnrampProvider::Bridge,
         amount: "50".parse()?,
         destination: InitiateUserFiatOfframpBodyDestination {
-            currency: InitiateUserFiatOfframpBodyDestinationCurrency::Eur,
+            currency: FiatCurrency::Eur,
             external_account_id: uuid::Uuid::new_v4(),
-            payment_rail: InitiateUserFiatOfframpBodyDestinationPaymentRail::Wire,
+            payment_rail: FiatPaymentRail::Wire,
         },
         source: InitiateUserFiatOfframpBodySource {
-            chain: InitiateUserFiatOfframpBodySourceChain::Ethereum,
-            currency: InitiateUserFiatOfframpBodySourceCurrency::Usdc,
+            chain: OnrampChain::Ethereum,
+            currency: OnrampAsset::Usdc,
             from_address: "todo".to_string(),
         },
     };
