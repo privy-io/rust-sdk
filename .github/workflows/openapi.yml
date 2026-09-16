@@ -8,9 +8,9 @@ jobs:
   update-openapi:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
 
-      - uses: jdx/mise-action@v2
+      - uses: jdx/mise-action@c37c93293d6b742fc901e1406b8f764f6fb19dac # v2
         with:
           install: false
           experimental: true
@@ -24,7 +24,7 @@ jobs:
         run: mise gen-openapi
 
       - name: create pull request
-        uses: peter-evans/create-pull-request@v3
+        uses: peter-evans/create-pull-request@18f7dc018cc2cd597073088f7c7591b9d1c02672 # v3
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           commit-message: Generate latest changes from OpenApi spec
