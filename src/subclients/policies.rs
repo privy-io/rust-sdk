@@ -1,6 +1,6 @@
 use super::ResponseValue;
 use crate::{
-    AuthorizationContext, PrivySignedApiError,
+    AuthorizationContext, PrivySignedApiError, RequestOptions,
     generated::types::{Policy, UpdatePolicyBody, UpdatePolicyPolicyId},
     subclients::{PoliciesClient, sign_request},
 };
@@ -19,6 +19,28 @@ impl PoliciesClient {
         ctx: &'a AuthorizationContext,
         body: &'a UpdatePolicyBody,
     ) -> Result<ResponseValue<Policy>, PrivySignedApiError> {
+        self.update_with_options(policy_id, ctx, body, &RequestOptions::default())
+            .await
+    }
+
+    /// Update a policy, with per-request [`RequestOptions`].
+    ///
+    /// `options.request_expiry`, when set, is sent as the `privy-request-expiry`
+    /// header and included in the authorization signature, even if request
+    /// expiry is disabled on the client.
+    ///
+    /// # Errors
+    ///
+    /// Can fail either if the authorization signature could not be generated,
+    /// or if the api call fails whether than be due to network issues, auth problems,
+    /// or the Privy API returning an error.
+    pub async fn update_with_options<'a>(
+        &'a self,
+        policy_id: &'a UpdatePolicyPolicyId,
+        ctx: &'a AuthorizationContext,
+        body: &'a UpdatePolicyBody,
+        options: &'a RequestOptions,
+    ) -> Result<ResponseValue<Policy>, PrivySignedApiError> {
         let signed = sign_request(
             ctx,
             &self.app_id,
@@ -26,7 +48,7 @@ impl PoliciesClient {
             format!("{}/v1/policies/{}", self.base_url, policy_id.as_str()),
             body,
             None,
-            self.request_expiry.resolve(None),
+            self.request_expiry.resolve(options.request_expiry),
         )
         .await?;
 
@@ -51,8 +73,28 @@ impl PoliciesClient {
         &'a self,
         policy_id: &'a crate::generated::types::DeletePolicyPolicyId,
         ctx: &'a AuthorizationContext,
-    ) -> Result<ResponseValue<crate::generated::types::SuccessResponse>, PrivySignedApiError>
-    {
+    ) -> Result<ResponseValue<crate::generated::types::SuccessResponse>, PrivySignedApiError> {
+        self.delete_with_options(policy_id, ctx, &RequestOptions::default())
+            .await
+    }
+
+    /// Delete a policy, with per-request [`RequestOptions`].
+    ///
+    /// `options.request_expiry`, when set, is sent as the `privy-request-expiry`
+    /// header and included in the authorization signature, even if request
+    /// expiry is disabled on the client.
+    ///
+    /// # Errors
+    ///
+    /// Can fail either if the authorization signature could not be generated,
+    /// or if the api call fails whether than be due to network issues, auth problems,
+    /// or the Privy API returning an error.
+    pub async fn delete_with_options<'a>(
+        &'a self,
+        policy_id: &'a crate::generated::types::DeletePolicyPolicyId,
+        ctx: &'a AuthorizationContext,
+        options: &'a RequestOptions,
+    ) -> Result<ResponseValue<crate::generated::types::SuccessResponse>, PrivySignedApiError> {
         let signed = sign_request(
             ctx,
             &self.app_id,
@@ -60,7 +102,7 @@ impl PoliciesClient {
             format!("{}/v1/policies/{}", self.base_url, policy_id.as_str()),
             &serde_json::json!({}),
             None,
-            self.request_expiry.resolve(None),
+            self.request_expiry.resolve(options.request_expiry),
         )
         .await?;
 
@@ -87,6 +129,29 @@ impl PoliciesClient {
         body: &'a crate::generated::types::PolicyRuleRequestBody,
     ) -> Result<ResponseValue<crate::generated::types::PolicyRuleResponse>, PrivySignedApiError>
     {
+        self.create_rule_with_options(policy_id, ctx, body, &RequestOptions::default())
+            .await
+    }
+
+    /// Create a rule for a policy, with per-request [`RequestOptions`].
+    ///
+    /// `options.request_expiry`, when set, is sent as the `privy-request-expiry`
+    /// header and included in the authorization signature, even if request
+    /// expiry is disabled on the client.
+    ///
+    /// # Errors
+    ///
+    /// Can fail either if the authorization signature could not be generated,
+    /// or if the api call fails whether than be due to network issues, auth problems,
+    /// or the Privy API returning an error.
+    pub async fn create_rule_with_options<'a>(
+        &'a self,
+        policy_id: &'a crate::generated::types::CreateRulePolicyId,
+        ctx: &'a AuthorizationContext,
+        body: &'a crate::generated::types::PolicyRuleRequestBody,
+        options: &'a RequestOptions,
+    ) -> Result<ResponseValue<crate::generated::types::PolicyRuleResponse>, PrivySignedApiError>
+    {
         let signed = sign_request(
             ctx,
             &self.app_id,
@@ -94,7 +159,7 @@ impl PoliciesClient {
             format!("{}/v1/policies/{}/rules", self.base_url, policy_id.as_str()),
             body,
             None,
-            self.request_expiry.resolve(None),
+            self.request_expiry.resolve(options.request_expiry),
         )
         .await?;
 
@@ -123,6 +188,30 @@ impl PoliciesClient {
         body: &'a crate::generated::types::PolicyRuleRequestBody,
     ) -> Result<ResponseValue<crate::generated::types::PolicyRuleResponse>, PrivySignedApiError>
     {
+        self.update_rule_with_options(policy_id, rule_id, ctx, body, &RequestOptions::default())
+            .await
+    }
+
+    /// Update a rule for a policy, with per-request [`RequestOptions`].
+    ///
+    /// `options.request_expiry`, when set, is sent as the `privy-request-expiry`
+    /// header and included in the authorization signature, even if request
+    /// expiry is disabled on the client.
+    ///
+    /// # Errors
+    ///
+    /// Can fail either if the authorization signature could not be generated,
+    /// or if the api call fails whether than be due to network issues, auth problems,
+    /// or the Privy API returning an error.
+    pub async fn update_rule_with_options<'a>(
+        &'a self,
+        policy_id: &'a crate::generated::types::UpdateRulePolicyId,
+        rule_id: &'a crate::generated::types::UpdateRuleRuleId,
+        ctx: &'a AuthorizationContext,
+        body: &'a crate::generated::types::PolicyRuleRequestBody,
+        options: &'a RequestOptions,
+    ) -> Result<ResponseValue<crate::generated::types::PolicyRuleResponse>, PrivySignedApiError>
+    {
         let signed = sign_request(
             ctx,
             &self.app_id,
@@ -135,7 +224,7 @@ impl PoliciesClient {
             ),
             body,
             None,
-            self.request_expiry.resolve(None),
+            self.request_expiry.resolve(options.request_expiry),
         )
         .await?;
 
@@ -162,8 +251,29 @@ impl PoliciesClient {
         policy_id: &'a crate::generated::types::DeleteRulePolicyId,
         rule_id: &'a crate::generated::types::DeleteRuleRuleId,
         ctx: &'a AuthorizationContext,
-    ) -> Result<ResponseValue<crate::generated::types::SuccessResponse>, PrivySignedApiError>
-    {
+    ) -> Result<ResponseValue<crate::generated::types::SuccessResponse>, PrivySignedApiError> {
+        self.delete_rule_with_options(policy_id, rule_id, ctx, &RequestOptions::default())
+            .await
+    }
+
+    /// Delete a rule for a policy, with per-request [`RequestOptions`].
+    ///
+    /// `options.request_expiry`, when set, is sent as the `privy-request-expiry`
+    /// header and included in the authorization signature, even if request
+    /// expiry is disabled on the client.
+    ///
+    /// # Errors
+    ///
+    /// Can fail either if the authorization signature could not be generated,
+    /// or if the api call fails whether than be due to network issues, auth problems,
+    /// or the Privy API returning an error.
+    pub async fn delete_rule_with_options<'a>(
+        &'a self,
+        policy_id: &'a crate::generated::types::DeleteRulePolicyId,
+        rule_id: &'a crate::generated::types::DeleteRuleRuleId,
+        ctx: &'a AuthorizationContext,
+        options: &'a RequestOptions,
+    ) -> Result<ResponseValue<crate::generated::types::SuccessResponse>, PrivySignedApiError> {
         let signed = sign_request(
             ctx,
             &self.app_id,
@@ -176,7 +286,7 @@ impl PoliciesClient {
             ),
             &serde_json::json!({}),
             None,
-            self.request_expiry.resolve(None),
+            self.request_expiry.resolve(options.request_expiry),
         )
         .await?;
 
