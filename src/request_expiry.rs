@@ -108,7 +108,6 @@ impl RequestExpiryOptions {
     ///
     /// Precedence: per-request value, then `disabled` (no expiry), then the
     /// configured default computed from the current time.
-    #[allow(dead_code)]
     pub(crate) fn resolve(&self, per_request: Option<u64>) -> Option<u64> {
         if per_request.is_some() {
             return per_request;

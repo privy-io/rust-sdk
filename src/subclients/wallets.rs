@@ -2,14 +2,13 @@ use super::{Error, ResponseValue, types};
 use crate::{
     AuthorizationContext, PrivyApiError, PrivyExportError, PrivyHpke, PrivySignedApiError,
     ethereum::EthereumService,
-    generate_authorization_signatures,
     generated::types::{
         AdditionalSignerInput, HpkeEncryption, OwnerInput, PrivateKeyInitInput, Wallet,
         WalletExportRequestBody, WalletImportSupportedChains,
     },
     import::WalletImport,
     solana::SolanaService,
-    subclients::WalletsClient,
+    subclients::{WalletsClient, sign_request},
 };
 
 impl WalletsClient {
@@ -28,18 +27,25 @@ impl WalletsClient {
         body: &'a crate::generated::types::WalletRpcRequestBody,
     ) -> Result<ResponseValue<crate::generated::types::WalletRpcResponse>, PrivySignedApiError>
     {
-        let sig = generate_authorization_signatures(
+        let signed = sign_request(
             ctx,
             &self.app_id,
             crate::Method::POST,
             format!("{}/v1/wallets/{}/rpc", self.base_url, wallet_id),
             body,
-            privy_idempotency_key.map(|k| k.to_owned()),
+            privy_idempotency_key,
+            self.request_expiry.resolve(None),
         )
         .await?;
 
         Ok(self
-            ._rpc(wallet_id, Some(&sig), privy_idempotency_key, None, body)
+            ._rpc(
+                wallet_id,
+                Some(&signed.signature),
+                privy_idempotency_key,
+                signed.request_expiry.as_deref(),
+                body,
+            )
             .await?)
     }
 
@@ -57,18 +63,25 @@ impl WalletsClient {
         privy_idempotency_key: Option<&'a str>,
         body: &'a crate::generated::types::RawSignInput,
     ) -> Result<ResponseValue<crate::generated::types::RawSignResponse>, PrivySignedApiError> {
-        let sig = generate_authorization_signatures(
+        let signed = sign_request(
             ctx,
             &self.app_id,
             crate::Method::POST,
             format!("{}/v1/wallets/{}/raw_sign", self.base_url, wallet_id),
             body,
-            privy_idempotency_key.map(|k| k.to_owned()),
+            privy_idempotency_key,
+            self.request_expiry.resolve(None),
         )
         .await?;
 
         Ok(self
-            ._raw_sign(wallet_id, Some(&sig), privy_idempotency_key, None, body)
+            ._raw_sign(
+                wallet_id,
+                Some(&signed.signature),
+                privy_idempotency_key,
+                signed.request_expiry.as_deref(),
+                body,
+            )
             .await?)
     }
 
@@ -84,17 +97,25 @@ impl WalletsClient {
         ctx: &'a AuthorizationContext,
         body: &'a crate::generated::types::WalletUpdateRequestBody,
     ) -> Result<ResponseValue<crate::generated::types::Wallet>, PrivySignedApiError> {
-        let sig = generate_authorization_signatures(
+        let signed = sign_request(
             ctx,
             &self.app_id,
             crate::Method::PATCH,
             format!("{}/v1/wallets/{}", self.base_url, wallet_id),
             body,
             None,
+            self.request_expiry.resolve(None),
         )
         .await?;
 
-        Ok(self._update(wallet_id, Some(&sig), None, body).await?)
+        Ok(self
+            ._update(
+                wallet_id,
+                Some(&signed.signature),
+                signed.request_expiry.as_deref(),
+                body,
+            )
+            .await?)
     }
 
     /// Export a wallet
@@ -118,17 +139,25 @@ impl WalletsClient {
             recipient_public_key: privy_hpke.public_key()?,
         };
 
-        let sig = generate_authorization_signatures(
+        let signed = sign_request(
             ctx,
             &self.app_id,
             crate::Method::POST,
             format!("{}/v1/wallets/{}/export", self.base_url, wallet_id),
             &body,
             None,
+            self.request_expiry.resolve(None),
         )
         .await?;
 
-        let resp = self._export(wallet_id, Some(&sig), None, &body).await?;
+        let resp = self
+            ._export(
+                wallet_id,
+                Some(&signed.signature),
+                signed.request_expiry.as_deref(),
+                &body,
+            )
+            .await?;
 
         tracing::debug!("Encapsulated key: {:?}", resp);
 
