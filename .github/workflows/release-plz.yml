@@ -3,7 +3,12 @@ name: Release-plz
 on:
   push:
     branches: [main]
+  # Manual retries must target protected main. The publishing job rejects all other refs.
   workflow_dispatch:
+
+# Keep the default token read-only. Jobs opt into only the permissions they need.
+permissions:
+  contents: read
 
 env:
   rust_min: 1.88
@@ -13,16 +18,32 @@ jobs:
   release-plz-release:
     name: Release-plz release
     runs-on: ubuntu-latest
-    if: ${{ github.repository_owner == 'privy-io' }}
+    if: github.repository == 'privy-io/rust-sdk' && github.ref == 'refs/heads/main'
+    # release-plz publishes before it creates the package-specific release tags, so this
+    # environment is restricted to protected main rather than to tag refs. crates.io's
+    # trusted publishers must require this exact environment for both workspace crates.
+    environment: package-release
     permissions:
-      contents: write
+      contents: read
       id-token: write
     steps:
+      # Use the narrowly scoped Builder Blobby token for release tags and GitHub releases.
+      # The default GITHUB_TOKEN is not allowed to bypass the release-tag ruleset.
+      - name: Mint builder-blobby token
+        id: app-token
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          app-id: ${{ secrets.BUILDER_BLOBBY_APP_ID }}
+          private-key: ${{ secrets.BUILDER_BLOBBY_APP_PRIVATE_KEY }}
+          owner: privy-io
+          repositories: rust-sdk
+          permission-contents: write
+
       - name: Checkout repository
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
           fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ steps.app-token.outputs.token }}
 
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@02cb101ec7c40f2c49e1d9714d64511d8e1b74de # master
@@ -37,13 +58,13 @@ jobs:
         with:
           command: release
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
 
   # Create a PR with the new versions and changelog, preparing the next release
   release-plz-pr:
     name: Release-plz PR
     runs-on: ubuntu-latest
-    if: ${{ github.repository_owner == 'privy-io' }}
+    if: github.repository == 'privy-io/rust-sdk' && github.ref == 'refs/heads/main'
     permissions:
       contents: write
       pull-requests: write
