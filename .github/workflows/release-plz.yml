@@ -3,7 +3,12 @@ name: Release-plz
 on:
   push:
     branches: [main]
+  # Manual retries must target protected main. The publishing job rejects all other refs.
   workflow_dispatch:
+
+# Keep the default token read-only. Jobs opt into only the permissions they need.
+permissions:
+  contents: read
 
 env:
   rust_min: 1.88
@@ -13,7 +18,11 @@ jobs:
   release-plz-release:
     name: Release-plz release
     runs-on: ubuntu-latest
-    if: ${{ github.repository_owner == 'privy-io' }}
+    if: github.repository == 'privy-io/rust-sdk' && github.ref == 'refs/heads/main'
+    # release-plz publishes before it creates the package-specific release tags, so this
+    # environment is restricted to protected main rather than to tag refs. crates.io's
+    # trusted publishers must require this exact environment for both workspace crates.
+    environment: package-release
     permissions:
       contents: write
       id-token: write
@@ -43,7 +52,7 @@ jobs:
   release-plz-pr:
     name: Release-plz PR
     runs-on: ubuntu-latest
-    if: ${{ github.repository_owner == 'privy-io' }}
+    if: github.repository == 'privy-io/rust-sdk' && github.ref == 'refs/heads/main'
     permissions:
       contents: write
       pull-requests: write

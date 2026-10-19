@@ -4,9 +4,16 @@ on:
     # run every Monday at 10am UTC
     - cron: "0 10 * * 1"
   workflow_dispatch:
+
+permissions:
+  contents: read
+
 jobs:
   update-openapi:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
 
