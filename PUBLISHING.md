@@ -25,8 +25,8 @@ This project uses [release-plz](https://github.com/release-plz/release-plz) for 
 The release process is configured via GitHub Actions in `.github/workflows/release-plz.yml`:
 
 - **Triggers**: Runs on pushes to `main` branch and manual workflow dispatch
-- **Authentication**: Uses trusted publishing (OIDC) for crates.io and a short-lived,
-  repository-scoped Builder Blobby token for GitHub release tags and releases
+- **Authentication**: Uses trusted publishing (OIDC) for crates.io and the built-in,
+  short-lived `GITHUB_TOKEN` for GitHub release tags and releases
 - **Release gate**: The publishing job uses the protected `package-release` GitHub
   environment, restricted to protected `main`; the trusted-publisher settings for both
   `privy-rs` and `privy-openapi` must require that exact environment and
