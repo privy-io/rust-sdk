@@ -11,7 +11,9 @@ permissions:
   contents: read
 
 env:
-  rust_min: 1.88
+  # Release tooling may require a newer compiler than the SDK's MSRV. CI continues
+  # to validate the repository-pinned toolchain separately.
+  release_rust: stable
 
 jobs:
   # Release unpublished packages
@@ -24,19 +26,30 @@ jobs:
     # trusted publishers must require this exact environment for both workspace crates.
     environment: package-release
     permissions:
-      contents: write
+      contents: read
       id-token: write
     steps:
+      - name: Mint Builder Blobby token
+        id: app-token
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          app-id: ${{ secrets.BUILDER_BLOBBY_APP_ID }}
+          private-key: ${{ secrets.BUILDER_BLOBBY_APP_PRIVATE_KEY }}
+          owner: privy-io
+          repositories: rust-sdk
+          permission-contents: write
+
       - name: Checkout repository
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
           fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ steps.app-token.outputs.token }}
+          persist-credentials: false
 
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@02cb101ec7c40f2c49e1d9714d64511d8e1b74de # master
         with:
-          toolchain: ${{ env.rust_min }}
+          toolchain: ${{ env.release_rust }}
 
       - name: Cache dependencies
         uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
@@ -46,7 +59,7 @@ jobs:
         with:
           command: release
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
 
   # Create a PR with the new versions and changelog, preparing the next release
   release-plz-pr:
@@ -69,7 +82,7 @@ jobs:
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@02cb101ec7c40f2c49e1d9714d64511d8e1b74de # master
         with:
-          toolchain: ${{ env.rust_min }}
+          toolchain: ${{ env.release_rust }}
 
       - name: Cache dependencies
         uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
