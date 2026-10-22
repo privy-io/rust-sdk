@@ -5,6 +5,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [0.1.0-alpha.7](https://github.com/privy-io/rust-sdk/compare/privy-rs-v0.1.0-alpha.6...privy-rs-v0.1.0-alpha.7) - 2026-10-22
+
+### Other
+
+- sign Solana transaction with test wallet
+- support Solana dev dependencies
+- force stable toolchain for releases
+- complete release tag hardening
+- keep existing Rust release token
+- protect crates.io publishing
+- pin GitHub Actions to immutable commit SHAs 🪿✨ ([#144](https://github.com/privy-io/rust-sdk/pull/144))
+
 ## [0.1.0-alpha.6](https://github.com/privy-io/rust-sdk/compare/privy-rs-v0.1.0-alpha.5...privy-rs-v0.1.0-alpha.6) - 2026-06-09
 
 ### Added
