@@ -4,7 +4,9 @@ use std::str::FromStr;
 
 use anyhow::Result;
 use base64::{Engine, engine::general_purpose::STANDARD};
-use common::{get_test_client, get_test_wallet_id_by_type, mint_staging_jwt};
+use common::{
+    get_test_client, get_test_wallet_by_type, get_test_wallet_id_by_type, mint_staging_jwt,
+};
 use privy_rs::{AuthorizationContext, JwtUser, generated::types::*};
 use solana_sdk::{pubkey::Pubkey, transaction::Transaction};
 use tracing_test::traced_test;
@@ -51,9 +53,20 @@ async fn test_solana_sign_message() -> Result<()> {
 #[mark_flaky_tests::flaky]
 async fn test_solana_sign_transaction() -> Result<()> {
     let client = get_test_client()?;
-    let wallet_id = get_test_wallet_id_by_type(&client, WalletChainType::Solana, None).await?;
+    let wallet = get_test_wallet_by_type(&client, WalletChainType::Solana, None).await?;
+    let wallet_pubkey = Pubkey::from_str(&wallet.address)?;
 
-    let transaction = "AQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAEDArczbMia1tLmq7zz4DinMNN0pJ1JtLdqIJPUw3YrGCzYAMHBsgN27lcgB6H2WQvFgyZuJYHa46puOQo9yQ8CVQbd9uHXZaGT2cvhRs7reawctIXtX1s3kTqM9YV+/wCp20C7Wj2aiuk5TReAXo+VTVg8QTHjs0UjNMMKCvpzZ+ABAgEBARU=";
+    // Build the transaction for the wallet selected above. A static transaction can
+    // name a different required signer and should be rejected by the API.
+    let transaction = Transaction::new_with_payer(
+        &[solana_system_interface::instruction::transfer(
+            &wallet_pubkey,
+            &wallet_pubkey,
+            0,
+        )],
+        Some(&wallet_pubkey),
+    );
+    let transaction = STANDARD.encode(bincode::serialize(&transaction)?);
 
     let rpc_body = WalletRpcRequestBody::SolanaSignTransactionRpcInput(SolanaSignTransactionRpcInput {
         address: None,
@@ -67,7 +80,7 @@ async fn test_solana_sign_transaction() -> Result<()> {
     });
 
     let result = debug_response!(client.wallets().rpc(
-        &wallet_id,
+        &wallet.id,
         &AuthorizationContext::new(),
         None,
         &rpc_body
