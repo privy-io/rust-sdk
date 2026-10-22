@@ -12,8 +12,10 @@ permissions:
 
 env:
   # Release tooling may require a newer compiler than the SDK's MSRV. CI continues
-  # to validate the repository-pinned toolchain separately.
+  # to validate the repository-pinned toolchain separately. RUSTUP_TOOLCHAIN is
+  # required because rust-toolchain.toml would otherwise override the installed default.
   release_rust: stable
+  RUSTUP_TOOLCHAIN: stable
 
 jobs:
   # Release unpublished packages
