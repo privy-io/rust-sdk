@@ -8,6 +8,7 @@ tests/
 ├── *.rs               # Integration tests per resource (wallets, users, policies, etc.)
 ├── e2e.rs             # End-to-end workflows (e.g., quorum signing)
 ├── client_behavior.rs # Unit-style tests using httpmock (no real API calls)
+├── request_expiry.rs  # httpmock tests for privy-request-expiry and signature coverage
 └── test_*.pem         # P-256 test keys for authorization tests
 ```
 
@@ -109,7 +110,9 @@ async fn test_my_feature() -> Result<()> {
 
 ## Mock Tests
 
-For tests that don't need a real API (client config, header validation), use `httpmock`:
+For tests that don't need a real API (client config, header validation), use `httpmock`.
+`tests/client_behavior.rs` and `tests/request_expiry.rs` run offline (`cargo test --test request_expiry`);
+the latter shows how to capture a signed request and verify its signature against `tests/test_public_key.pem`.
 
 ```rust
 use httpmock::prelude::*;
