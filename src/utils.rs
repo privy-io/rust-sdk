@@ -43,6 +43,26 @@ impl RequestFormatter {
     ) -> Result<String, serde_json::Error> {
         format_request_for_authorization_signature(&self.app_id, method, url, body, idempotency_key)
     }
+
+    /// Builds the canonical request, covering every header in `headers`.
+    ///
+    /// # Errors
+    /// This can fail if JSON serialization fails
+    pub async fn build_canonical_request_with_headers<S: Serialize>(
+        &self,
+        method: Method,
+        url: String,
+        body: S,
+        headers: &AuthorizationSignatureHeaders,
+    ) -> Result<String, serde_json::Error> {
+        format_request_for_authorization_signature_with_headers(
+            &self.app_id,
+            method,
+            url,
+            body,
+            headers,
+        )
+    }
 }
 
 impl RequestSigner {
@@ -57,6 +77,73 @@ impl RequestSigner {
         generate_authorization_signatures(ctx, &self.app_id, method, url, body, idempotency_key)
             .await
     }
+
+    /// Signs the canonical request, covering every header in `headers`.
+    ///
+    /// # Errors
+    /// This can fail if serialization or signing fails
+    pub async fn sign_canonical_request_with_headers<S: Serialize>(
+        &self,
+        ctx: &AuthorizationContext,
+        method: Method,
+        url: String,
+        body: S,
+        headers: &AuthorizationSignatureHeaders,
+    ) -> Result<String, SignatureGenerationError> {
+        generate_authorization_signatures_with_headers(
+            ctx,
+            &self.app_id,
+            method,
+            url,
+            body,
+            headers,
+        )
+        .await
+    }
+}
+
+/// Request headers covered by the authorization signature, in addition to
+/// `privy-app-id`.
+///
+/// Every header set here must also be sent with the request, with the same value.
+///
+/// ```rust
+/// use privy_rs::{AuthorizationSignatureHeaders, request_expiry_from_now};
+/// use std::time::Duration;
+///
+/// let headers = AuthorizationSignatureHeaders::new()
+///     .with_idempotency_key("my-key")
+///     .with_request_expiry(request_expiry_from_now(Duration::from_secs(60)));
+/// ```
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+#[non_exhaustive]
+pub struct AuthorizationSignatureHeaders {
+    /// Value of the `privy-idempotency-key` header.
+    pub idempotency_key: Option<String>,
+    /// Value of the `privy-request-expiry` header: a Unix timestamp in milliseconds.
+    pub request_expiry: Option<u64>,
+}
+
+impl AuthorizationSignatureHeaders {
+    /// Creates an empty set of headers.
+    #[must_use]
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    /// Sets the `privy-idempotency-key` header.
+    #[must_use]
+    pub fn with_idempotency_key(mut self, idempotency_key: impl Into<String>) -> Self {
+        self.idempotency_key = Some(idempotency_key.into());
+        self
+    }
+
+    /// Sets the `privy-request-expiry` header (Unix timestamp in milliseconds).
+    #[must_use]
+    pub fn with_request_expiry(mut self, request_expiry: u64) -> Self {
+        self.request_expiry = Some(request_expiry);
+        self
+    }
 }
 
 /// Create canonical request data for signing
@@ -70,20 +157,49 @@ pub fn format_request_for_authorization_signature<S: Serialize>(
     body: S,
     idempotency_key: Option<String>,
 ) -> Result<String, serde_json::Error> {
-    let mut headers = serde_json::Map::new();
-    headers.insert(
+    format_request_for_authorization_signature_with_headers(
+        app_id,
+        method,
+        url,
+        body,
+        &AuthorizationSignatureHeaders {
+            idempotency_key,
+            request_expiry: None,
+        },
+    )
+}
+
+/// Create canonical request data for signing, covering every header in `headers`
+///
+/// # Errors
+/// This can fail if JSON serialization fails
+pub fn format_request_for_authorization_signature_with_headers<S: Serialize>(
+    app_id: &str,
+    method: Method,
+    url: String,
+    body: S,
+    headers: &AuthorizationSignatureHeaders,
+) -> Result<String, serde_json::Error> {
+    let mut signed_headers = serde_json::Map::new();
+    signed_headers.insert(
         "privy-app-id".into(),
         serde_json::Value::String(app_id.to_owned()),
     );
-    if let Some(key) = idempotency_key {
-        headers.insert(
+    if let Some(key) = &headers.idempotency_key {
+        signed_headers.insert(
             "privy-idempotency-key".to_string(),
-            serde_json::Value::String(key),
+            serde_json::Value::String(key.clone()),
+        );
+    }
+    if let Some(expiry) = headers.request_expiry {
+        signed_headers.insert(
+            "privy-request-expiry".to_string(),
+            serde_json::Value::String(expiry.to_string()),
         );
     }
 
     WalletApiRequestSignatureInput::new(method, url)
-        .headers(serde_json::Value::Object(headers))
+        .headers(serde_json::Value::Object(signed_headers))
         .body(body)
         .canonicalize()
 }
@@ -112,8 +228,39 @@ pub async fn generate_authorization_signatures<S: Serialize>(
     body: S,
     idempotency_key: Option<String>,
 ) -> Result<String, SignatureGenerationError> {
-    let canonical =
-        format_request_for_authorization_signature(app_id, method, url, body, idempotency_key)?;
+    generate_authorization_signatures_with_headers(
+        ctx,
+        app_id,
+        method,
+        url,
+        body,
+        &AuthorizationSignatureHeaders {
+            idempotency_key,
+            request_expiry: None,
+        },
+    )
+    .await
+}
+
+/// Generates an authorization signature for a given request, covering every
+/// header in `headers`
+///
+/// Every header in `headers` must also be sent with the request, with the same value.
+///
+/// # Errors
+/// This function will return an error if the signature could not be generated, whether
+/// it be due to a serialization error or base64 encoding error.
+pub async fn generate_authorization_signatures_with_headers<S: Serialize>(
+    ctx: &AuthorizationContext,
+    app_id: &str,
+    method: Method,
+    url: String,
+    body: S,
+    headers: &AuthorizationSignatureHeaders,
+) -> Result<String, SignatureGenerationError> {
+    let canonical = format_request_for_authorization_signature_with_headers(
+        app_id, method, url, body, headers,
+    )?;
 
     #[cfg(all(feature = "unsafe_debug", debug_assertions))]
     {
@@ -518,6 +665,91 @@ mod tests {
             canonical_data.contains("privy-idempotency-key"),
             "Should include idempotency key header"
         );
+    }
+
+    #[test]
+    fn test_build_canonical_request_with_request_expiry() {
+        let body = serde_json::json!({"test": "data"});
+
+        let canonical_data = format_request_for_authorization_signature_with_headers(
+            "test_app_id",
+            Method::POST,
+            "https://api.privy.io/v1/test".to_string(),
+            body,
+            &AuthorizationSignatureHeaders::new()
+                .with_idempotency_key("unique-key-123")
+                .with_request_expiry(1_700_000_000_000),
+        )
+        .unwrap();
+
+        assert_eq!(
+            canonical_data,
+            r#"{"body":{"test":"data"},"headers":{"privy-app-id":"test_app_id","privy-idempotency-key":"unique-key-123","privy-request-expiry":"1700000000000"},"method":"POST","url":"https://api.privy.io/v1/test","version":1}"#
+        );
+    }
+
+    #[test]
+    fn test_build_canonical_request_without_optional_headers_is_unchanged() {
+        let body = serde_json::json!({"test": "data"});
+        let url = "https://api.privy.io/v1/test".to_string();
+
+        let with_headers = format_request_for_authorization_signature_with_headers(
+            "test_app_id",
+            Method::POST,
+            url.clone(),
+            &body,
+            &AuthorizationSignatureHeaders::new(),
+        )
+        .unwrap();
+        let legacy = format_request_for_authorization_signature(
+            "test_app_id",
+            Method::POST,
+            url,
+            &body,
+            None,
+        )
+        .unwrap();
+
+        assert_eq!(with_headers, legacy);
+        assert!(!with_headers.contains("privy-request-expiry"));
+    }
+
+    #[tokio::test]
+    async fn test_sign_canonical_request_covers_request_expiry() {
+        let ctx =
+            AuthorizationContext::new().push(PrivateKey::new(TEST_PRIVATE_KEY_PEM.to_string()));
+        let body = serde_json::json!({"test": "data"});
+        let url = "https://api.privy.io/v1/test".to_string();
+
+        let sign = |expiry: Option<u64>| {
+            let headers = AuthorizationSignatureHeaders {
+                idempotency_key: None,
+                request_expiry: expiry,
+            };
+            let ctx = &ctx;
+            let body = &body;
+            let url = url.clone();
+            async move {
+                generate_authorization_signatures_with_headers(
+                    ctx,
+                    "test_app_id",
+                    Method::POST,
+                    url,
+                    body,
+                    &headers,
+                )
+                .await
+                .unwrap()
+            }
+        };
+
+        let without = sign(None).await;
+        let with_a = sign(Some(1_700_000_000_000)).await;
+        let with_b = sign(Some(1_700_000_000_001)).await;
+
+        assert_ne!(without, with_a);
+        assert_ne!(with_a, with_b);
+        assert_eq!(with_a, sign(Some(1_700_000_000_000)).await);
     }
 
     #[tokio::test]
