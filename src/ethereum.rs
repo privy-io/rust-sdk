@@ -43,6 +43,12 @@ pub struct SendTransactionOptions {
     /// - `Some(false)` — explicitly disable gas sponsorship
     /// - `None` — use the server default
     pub sponsor: Option<bool>,
+    /// Absolute expiry for this request, as a Unix timestamp in milliseconds.
+    ///
+    /// Overrides the client's default request expiry and is sent even when
+    /// request expiry is disabled on the client. See
+    /// [`RequestOptions::request_expiry`](crate::RequestOptions::request_expiry).
+    pub request_expiry: Option<u64>,
 }
 
 impl SendTransactionOptions {
@@ -54,6 +60,12 @@ impl SendTransactionOptions {
     /// Sets the sponsor option.
     pub fn with_sponsor(mut self, sponsor: bool) -> Self {
         self.sponsor = Some(sponsor);
+        self
+    }
+
+    /// Sets the absolute request expiry (Unix timestamp in milliseconds).
+    pub fn with_request_expiry(mut self, request_expiry: u64) -> Self {
+        self.request_expiry = Some(request_expiry);
         self
     }
 }
@@ -669,7 +681,15 @@ impl EthereumService {
             });
 
         self.wallets_client
-            .rpc(wallet_id, authorization_context, idempotency_key, &rpc_body)
+            .rpc_with_options(
+                wallet_id,
+                authorization_context,
+                idempotency_key,
+                &rpc_body,
+                &crate::RequestOptions {
+                    request_expiry: options.request_expiry,
+                },
+            )
             .await
     }
 

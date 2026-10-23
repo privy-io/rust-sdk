@@ -26,6 +26,7 @@ pub(crate) mod errors;
 pub(crate) mod import;
 pub(crate) mod jwt_exchange;
 pub(crate) mod keys;
+pub(crate) mod request_options;
 pub(crate) mod utils;
 
 pub use client::PrivyClient;
@@ -34,6 +35,7 @@ pub use ethereum::SendTransactionOptions;
 pub use keys::*;
 pub use privy_hpke::PrivyHpke;
 pub use request_expiry::{RequestExpiryOptions, request_expiry_from_now};
+pub use request_options::RequestOptions;
 pub use solana::SignAndSendTransactionOptions;
 pub use utils::{
     AuthorizationSignatureHeaders, Method, Utils, WalletApiRequestSignatureInput,
