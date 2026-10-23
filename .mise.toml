@@ -6,8 +6,8 @@ rust = "{{ exec(command='./scripts/rust-version.sh') }}"
 cargo-binstall = "latest"
 "cargo:bacon" = "latest"
 
-# once progenitor releases a new version, we can depend on that
-"cargo:https://github.com/oxidecomputer/progenitor" = {version = "branch:main", crate = "cargo-progenitor"}
+# Keep codegen on a reviewed immutable commit; bump this only with a deliberate regeneration.
+"cargo:https://github.com/oxidecomputer/progenitor" = {version = "rev:9c42bd581f05c5f3a214f2d7857c97b2e0af4d04", crate = "cargo-progenitor"}
 
 [hooks]
 postinstall = "rustup component add clippy"
