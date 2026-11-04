@@ -6,8 +6,10 @@ rust = "{{ exec(command='./scripts/rust-version.sh') }}"
 cargo-binstall = "latest"
 "cargo:bacon" = "latest"
 
-# once progenitor releases a new version, we can depend on that
-"cargo:https://github.com/oxidecomputer/progenitor" = {version = "branch:main", crate = "cargo-progenitor"}
+# Progenitor 0.11.2 with typify 0.5.0, at main when adopted on 2025-11-24.
+# Review upstream changes before updating this full commit SHA and mise.lock.
+# locked=true uses the upstream Cargo.lock for the generator's build dependencies.
+"cargo:https://github.com/oxidecomputer/progenitor" = {version = "rev:912cdcdabb0d8008484bdffd693b11c518057a09", crate = "cargo-progenitor", locked = true}
 
 [hooks]
 postinstall = "rustup component add clippy"

@@ -16,7 +16,7 @@ This project uses [mise](https://mise.jdx.dev/) to manage the development enviro
 
 2.  **Install mise:** Follow the instructions on the [mise website](https://mise.jdx.dev/getting-started.html).
 
-3.  **Install dependencies:** Run `mise install` in the project root to install the required Rust toolchain and other tools.
+3.  **Install dependencies:** Use mise 2026.11.0 or newer and run `mise install --locked` in the project root to install the tool versions recorded in `mise.lock`.
 
 4.  **Activate environment:** Run `mise trust` in the project root to approve the configuration. `mise` will automatically pick up the Rust version from the `rust-toolchain.toml` file.
 
