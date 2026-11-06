@@ -1,8 +1,8 @@
 use super::ResponseValue;
 use crate::{
-    AuthorizationContext, PrivySignedApiError, generate_authorization_signatures,
+    AuthorizationContext, PrivySignedApiError,
     generated::types::KeyQuorumId,
-    subclients::KeyQuorumsClient,
+    subclients::{KeyQuorumsClient, sign_request},
 };
 
 impl KeyQuorumsClient {
@@ -19,17 +19,25 @@ impl KeyQuorumsClient {
         ctx: &'a AuthorizationContext,
         body: &'a crate::generated::types::KeyQuorumUpdateRequestBody,
     ) -> Result<ResponseValue<crate::generated::types::KeyQuorum>, PrivySignedApiError> {
-        let sig = generate_authorization_signatures(
+        let signed = sign_request(
             ctx,
             &self.app_id,
             crate::Method::PATCH,
             format!("{}/v1/key_quorums/{}", self.base_url, key_quorum_id.as_str()),
             body,
             None,
+            self.request_expiry.resolve(None),
         )
         .await?;
 
-        Ok(self._update(key_quorum_id, Some(&sig), None, body).await?)
+        Ok(self
+            ._update(
+                key_quorum_id,
+                Some(&signed.signature),
+                signed.request_expiry.as_deref(),
+                body,
+            )
+            .await?)
     }
 
     /// Delete a key quorum
@@ -45,16 +53,23 @@ impl KeyQuorumsClient {
         ctx: &'a AuthorizationContext,
     ) -> Result<ResponseValue<crate::generated::types::SuccessResponse>, PrivySignedApiError>
     {
-        let sig = generate_authorization_signatures(
+        let signed = sign_request(
             ctx,
             &self.app_id,
             crate::Method::DELETE,
             format!("{}/v1/key_quorums/{}", self.base_url, key_quorum_id.as_str()),
             &serde_json::json!({}),
             None,
+            self.request_expiry.resolve(None),
         )
         .await?;
 
-        Ok(self._delete(key_quorum_id, Some(&sig), None).await?)
+        Ok(self
+            ._delete(
+                key_quorum_id,
+                Some(&signed.signature),
+                signed.request_expiry.as_deref(),
+            )
+            .await?)
     }
 }

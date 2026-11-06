@@ -1,8 +1,8 @@
 use super::ResponseValue;
 use crate::{
-    AuthorizationContext, PrivySignedApiError, generate_authorization_signatures,
+    AuthorizationContext, PrivySignedApiError,
     generated::types::{Policy, UpdatePolicyBody, UpdatePolicyPolicyId},
-    subclients::PoliciesClient,
+    subclients::{PoliciesClient, sign_request},
 };
 
 impl PoliciesClient {
@@ -19,17 +19,25 @@ impl PoliciesClient {
         ctx: &'a AuthorizationContext,
         body: &'a UpdatePolicyBody,
     ) -> Result<ResponseValue<Policy>, PrivySignedApiError> {
-        let sig = generate_authorization_signatures(
+        let signed = sign_request(
             ctx,
             &self.app_id,
             crate::Method::PATCH,
             format!("{}/v1/policies/{}", self.base_url, policy_id.as_str()),
             body,
             None,
+            self.request_expiry.resolve(None),
         )
         .await?;
 
-        Ok(self._update(policy_id, Some(&sig), None, body).await?)
+        Ok(self
+            ._update(
+                policy_id,
+                Some(&signed.signature),
+                signed.request_expiry.as_deref(),
+                body,
+            )
+            .await?)
     }
 
     /// Delete a policy
@@ -45,17 +53,24 @@ impl PoliciesClient {
         ctx: &'a AuthorizationContext,
     ) -> Result<ResponseValue<crate::generated::types::SuccessResponse>, PrivySignedApiError>
     {
-        let sig = generate_authorization_signatures(
+        let signed = sign_request(
             ctx,
             &self.app_id,
             crate::Method::DELETE,
             format!("{}/v1/policies/{}", self.base_url, policy_id.as_str()),
             &serde_json::json!({}),
             None,
+            self.request_expiry.resolve(None),
         )
         .await?;
 
-        Ok(self._delete(policy_id, Some(&sig), None).await?)
+        Ok(self
+            ._delete(
+                policy_id,
+                Some(&signed.signature),
+                signed.request_expiry.as_deref(),
+            )
+            .await?)
     }
 
     /// Create a rule for a policy
@@ -72,17 +87,25 @@ impl PoliciesClient {
         body: &'a crate::generated::types::PolicyRuleRequestBody,
     ) -> Result<ResponseValue<crate::generated::types::PolicyRuleResponse>, PrivySignedApiError>
     {
-        let sig = generate_authorization_signatures(
+        let signed = sign_request(
             ctx,
             &self.app_id,
             crate::Method::POST,
             format!("{}/v1/policies/{}/rules", self.base_url, policy_id.as_str()),
             body,
             None,
+            self.request_expiry.resolve(None),
         )
         .await?;
 
-        Ok(self._create_rule(policy_id, Some(&sig), None, body).await?)
+        Ok(self
+            ._create_rule(
+                policy_id,
+                Some(&signed.signature),
+                signed.request_expiry.as_deref(),
+                body,
+            )
+            .await?)
     }
 
     /// Update a rule for a policy
@@ -100,7 +123,7 @@ impl PoliciesClient {
         body: &'a crate::generated::types::PolicyRuleRequestBody,
     ) -> Result<ResponseValue<crate::generated::types::PolicyRuleResponse>, PrivySignedApiError>
     {
-        let sig = generate_authorization_signatures(
+        let signed = sign_request(
             ctx,
             &self.app_id,
             crate::Method::PATCH,
@@ -112,11 +135,18 @@ impl PoliciesClient {
             ),
             body,
             None,
+            self.request_expiry.resolve(None),
         )
         .await?;
 
         Ok(self
-            ._update_rule(policy_id, rule_id, Some(&sig), None, body)
+            ._update_rule(
+                policy_id,
+                rule_id,
+                Some(&signed.signature),
+                signed.request_expiry.as_deref(),
+                body,
+            )
             .await?)
     }
 
@@ -134,7 +164,7 @@ impl PoliciesClient {
         ctx: &'a AuthorizationContext,
     ) -> Result<ResponseValue<crate::generated::types::SuccessResponse>, PrivySignedApiError>
     {
-        let sig = generate_authorization_signatures(
+        let signed = sign_request(
             ctx,
             &self.app_id,
             crate::Method::DELETE,
@@ -146,9 +176,17 @@ impl PoliciesClient {
             ),
             &serde_json::json!({}),
             None,
+            self.request_expiry.resolve(None),
         )
         .await?;
 
-        Ok(self._delete_rule(policy_id, rule_id, Some(&sig), None).await?)
+        Ok(self
+            ._delete_rule(
+                policy_id,
+                rule_id,
+                Some(&signed.signature),
+                signed.request_expiry.as_deref(),
+            )
+            .await?)
     }
 }

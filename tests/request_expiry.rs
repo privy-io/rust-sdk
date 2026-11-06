@@ -5,6 +5,7 @@
 //! covers it.
 
 use std::{
+    future::Future,
     sync::{Arc, Mutex},
     time::{Duration, SystemTime, UNIX_EPOCH},
 };
@@ -20,13 +21,20 @@ use privy_rs::{
     client::PrivyClientOptions,
     format_request_for_authorization_signature_with_headers,
     generated::types::{
-        RawSignHashParams, RawSignInput, RawSignInputParams, WalletUpdateRequestBody,
+        CreateRulePolicyId, DeletePolicyPolicyId, DeleteRulePolicyId, DeleteRuleRuleId,
+        KeyQuorumId, KeyQuorumUpdateRequestBody, PolicyAction, PolicyMethod, PolicyRuleRequestBody,
+        RawSignHashParams, RawSignInput, RawSignInputParams, UpdatePolicyBody,
+        UpdatePolicyPolicyId, UpdateRulePolicyId, UpdateRuleRuleId, WalletUpdateRequestBody,
     },
     request_expiry::{DEFAULT_REQUEST_EXPIRY, RequestExpiryOptions},
 };
 
 const APP_ID: &str = "test_app_id";
 const WALLET_ID: &str = "wallet_123";
+// Policy and rule ids must be 24 characters.
+const POLICY_ID: &str = "policy000000000000000001";
+const RULE_ID: &str = "rule00000000000000000001";
+const KEY_QUORUM_ID: &str = "key_quorum_123";
 const PRIVATE_KEY_PEM: &str = include_str!("test_private_key.pem");
 const PUBLIC_KEY_PEM: &str = include_str!("test_public_key.pem");
 
@@ -180,6 +188,42 @@ fn assert_signature_covers_headers(method: fn() -> Method, request: &CapturedReq
         key.verify(tampered.as_bytes(), &signature).is_err(),
         "signature should not verify with a different request expiry"
     );
+}
+
+/// Sends one request through `call` with the default settings, then checks the
+/// expiry header and that the signature covers it.
+async fn assert_sends_default_expiry<Fut: Future>(
+    http_method: HttpMethod,
+    path: &str,
+    method: fn() -> Method,
+    call: impl FnOnce(PrivyClient) -> Fut,
+) {
+    let server = MockServer::start();
+    let (mock, captured) = capture(&server, http_method, path);
+    let client = client(&server, RequestExpiryOptions::default());
+
+    let before = now_ms();
+    call(client).await;
+    let after = now_ms();
+
+    mock.assert();
+    let request = captured.get();
+    assert_expiry_near(
+        request.request_expiry_ms(),
+        before,
+        after,
+        DEFAULT_REQUEST_EXPIRY,
+    );
+    assert_signature_covers_headers(method, &request);
+}
+
+fn rule_body() -> PolicyRuleRequestBody {
+    PolicyRuleRequestBody {
+        action: PolicyAction::Allow,
+        conditions: vec![],
+        method: PolicyMethod::SignTransaction,
+        name: "rule".try_into().unwrap(),
+    }
 }
 
 #[tokio::test]
@@ -403,4 +447,147 @@ async fn disabled_expiry_sends_no_header() {
     let request = captured.get();
     assert_eq!(request.request_expiry, None);
     assert_signature_covers_headers(|| Method::POST, &request);
+}
+
+#[tokio::test]
+async fn policy_update_sends_default_expiry_covered_by_signature() {
+    assert_sends_default_expiry(
+        HttpMethod::PATCH,
+        &format!("/v1/policies/{POLICY_ID}"),
+        || Method::PATCH,
+        |client| async move {
+            let id = UpdatePolicyPolicyId::try_from(POLICY_ID).unwrap();
+            let _ = client
+                .policies()
+                .update(&id, &ctx(), &UpdatePolicyBody::default())
+                .await;
+        },
+    )
+    .await;
+}
+
+#[tokio::test]
+async fn policy_delete_sends_default_expiry_covered_by_signature() {
+    assert_sends_default_expiry(
+        HttpMethod::DELETE,
+        &format!("/v1/policies/{POLICY_ID}"),
+        || Method::DELETE,
+        |client| async move {
+            let id = DeletePolicyPolicyId::try_from(POLICY_ID).unwrap();
+            let _ = client.policies().delete(&id, &ctx()).await;
+        },
+    )
+    .await;
+}
+
+#[tokio::test]
+async fn policy_create_rule_sends_default_expiry_covered_by_signature() {
+    assert_sends_default_expiry(
+        HttpMethod::POST,
+        &format!("/v1/policies/{POLICY_ID}/rules"),
+        || Method::POST,
+        |client| async move {
+            let id = CreateRulePolicyId::try_from(POLICY_ID).unwrap();
+            let _ = client
+                .policies()
+                .create_rule(&id, &ctx(), &rule_body())
+                .await;
+        },
+    )
+    .await;
+}
+
+#[tokio::test]
+async fn policy_update_rule_sends_default_expiry_covered_by_signature() {
+    assert_sends_default_expiry(
+        HttpMethod::PATCH,
+        &format!("/v1/policies/{POLICY_ID}/rules/{RULE_ID}"),
+        || Method::PATCH,
+        |client| async move {
+            let policy_id = UpdateRulePolicyId::try_from(POLICY_ID).unwrap();
+            let rule_id = UpdateRuleRuleId::try_from(RULE_ID).unwrap();
+            let _ = client
+                .policies()
+                .update_rule(&policy_id, &rule_id, &ctx(), &rule_body())
+                .await;
+        },
+    )
+    .await;
+}
+
+#[tokio::test]
+async fn policy_delete_rule_sends_default_expiry_covered_by_signature() {
+    assert_sends_default_expiry(
+        HttpMethod::DELETE,
+        &format!("/v1/policies/{POLICY_ID}/rules/{RULE_ID}"),
+        || Method::DELETE,
+        |client| async move {
+            let policy_id = DeleteRulePolicyId::try_from(POLICY_ID).unwrap();
+            let rule_id = DeleteRuleRuleId::try_from(RULE_ID).unwrap();
+            let _ = client
+                .policies()
+                .delete_rule(&policy_id, &rule_id, &ctx())
+                .await;
+        },
+    )
+    .await;
+}
+
+#[tokio::test]
+async fn key_quorum_update_sends_default_expiry_covered_by_signature() {
+    assert_sends_default_expiry(
+        HttpMethod::PATCH,
+        &format!("/v1/key_quorums/{KEY_QUORUM_ID}"),
+        || Method::PATCH,
+        |client| async move {
+            let id = KeyQuorumId(KEY_QUORUM_ID.to_string());
+            let _ = client
+                .key_quorums()
+                .update(&id, &ctx(), &KeyQuorumUpdateRequestBody::default())
+                .await;
+        },
+    )
+    .await;
+}
+
+#[tokio::test]
+async fn key_quorum_delete_sends_default_expiry_covered_by_signature() {
+    assert_sends_default_expiry(
+        HttpMethod::DELETE,
+        &format!("/v1/key_quorums/{KEY_QUORUM_ID}"),
+        || Method::DELETE,
+        |client| async move {
+            let id = KeyQuorumId(KEY_QUORUM_ID.to_string());
+            let _ = client.key_quorums().delete(&id, &ctx()).await;
+        },
+    )
+    .await;
+}
+
+#[tokio::test]
+async fn disabled_expiry_applies_to_policies_and_key_quorums() {
+    let server = MockServer::start();
+    let (policy_mock, policy_request) = capture(
+        &server,
+        HttpMethod::DELETE,
+        &format!("/v1/policies/{POLICY_ID}"),
+    );
+    let (quorum_mock, quorum_request) = capture(
+        &server,
+        HttpMethod::DELETE,
+        &format!("/v1/key_quorums/{KEY_QUORUM_ID}"),
+    );
+    let client = client(&server, RequestExpiryOptions::new().with_disabled(true));
+
+    let policy_id = DeletePolicyPolicyId::try_from(POLICY_ID).unwrap();
+    let _ = client.policies().delete(&policy_id, &ctx()).await;
+    let quorum_id = KeyQuorumId(KEY_QUORUM_ID.to_string());
+    let _ = client.key_quorums().delete(&quorum_id, &ctx()).await;
+
+    policy_mock.assert();
+    quorum_mock.assert();
+    for request in [policy_request.get(), quorum_request.get()] {
+        assert_eq!(request.request_expiry, None);
+        assert_signature_covers_headers(|| Method::DELETE, &request);
+    }
 }
