@@ -7,6 +7,19 @@ release-plz from commit messages) with context that commit messages alone can't
 capture — such as breaking type renames, migration guidance, and new schema patches.
 -->
 
+## 2026-11-06 — Typed Privy API error bodies
+
+Non-2xx responses surface as `PrivyApiError::UnexpectedResponse` with the body unread. `PrivyApiErrorResponse::from_api_error` reads and parses its `error`, `code` and optional `data` fields (codes per the Privy API error-code reference; the body layout is observed).
+
+### Added
+
+- `PrivyApiErrorCode` — the eleven codes in Privy's API error-code reference, plus `Unknown(String)` for codes this SDK version does not list
+- `PrivyApiErrorBody` with `code()` (parsed `PrivyApiErrorCode`) and `data_as()` (decode the code-specific `data` payload)
+- `PrivyApiErrorBodyError` — why a body could not be read (`Read`) or parsed (`Parse`, keeps the raw body)
+- `PrivyApiErrorResponse::from_api_error` — reads the body of `PrivyApiError::UnexpectedResponse`; other variants are returned unchanged as `Err`
+
+No change to `PrivySignedApiError`, `PrivyClient` or generated code; `PrivyApiErrorCode` is `#[non_exhaustive]`.
+
 ## 2026-06-08 — OpenAPI Regeneration (3.0 → 3.1)
 
 Regenerated from latest Privy OpenAPI spec. The upstream spec upgraded from OpenAPI 3.0 to 3.1.0, requiring three new schema patches to maintain progenitor compatibility.
