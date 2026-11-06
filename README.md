@@ -95,6 +95,57 @@ let signature = solana_service
     .await?;
 ```
 
+### Request expiry
+
+Every signed request (wallet RPC, raw sign, update and export, the Ethereum and
+Solana helpers, policy and key quorum updates and deletes) sends a
+`privy-request-expiry` header: a Unix timestamp in milliseconds after which the
+Privy API rejects the request. The SDK computes it when each request is sent and
+includes the same value in the authorization signature.
+
+By default a request expires 15 minutes after it is sent. To change the default,
+or turn it off, set `request_expiry` when you create the client:
+
+```rust
+use std::time::Duration;
+use privy_rs::{PrivyClient, RequestExpiryOptions, client::PrivyClientOptions};
+
+let client = PrivyClient::new_with_options(
+    app_id,
+    app_secret,
+    PrivyClientOptions {
+        // Expire signed requests 5 minutes after they are sent.
+        request_expiry: RequestExpiryOptions::new().with_default_expiry(Duration::from_secs(5 * 60)),
+        // Or don't send a default expiry at all:
+        // request_expiry: RequestExpiryOptions::new().with_disabled(true),
+        ..Default::default()
+    },
+)?;
+```
+
+To set the expiry for a single request, pass an absolute timestamp through the
+`*_with_options` methods, `SendTransactionOptions` or
+`SignAndSendTransactionOptions`. A per-request value is sent as-is, even when the
+default is disabled:
+
+```rust
+use std::time::Duration;
+use privy_rs::{RequestOptions, request_expiry_from_now};
+
+let options = RequestOptions::new()
+    .with_request_expiry(request_expiry_from_now(Duration::from_secs(60)));
+
+let result = client
+    .wallets()
+    .rpc_with_options(&wallet.id, &auth_ctx, None, &rpc_body, &options)
+    .await?;
+```
+
+If you sign requests yourself with `generate_authorization_signatures`, use
+`generate_authorization_signatures_with_headers` with
+`AuthorizationSignatureHeaders::with_request_expiry` and send the same value in the
+`privy-request-expiry` header.
+
 ### Alloy Integration
 
 Privy wallets can be used with the Alloy ecosystem by enabling the `alloy` feature:

@@ -19,11 +19,13 @@ src/keys.rs              AuthorizationContext + P-256 signing
 src/utils.rs             Request signing/formatting utilities
 src/privy_hpke.rs        HPKE encryption for wallet export
 src/client.rs            PrivyClient initialization and configuration
+src/request_expiry.rs    privy-request-expiry defaults, client config, per-request resolution
+src/request_options.rs   Per-request options for signed `*_with_options` wrappers
 ```
 
 ## Adding New Behavior
 
-1. If the method needs authorization signing, add a wrapper in `src/subclients/` that calls `generate_authorization_signatures()` then delegates to the generated `_method`.
+1. If the method needs authorization signing, add a wrapper in `src/subclients/` that calls `sign_request()` (in `src/subclients/mod.rs`) then delegates to the generated `_method`. If the endpoint takes `privy-request-expiry`, pass `self.request_expiry.resolve(options.request_expiry)` to `sign_request()` and `signed.request_expiry.as_deref()` as the generated `privy_request_expiry` argument, so the header and the signature use the same value. Add a `<method>_with_options(..., options: &RequestOptions)` variant and have the plain method delegate with `&RequestOptions::default()`. Cover it in `tests/request_expiry.rs`.
 2. For new resources/endpoints, update `allowlist.yml` and rebuild.
 3. For high-level chain operations, extend `src/ethereum.rs` or `src/solana.rs`.
 
