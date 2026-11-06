@@ -18,15 +18,19 @@ use p256::{
 };
 use privy_rs::{
     AuthorizationContext, AuthorizationSignatureHeaders, Method, PrivateKey, PrivyClient,
+    RequestOptions,
     client::PrivyClientOptions,
+    ethereum::SendTransactionOptions,
     format_request_for_authorization_signature_with_headers,
     generated::types::{
         CreateRulePolicyId, DeletePolicyPolicyId, DeleteRulePolicyId, DeleteRuleRuleId,
         KeyQuorumId, KeyQuorumUpdateRequestBody, PolicyAction, PolicyMethod, PolicyRuleRequestBody,
-        RawSignHashParams, RawSignInput, RawSignInputParams, UpdatePolicyBody,
-        UpdatePolicyPolicyId, UpdateRulePolicyId, UpdateRuleRuleId, WalletUpdateRequestBody,
+        RawSignHashParams, RawSignInput, RawSignInputParams, UnsignedStandardEthereumTransaction,
+        UpdatePolicyBody, UpdatePolicyPolicyId, UpdateRulePolicyId, UpdateRuleRuleId,
+        WalletUpdateRequestBody,
     },
     request_expiry::{DEFAULT_REQUEST_EXPIRY, RequestExpiryOptions},
+    solana::SignAndSendTransactionOptions,
 };
 
 const APP_ID: &str = "test_app_id";
@@ -590,4 +594,322 @@ async fn disabled_expiry_applies_to_policies_and_key_quorums() {
         assert_eq!(request.request_expiry, None);
         assert_signature_covers_headers(|| Method::DELETE, &request);
     }
+}
+
+/// An absolute expiry far from any default, so a match means it was sent as-is.
+const PER_CALL_EXPIRY: u64 = 1_900_000_000_123;
+
+/// Sends one request through `call` with `config`, then checks that the header
+/// is exactly `expected` and that the signature covers it.
+async fn assert_sends_expiry<Fut: Future>(
+    config: RequestExpiryOptions,
+    http_method: HttpMethod,
+    path: &str,
+    method: fn() -> Method,
+    expected: &str,
+    call: impl FnOnce(PrivyClient) -> Fut,
+) {
+    let server = MockServer::start();
+    let (mock, captured) = capture(&server, http_method, path);
+
+    call(client(&server, config)).await;
+
+    mock.assert();
+    let request = captured.get();
+    assert_eq!(request.request_expiry.as_deref(), Some(expected));
+    assert_signature_covers_headers(method, &request);
+}
+
+fn per_call() -> RequestOptions {
+    RequestOptions::new().with_request_expiry(PER_CALL_EXPIRY)
+}
+
+#[tokio::test]
+async fn per_call_expiry_is_sent_verbatim_on_every_signed_wrapper() {
+    let expected = PER_CALL_EXPIRY.to_string();
+    let config = RequestExpiryOptions::default();
+    let rpc_body = serde_json::from_value(serde_json::json!({
+        "method": "personal_sign",
+        "params": {"message": "hello", "encoding": "utf-8"}
+    }))
+    .unwrap();
+    let raw_sign_body = RawSignInput {
+        params: RawSignInputParams::HashParams(RawSignHashParams {
+            hash: "0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef"
+                .parse()
+                .unwrap(),
+        }),
+    };
+
+    assert_sends_expiry(
+        config,
+        HttpMethod::POST,
+        &format!("/v1/wallets/{WALLET_ID}/rpc"),
+        || Method::POST,
+        &expected,
+        |client| async move {
+            let _ = client
+                .wallets()
+                .rpc_with_options(WALLET_ID, &ctx(), Some("idem-1"), &rpc_body, &per_call())
+                .await;
+        },
+    )
+    .await;
+    assert_sends_expiry(
+        config,
+        HttpMethod::POST,
+        &format!("/v1/wallets/{WALLET_ID}/raw_sign"),
+        || Method::POST,
+        &expected,
+        |client| async move {
+            let _ = client
+                .wallets()
+                .raw_sign_with_options(WALLET_ID, &ctx(), None, &raw_sign_body, &per_call())
+                .await;
+        },
+    )
+    .await;
+    assert_sends_expiry(
+        config,
+        HttpMethod::PATCH,
+        &format!("/v1/wallets/{WALLET_ID}"),
+        || Method::PATCH,
+        &expected,
+        |client| async move {
+            let _ = client
+                .wallets()
+                .update_with_options(
+                    WALLET_ID,
+                    &ctx(),
+                    &WalletUpdateRequestBody::default(),
+                    &per_call(),
+                )
+                .await;
+        },
+    )
+    .await;
+    assert_sends_expiry(
+        config,
+        HttpMethod::POST,
+        &format!("/v1/wallets/{WALLET_ID}/export"),
+        || Method::POST,
+        &expected,
+        |client| async move {
+            let _ = client
+                .wallets()
+                .export_with_options(WALLET_ID, &ctx(), &per_call())
+                .await;
+        },
+    )
+    .await;
+    assert_sends_expiry(
+        config,
+        HttpMethod::PATCH,
+        &format!("/v1/policies/{POLICY_ID}"),
+        || Method::PATCH,
+        &expected,
+        |client| async move {
+            let id = UpdatePolicyPolicyId::try_from(POLICY_ID).unwrap();
+            let _ = client
+                .policies()
+                .update_with_options(&id, &ctx(), &UpdatePolicyBody::default(), &per_call())
+                .await;
+        },
+    )
+    .await;
+    assert_sends_expiry(
+        config,
+        HttpMethod::DELETE,
+        &format!("/v1/policies/{POLICY_ID}"),
+        || Method::DELETE,
+        &expected,
+        |client| async move {
+            let id = DeletePolicyPolicyId::try_from(POLICY_ID).unwrap();
+            let _ = client
+                .policies()
+                .delete_with_options(&id, &ctx(), &per_call())
+                .await;
+        },
+    )
+    .await;
+    assert_sends_expiry(
+        config,
+        HttpMethod::POST,
+        &format!("/v1/policies/{POLICY_ID}/rules"),
+        || Method::POST,
+        &expected,
+        |client| async move {
+            let id = CreateRulePolicyId::try_from(POLICY_ID).unwrap();
+            let _ = client
+                .policies()
+                .create_rule_with_options(&id, &ctx(), &rule_body(), &per_call())
+                .await;
+        },
+    )
+    .await;
+    assert_sends_expiry(
+        config,
+        HttpMethod::PATCH,
+        &format!("/v1/policies/{POLICY_ID}/rules/{RULE_ID}"),
+        || Method::PATCH,
+        &expected,
+        |client| async move {
+            let policy_id = UpdateRulePolicyId::try_from(POLICY_ID).unwrap();
+            let rule_id = UpdateRuleRuleId::try_from(RULE_ID).unwrap();
+            let _ = client
+                .policies()
+                .update_rule_with_options(&policy_id, &rule_id, &ctx(), &rule_body(), &per_call())
+                .await;
+        },
+    )
+    .await;
+    assert_sends_expiry(
+        config,
+        HttpMethod::DELETE,
+        &format!("/v1/policies/{POLICY_ID}/rules/{RULE_ID}"),
+        || Method::DELETE,
+        &expected,
+        |client| async move {
+            let policy_id = DeleteRulePolicyId::try_from(POLICY_ID).unwrap();
+            let rule_id = DeleteRuleRuleId::try_from(RULE_ID).unwrap();
+            let _ = client
+                .policies()
+                .delete_rule_with_options(&policy_id, &rule_id, &ctx(), &per_call())
+                .await;
+        },
+    )
+    .await;
+    assert_sends_expiry(
+        config,
+        HttpMethod::PATCH,
+        &format!("/v1/key_quorums/{KEY_QUORUM_ID}"),
+        || Method::PATCH,
+        &expected,
+        |client| async move {
+            let id = KeyQuorumId(KEY_QUORUM_ID.to_string());
+            let _ = client
+                .key_quorums()
+                .update_with_options(
+                    &id,
+                    &ctx(),
+                    &KeyQuorumUpdateRequestBody::default(),
+                    &per_call(),
+                )
+                .await;
+        },
+    )
+    .await;
+    assert_sends_expiry(
+        config,
+        HttpMethod::DELETE,
+        &format!("/v1/key_quorums/{KEY_QUORUM_ID}"),
+        || Method::DELETE,
+        &expected,
+        |client| async move {
+            let id = KeyQuorumId(KEY_QUORUM_ID.to_string());
+            let _ = client
+                .key_quorums()
+                .delete_with_options(&id, &ctx(), &per_call())
+                .await;
+        },
+    )
+    .await;
+}
+
+#[tokio::test]
+async fn per_call_expiry_is_sent_when_disabled() {
+    assert_sends_expiry(
+        RequestExpiryOptions::new().with_disabled(true),
+        HttpMethod::PATCH,
+        &format!("/v1/wallets/{WALLET_ID}"),
+        || Method::PATCH,
+        &PER_CALL_EXPIRY.to_string(),
+        |client| async move {
+            let _ = client
+                .wallets()
+                .update_with_options(
+                    WALLET_ID,
+                    &ctx(),
+                    &WalletUpdateRequestBody::default(),
+                    &per_call(),
+                )
+                .await;
+        },
+    )
+    .await;
+}
+
+#[tokio::test]
+async fn per_call_zero_expiry_is_sent() {
+    assert_sends_expiry(
+        RequestExpiryOptions::default(),
+        HttpMethod::PATCH,
+        &format!("/v1/wallets/{WALLET_ID}"),
+        || Method::PATCH,
+        "0",
+        |client| async move {
+            let _ = client
+                .wallets()
+                .update_with_options(
+                    WALLET_ID,
+                    &ctx(),
+                    &WalletUpdateRequestBody::default(),
+                    &RequestOptions::new().with_request_expiry(0),
+                )
+                .await;
+        },
+    )
+    .await;
+}
+
+#[tokio::test]
+async fn ethereum_send_transaction_options_expiry_is_sent() {
+    assert_sends_expiry(
+        RequestExpiryOptions::new().with_disabled(true),
+        HttpMethod::POST,
+        &format!("/v1/wallets/{WALLET_ID}/rpc"),
+        || Method::POST,
+        &PER_CALL_EXPIRY.to_string(),
+        |client| async move {
+            let _ = client
+                .wallets()
+                .ethereum()
+                .send_transaction_with_options(
+                    WALLET_ID,
+                    "eip155:1",
+                    UnsignedStandardEthereumTransaction::default().into(),
+                    &ctx(),
+                    None,
+                    &SendTransactionOptions::new().with_request_expiry(PER_CALL_EXPIRY),
+                )
+                .await;
+        },
+    )
+    .await;
+}
+
+#[tokio::test]
+async fn solana_sign_and_send_options_expiry_is_sent() {
+    assert_sends_expiry(
+        RequestExpiryOptions::default(),
+        HttpMethod::POST,
+        &format!("/v1/wallets/{WALLET_ID}/rpc"),
+        || Method::POST,
+        &PER_CALL_EXPIRY.to_string(),
+        |client| async move {
+            let _ = client
+                .wallets()
+                .solana()
+                .sign_and_send_transaction_with_options(
+                    WALLET_ID,
+                    "solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1",
+                    "AQAB",
+                    &ctx(),
+                    None,
+                    &SignAndSendTransactionOptions::new().with_request_expiry(PER_CALL_EXPIRY),
+                )
+                .await;
+        },
+    )
+    .await;
 }

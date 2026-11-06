@@ -1,6 +1,7 @@
 use super::{Error, ResponseValue, types};
 use crate::{
     AuthorizationContext, PrivyApiError, PrivyExportError, PrivyHpke, PrivySignedApiError,
+    RequestOptions,
     ethereum::EthereumService,
     generated::types::{
         AdditionalSignerInput, HpkeEncryption, OwnerInput, PrivateKeyInitInput, Wallet,
@@ -27,6 +28,36 @@ impl WalletsClient {
         body: &'a crate::generated::types::WalletRpcRequestBody,
     ) -> Result<ResponseValue<crate::generated::types::WalletRpcResponse>, PrivySignedApiError>
     {
+        self.rpc_with_options(
+            wallet_id,
+            ctx,
+            privy_idempotency_key,
+            body,
+            &RequestOptions::default(),
+        )
+        .await
+    }
+
+    /// Make a wallet rpc call, with per-request [`RequestOptions`].
+    ///
+    /// `options.request_expiry`, when set, is sent as the `privy-request-expiry`
+    /// header and included in the authorization signature, even if request
+    /// expiry is disabled on the client.
+    ///
+    /// # Errors
+    ///
+    /// Can fail either if the authorization signature could not be generated,
+    /// or if the api call fails whether than be due to network issues, auth problems,
+    /// or the Privy API returning an error.
+    pub async fn rpc_with_options<'a>(
+        &'a self,
+        wallet_id: &'a str,
+        ctx: &'a AuthorizationContext,
+        privy_idempotency_key: Option<&'a str>,
+        body: &'a crate::generated::types::WalletRpcRequestBody,
+        options: &'a RequestOptions,
+    ) -> Result<ResponseValue<crate::generated::types::WalletRpcResponse>, PrivySignedApiError>
+    {
         let signed = sign_request(
             ctx,
             &self.app_id,
@@ -34,7 +65,7 @@ impl WalletsClient {
             format!("{}/v1/wallets/{}/rpc", self.base_url, wallet_id),
             body,
             privy_idempotency_key,
-            self.request_expiry.resolve(None),
+            self.request_expiry.resolve(options.request_expiry),
         )
         .await?;
 
@@ -63,6 +94,35 @@ impl WalletsClient {
         privy_idempotency_key: Option<&'a str>,
         body: &'a crate::generated::types::RawSignInput,
     ) -> Result<ResponseValue<crate::generated::types::RawSignResponse>, PrivySignedApiError> {
+        self.raw_sign_with_options(
+            wallet_id,
+            ctx,
+            privy_idempotency_key,
+            body,
+            &RequestOptions::default(),
+        )
+        .await
+    }
+
+    /// Make a wallet raw sign call, with per-request [`RequestOptions`].
+    ///
+    /// `options.request_expiry`, when set, is sent as the `privy-request-expiry`
+    /// header and included in the authorization signature, even if request
+    /// expiry is disabled on the client.
+    ///
+    /// # Errors
+    ///
+    /// Can fail either if the authorization signature could not be generated,
+    /// or if the api call fails whether than be due to network issues, auth problems,
+    /// or the Privy API returning an error.
+    pub async fn raw_sign_with_options<'a>(
+        &'a self,
+        wallet_id: &'a str,
+        ctx: &'a AuthorizationContext,
+        privy_idempotency_key: Option<&'a str>,
+        body: &'a crate::generated::types::RawSignInput,
+        options: &'a RequestOptions,
+    ) -> Result<ResponseValue<crate::generated::types::RawSignResponse>, PrivySignedApiError> {
         let signed = sign_request(
             ctx,
             &self.app_id,
@@ -70,7 +130,7 @@ impl WalletsClient {
             format!("{}/v1/wallets/{}/raw_sign", self.base_url, wallet_id),
             body,
             privy_idempotency_key,
-            self.request_expiry.resolve(None),
+            self.request_expiry.resolve(options.request_expiry),
         )
         .await?;
 
@@ -97,6 +157,27 @@ impl WalletsClient {
         ctx: &'a AuthorizationContext,
         body: &'a crate::generated::types::WalletUpdateRequestBody,
     ) -> Result<ResponseValue<crate::generated::types::Wallet>, PrivySignedApiError> {
+        self.update_with_options(wallet_id, ctx, body, &RequestOptions::default())
+            .await
+    }
+
+    /// Update a wallet, with per-request [`RequestOptions`].
+    ///
+    /// `options.request_expiry`, when set, is sent as the `privy-request-expiry`
+    /// header and included in the authorization signature, even if request
+    /// expiry is disabled on the client.
+    ///
+    /// # Errors
+    ///
+    /// Can fail either if the authorization signature could not be generated,
+    /// or if the api call fails whether than be due to
+    pub async fn update_with_options<'a>(
+        &'a self,
+        wallet_id: &'a str,
+        ctx: &'a AuthorizationContext,
+        body: &'a crate::generated::types::WalletUpdateRequestBody,
+        options: &'a RequestOptions,
+    ) -> Result<ResponseValue<crate::generated::types::Wallet>, PrivySignedApiError> {
         let signed = sign_request(
             ctx,
             &self.app_id,
@@ -104,7 +185,7 @@ impl WalletsClient {
             format!("{}/v1/wallets/{}", self.base_url, wallet_id),
             body,
             None,
-            self.request_expiry.resolve(None),
+            self.request_expiry.resolve(options.request_expiry),
         )
         .await?;
 
@@ -132,6 +213,29 @@ impl WalletsClient {
         wallet_id: &'a str,
         ctx: &'a AuthorizationContext,
     ) -> Result<zeroize::Zeroizing<Vec<u8>>, PrivyExportError> {
+        self.export_with_options(wallet_id, ctx, &RequestOptions::default())
+            .await
+    }
+
+    /// Export a wallet, with per-request [`RequestOptions`].
+    ///
+    /// `options.request_expiry`, when set, is sent as the `privy-request-expiry`
+    /// header and included in the authorization signature, even if request
+    /// expiry is disabled on the client.
+    ///
+    /// # Errors
+    ///
+    /// Can fail either if the authorization signature could not be generated,
+    /// or if the api call fails whether than be due to network issues, auth problems,
+    /// or the Privy API returning an error. Additionally, if the privy platform
+    /// were to produce a response from which we cannot decrypt the secret key,
+    /// a `PrivyExportError::Key` will be returned.
+    pub async fn export_with_options<'a>(
+        &'a self,
+        wallet_id: &'a str,
+        ctx: &'a AuthorizationContext,
+        options: &'a RequestOptions,
+    ) -> Result<zeroize::Zeroizing<Vec<u8>>, PrivyExportError> {
         let privy_hpke = PrivyHpke::new();
         let body = WalletExportRequestBody {
             encryption_type: HpkeEncryption::Hpke,
@@ -146,7 +250,7 @@ impl WalletsClient {
             format!("{}/v1/wallets/{}/export", self.base_url, wallet_id),
             &body,
             None,
-            self.request_expiry.resolve(None),
+            self.request_expiry.resolve(options.request_expiry),
         )
         .await?;
 
