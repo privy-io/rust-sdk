@@ -326,6 +326,8 @@ fn generate_resource_code(
             app_id: String,
             #[allow(dead_code)]
             base_url: String,
+            #[allow(dead_code)]
+            request_expiry: crate::request_expiry::RequestExpiryOptions,
         }
     };
 
@@ -353,8 +355,25 @@ fn generate_resource_code(
         #[allow(clippy::too_many_arguments)]
         impl #client_ident {
             /// Create a new client instance
+            ///
+            /// Signed requests made through this client use the default
+            /// request expiry settings.
             pub fn new(client: Client, app_id: String, base_url: String) -> Self {
-                Self { client, app_id, base_url }
+                Self {
+                    client,
+                    app_id,
+                    base_url,
+                    request_expiry: crate::request_expiry::RequestExpiryOptions::default(),
+                }
+            }
+
+            /// Use the given request expiry settings for signed requests.
+            pub(crate) fn with_request_expiry(
+                mut self,
+                request_expiry: crate::request_expiry::RequestExpiryOptions,
+            ) -> Self {
+                self.request_expiry = request_expiry;
+                self
             }
 
             #(#impl_methods)*
@@ -470,6 +489,7 @@ fn generate_subresource_accessor(
         #[doc = #msg]
         pub fn #method_name(&self) -> #client_ident {
             #client_ident::new(self.client.clone(), self.app_id.clone(), self.base_url.clone())
+                .with_request_expiry(self.request_expiry)
         }
     }
 }
@@ -488,6 +508,7 @@ fn generate_main_client_extension(resources: &[ResourceConfig]) -> proc_macro2::
             #[doc = #msg]
             pub fn #method_name(&self) -> #client_ident {
                 #client_ident::new(self.client.clone(), self.app_id.clone(), self.base_url.clone())
+                    .with_request_expiry(self.request_expiry)
             }
         });
     }

@@ -6,7 +6,10 @@ use std::{num::NonZeroUsize, time::Duration};
 
 use reqwest::header::{CONTENT_TYPE, HeaderValue};
 
-use crate::{PrivyCreateError, generated::Client, get_auth_header, jwt_exchange::JwtExchange};
+use crate::{
+    PrivyCreateError, generated::Client, get_auth_header, jwt_exchange::JwtExchange,
+    request_expiry::RequestExpiryOptions,
+};
 
 const DEFAULT_BASE_URL: &str = "https://api.privy.io";
 const APP_ID_ENV_VAR: &str = "PRIVY_TEST_APP_ID";
@@ -30,6 +33,7 @@ pub struct PrivyClient {
     pub(crate) app_secret: String,
     pub(crate) base_url: String,
     pub(crate) client: Client,
+    pub(crate) request_expiry: RequestExpiryOptions,
 
     /// A store of all jwt operations for this client
     pub jwt_exchange: JwtExchange,
@@ -41,6 +45,10 @@ pub struct PrivyClientOptions {
     pub cache_size: NonZeroUsize,
     /// The base url to use when making requests
     pub base_url: String,
+    /// Request expiry settings for signed requests. Defaults to an expiry
+    /// [`DEFAULT_REQUEST_EXPIRY`](crate::request_expiry::DEFAULT_REQUEST_EXPIRY)
+    /// after each request is made.
+    pub request_expiry: RequestExpiryOptions,
 }
 
 impl Default for PrivyClientOptions {
@@ -48,6 +56,7 @@ impl Default for PrivyClientOptions {
         Self {
             cache_size: NonZeroUsize::new(1000).expect("non-zero"),
             base_url: String::from(DEFAULT_BASE_URL),
+            request_expiry: RequestExpiryOptions::default(),
         }
     }
 }
@@ -128,6 +137,7 @@ impl PrivyClient {
             app_secret,
             client: Client::new_with_client(&options.base_url, client_with_custom_defaults),
             base_url: options.base_url,
+            request_expiry: options.request_expiry,
             jwt_exchange: JwtExchange::new(options.cache_size),
         })
     }
